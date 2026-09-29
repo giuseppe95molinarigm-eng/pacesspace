@@ -1,0 +1,5 @@
+node_modules/
+dist/
+# Proof-only subset of Adobe Caslon Pro extracted from the sample PDF (licensed font:
+# not redistributed). Drop your licensed copy / proof files here to match the sample.
+assets/fonts/local/
