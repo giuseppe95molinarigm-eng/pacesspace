@@ -12,9 +12,9 @@ export default {
     silhouette: 'assets/img/alabama/state-silhouette.png',
   },
 
-  // Flag shown, highly transparent, behind the story text.
-  // PLACEHOLDER until the client's flag file is dropped in (see README).
-  flag: 'assets/flags/alabama.svg',
+  // U.S. flag from Alabama's entry in the client's "How the Stars Were Added"
+  // file, shown highly transparent behind the story text.
+  flag: 'assets/flags/states/alabama.png',
 
   story: [
     'In the Tennessee Valley of northern Alabama, where the river bends west through Decatur and the land flattens toward the Mississippi border, a railroad man named Bob Gibson spent his weekends tending a fire. It was 1925. Gibson worked the line for the L&N Railroad, but on Saturdays and Sundays he dug a pit in his own backyard, laid hickory coals in the bottom, and smoked chicken and pork for anyone who wandered by. He nailed oak planks to a big sycamore tree to make a serving table, and the smoke that rose off that pit pulled neighbors and fellow railway workers down the road from miles around. Standing six feet four and weighing better than three hundred pounds, he was Big Bob to everyone who knew him, a man his family still describes as never having met a stranger.',

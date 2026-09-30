@@ -118,17 +118,10 @@ export function heroPage(s) {
   </section>`;
 }
 
-export function storyPage(s, { variant = '', label = '' } = {}) {
+export function storyPage(s) {
   const folio = s.firstPage + 1;
-  const paras = s.story.map((p, i) => {
-    if (i === 0 && variant === 'dropcap') {
-      const words = p.split(' ');
-      return `<p><span class="opening">${esc(words.slice(0, 6).join(' '))}</span> ${esc(words.slice(6).join(' '))}</p>`;
-    }
-    return `<p>${esc(p)}</p>`;
-  }).join('');
-  return `<section class="page story ${side(folio)} ${variant ? 'story-' + variant : ''}">
-    ${label ? `<div class="option-label">${esc(label)}</div>` : ''}
+  const paras = s.story.map((p) => `<p>${esc(p)}</p>`).join('');
+  return `<section class="page story ${side(folio)}">
     <div class="live body-text">
       <div class="story-body">
         <div class="story-flag" aria-hidden="true"><img src="${s.flag}" alt=""></div>
@@ -148,12 +141,12 @@ function recipeBlock(r) {
   const steps = r.steps
     .map(([lead, text]) => `<li><span class="lead-in">${esc(lead.replace(/:$/, ''))}</span>: ${esc(text)}</li>`)
     .join('');
-  // Order requested by the client: title, tagline, five stars, yield, ingredients, instructions.
+  // Order requested by the client: title, tagline, yield, five stars, ingredients, instructions.
   return `<div class="${r.sub ? 'sub-recipe' : 'main-recipe'}">
     <h2 class="recipe-title">${r.title.map(esc).join('<br>')}</h2>
     ${r.tagline ? `<p class="recipe-tagline">${esc(r.tagline)}</p>` : ''}
-    ${starRule({ cls: 'title-stars' })}
     <p class="recipe-yield">${esc(r.yield)}</p>
+    ${starRule({ cls: 'title-stars' })}
     <h3 class="recipe-h">INGREDIENTS</h3>
     <ul class="ingredients ${cols}">${ing}${r.note ? `<li class="note">${esc(r.note)}</li>` : ''}</ul>
     <h3 class="recipe-h">INSTRUCTIONS</h3>
@@ -161,10 +154,9 @@ function recipeBlock(r) {
   </div>`;
 }
 
-export function recipePage(s, { styleClass = 'ts-a', label = '' } = {}) {
+export function recipePage(s) {
   const folio = s.firstPage + 2;
-  return `<section class="page recipe ${side(folio)} ${styleClass}">
-    ${label ? `<div class="option-label">${esc(label)}</div>` : ''}
+  return `<section class="page recipe ${side(folio)}">
     <div class="live">${s.recipes.map(recipeBlock).join('')}</div>
     ${stateFooter(folio, side(folio))}
   </section>`;

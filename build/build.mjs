@@ -34,16 +34,6 @@ const documents = [
     title: 'Made in the USA — Alabama (template chapter)',
     pages: [heroPage(alabama), storyPage(alabama), recipePage(alabama), foodImagePage(alabama)],
   },
-  {
-    file: '03_Text_Styling_Options',
-    title: 'Made in the USA — Text styling options',
-    pages: [
-      recipePage(alabama, { styleClass: 'ts-a', label: 'OPTION A — AS IN THE APPROVED SAMPLE (MONTSERRAT TITLES)' }),
-      recipePage(alabama, { styleClass: 'ts-b', label: 'OPTION B — CLASSIC SERIF (CORMORANT TITLES, OPEN TAGLINE)' }),
-      recipePage(alabama, { styleClass: 'ts-c', label: 'OPTION C — HERITAGE CAPITALS (SPACED CAPS, GOLD-RULED TAGLINE)' }),
-      storyPage(alabama, { variant: 'dropcap', label: 'STORY PAGE OPTION — DROP CAP + SMALL-CAPS OPENING (TEXT UNCHANGED)' }),
-    ],
-  },
 ];
 
 // Internal proof: everything in one file, with open points highlighted.

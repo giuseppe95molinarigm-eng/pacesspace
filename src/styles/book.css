@@ -85,7 +85,7 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .cover .the-usa .the { color: var(--navy); }
 .cover .the-usa .usa { color: var(--red); }
 .cover .subtitle-group { position: absolute; left: 0; right: 0; top: 270pt; display: flex; flex-direction: column; align-items: center; }
-.cover .subtitle { font-family: var(--cormorant); font-weight: 700; font-size: 31.9pt; letter-spacing: .075em; color: var(--ink); line-height: 1; }
+.cover .subtitle { font-family: var(--cormorant); font-weight: 700; font-size: 31.9pt; letter-spacing: .075em; color: var(--navy); line-height: 1; }
 .cover .tagline-group { display: flex; flex-direction: column; align-items: center; }
 .cover .tagline { font-family: var(--cormorant); font-style: italic; font-size: 17pt; color: var(--ink); white-space: pre; line-height: 1; }
 .cover .author { position: absolute; left: 0; right: 0; top: 696pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-size: 26pt; letter-spacing: .32em; color: #0a1334; padding-left: .32em; }
@@ -147,17 +147,18 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .story .live { top: 61pt; }
 .story .story-body { position: relative; isolation: isolate; }
 /* Flag = background layer centred behind the text block (not a separate element under it) */
-.story .story-flag { position: absolute; z-index: -1; left: 50%; top: 50%; width: 118%; transform: translate(-50%, -50%);
-  opacity: .13; pointer-events: none; }
+.story .story-flag { position: absolute; z-index: -1; left: -57.6pt; top: 50%; width: 594pt; transform: translateY(-50%); /* edge to edge */
+  opacity: .10; pointer-events: none; }
 .story .story-flag img { display: block; width: 100%; height: auto; }
 
 /* ---------- State: recipe page ---------- */
 .recipe .live { top: 40pt; bottom: 58pt; display: flex; flex-direction: column; }
-.recipe-title { text-align: center; font-family: var(--montserrat); font-weight: 700; font-size: 20pt; line-height: 26pt; color: var(--red); }
-.recipe-tagline { margin: 10pt 0 0; padding: 8pt 14pt 7pt; background: var(--tagline-box); border-radius: 4pt; font-style: italic; font-size: 12pt; line-height: 16pt; color: var(--navy); text-align: justify; }
-.recipe .star-rule.title-stars { margin-top: 9pt; }
-.recipe-yield { margin-top: 6pt; text-align: center; font-size: 12.5pt; line-height: 17pt; }
-.recipe-h { margin-top: 10pt; font-family: var(--montserrat); font-weight: 700; font-size: 14pt; line-height: 18pt; letter-spacing: .04em; color: var(--navy); }
+/* Recipe typography = "Option C — Heritage capitals", chosen by the client. */
+.recipe-title { text-align: center; font-family: var(--cormorant); font-weight: 700; font-size: 21pt; line-height: 27pt; letter-spacing: .09em; text-transform: uppercase; color: var(--red); }
+.recipe-tagline { margin: 10pt 36pt 0; padding: 7pt 20pt 6pt; border-top: .5pt solid var(--gold); border-bottom: .5pt solid var(--gold); font-style: italic; font-size: 12pt; line-height: 16pt; color: var(--navy); text-align: center; }
+.recipe .star-rule.title-stars { margin-top: 7pt; }
+.recipe-yield { margin-top: 8pt; text-align: center; font-size: 12.5pt; line-height: 17pt; }
+.recipe-h { margin-top: 10pt; font-family: var(--montserrat); font-weight: 700; font-size: 10.5pt; line-height: 18pt; letter-spacing: .22em; color: var(--red); }
 .ingredients { list-style: none; margin-top: 3pt; column-gap: 26pt; font-size: 12pt; line-height: 15pt; }
 .ingredients.cols-2 { columns: 2; }
 .ingredients li { display: flex; gap: 7pt; align-items: baseline; break-inside: avoid; padding: 1.5pt 0; }
@@ -166,10 +167,10 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .steps { list-style: none; margin-top: 3pt; counter-reset: step; font-size: 12pt; line-height: 16pt; }
 .steps li { position: relative; padding-left: 17pt; margin-bottom: 4pt; text-align: justify; counter-increment: step; }
 .steps li::before { content: counter(step) '.'; position: absolute; left: 0; }
-.steps .lead-in { }
+.steps .lead-in { font-style: italic; }
 .sub-recipe { margin-top: 16pt; }
 .sub-recipe .recipe-title { font-size: 16pt; line-height: 20pt; }
-.sub-recipe .star-rule { margin-top: 6pt; }
+.sub-recipe .star-rule { margin-top: 5pt; }
 .sub-recipe .recipe-yield { margin-top: 4pt; }
 
 /* ---------- State: food image page ---------- */
@@ -181,23 +182,3 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .food .details { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
 .food .details figure { height: 100%; }
 .proof .food figure.provisional::after { content: 'PROVISIONAL CROP — final hi-res image to come'; position: absolute; left: 6pt; bottom: 5pt; font: 700 6.5pt var(--montserrat); letter-spacing: .05em; color: #fff; background: rgba(163,54,35,.85); padding: 2pt 4pt; }
-
-/* ---------- Text-styling options (for the client's review only) ---------- */
-.option-label { position: absolute; top: 14pt; left: 0; right: 0; text-align: center; font: 700 7pt var(--montserrat); letter-spacing: .14em; color: #8a8f99; }
-
-/* Option B — "Classic serif": titles in the chapter/cover face */
-.ts-b .recipe-title { font-family: var(--cormorant); font-weight: 700; font-size: 27pt; line-height: 30pt; letter-spacing: .005em; }
-.ts-b .sub-recipe .recipe-title { font-size: 21pt; line-height: 24pt; }
-.ts-b .recipe-tagline { background: none; padding: 0 28pt; text-align: center; font-size: 13pt; line-height: 17pt; margin-top: 8pt; }
-.ts-b .recipe-h { font-family: var(--cormorant); font-size: 16pt; letter-spacing: .12em; }
-
-/* Option C — "Heritage small caps": spaced capitals like the state names */
-.ts-c .recipe-title { font-family: var(--cormorant); font-weight: 700; font-size: 21pt; line-height: 27pt; letter-spacing: .09em; text-transform: uppercase; }
-.ts-c .sub-recipe .recipe-title { font-size: 16pt; line-height: 20pt; }
-.ts-c .recipe-tagline { background: none; border-top: .5pt solid var(--gold); border-bottom: .5pt solid var(--gold); border-radius: 0; padding: 7pt 20pt 6pt; text-align: center; margin: 10pt 36pt 0; }
-.ts-c .recipe-h { font-size: 10.5pt; letter-spacing: .22em; color: var(--red); }
-.ts-c .steps .lead-in { font-style: italic; }
-
-/* Story option — drop cap + small-caps opening */
-.story-dropcap .story-body p:first-of-type::first-letter { float: left; font-family: var(--cormorant); font-weight: 700; color: var(--red); font-size: 52pt; line-height: 40pt; padding: 3pt 5pt 0 0; }
-.story-dropcap .story-body p:first-of-type .opening { font-variant: small-caps; letter-spacing: .04em; }
