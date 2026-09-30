@@ -8,12 +8,26 @@ Gli altri stati **non** sono stati impaginati: si procede solo dopo l'approvazio
 
 | File | Contenuto |
 |---|---|
-| `01_General_Pages_Corrected.pdf` | Cover, Copyright, Table of Contents, Welcome to Our Place, pag. 9 |
-| `02_Alabama_Section.pdf` | Hero page (12), Story page (13), Recipe page (14), Food image page (15) |
-| `00_Internal_Proof_with_markers.pdf` | **Solo uso interno**: tutto insieme, con evidenziati i punti aperti (pag. 235 nel TOC, crop provvisori) |
+| `01_General_Pages_Corrected.pdf` | Cover, Copyright, Table of Contents (numeri reali degli stati), Welcome, pag. 9 |
+| `states/01_Alabama.pdf` … `states/50_Wyoming.pdf` | Un PDF per stato (la cliente approva uno stato alla volta) |
+| `states/INDEX.md` | Pagine di ogni stato, numero di pagine, cose da verificare |
+| `00_Internal_Proof_with_markers.pdf` | **Solo uso interno**: tutto il libro con i punti aperti evidenziati |
 
-**Round 2 (feedback cliente):** sottotitolo della cover in navy come «THE»; stile ricetta = Option C «Heritage Capitals» (titoli in maiuscolo spaziato, tagline tra filetti oro) con lo Yield **sopra** la linea a cinque stelle e gli ingredienti subito sotto; capolettera scartato; bandiera della Story page presa dal file della cliente «How the Stars Were Added». La cliente approva **uno stato alla volta**: ogni stato si consegna come PDF a sé.
-| `previews/*.jpg` | Anteprime pagina per pagina |
+## Come nasce l'impaginato
+
+Testi dal manoscritto `manuscript/Made_in_the_USA_BASE.docx`, letti tramite gli stili di Word
+(HeroStateName, RecipeTagline, IngredientItem…): se il Word cambia, basta rilanciare la build.
+`src/paginate.js` distribuisce storia e ricette su quante pagine servono (una ricetta lunga
+continua sulla pagina successiva, con interlinea leggermente più stretta se serve per evitare
+una pagina quasi vuota), numera le pagine da 12, risolve i rimandi «page XX» e fornisce i numeri
+al TOC. Le bandiere dietro le storie vengono da `assets/flags/states/`, le sagome degli stati
+dai confini reali (pacchetto us-atlas).
+
+**Immagini:** solo l'Alabama ha le immagini definitive. Negli altri 49 stati la hero page mostra
+la sagoma reale dello stato con il contorno oro e la dicitura «ILLUSTRATION PLACEHOLDER»; le
+pagine food sono segnaposto con la descrizione presa dal manoscritto (una per illustrazione;
+le «full page spread» occupano due pagine). Per aggiungere le immagini di uno stato: file come
+`src/content/states/alabama.mjs` e voce in `ART` in `build/build.mjs`.
 
 ## Correzioni applicate
 
@@ -45,7 +59,7 @@ Gli altri stati **non** sono stati impaginati: si procede solo dopo l'approvazio
 2. **Immagini food page.** L'unica foto del piatto disponibile è quella del sample (1536 × 834 px). La foto principale è ok (~220 dpi); i due riquadri inferiori sono **crop provvisori** della stessa foto (~150 dpi, marcati nel proof interno). Per la stampa servono due scatti dedicati in alta risoluzione (≥ 300 dpi, senza persone né mani), ad es.: (a) flat-lay ingredienti — maionese, aceto di mele, limone, rafano, pepe nero, petti di pollo, panini slider; (b) preparazione — ciotola di white sauce con frusta appoggiata, oppure pollo sulla griglia.
 3. **Numerazione TOC.** Oltre al doppio «235» (The Table We Set Together / Menus for the Occasion), i numeri del sample risultano **+1 rispetto alle pagine reali**: Welcome è a pag. 5 ma indicato 6; la hero Alabama è a pag. 12 ma indicata 13. Il blocco da 4 pagine per stato (Alabama 13 → Alaska 17) è coerente; gli stati con salti di 6 pagine hanno probabilmente una ricetta in più. I numeri vanno confermati a impaginazione chiusa; non li ho cambiati.
 4. **White Sauce sulla stessa pagina della ricetta.** Per avere Recipe page (14) + Food image page (15) come spread, la sottoricetta Alabama White Sauce è sotto la ricetta principale; il rimando «See Alabama White Sauce, page 15» è diventato «*See Alabama White Sauce, below.». Da confermare con la cliente.
-5. **Font.** Il sample usa Adobe Caslon Pro (licenza Adobe). I PDF di questo round sono stati generati con il sottoinsieme incorporato nel sample PDF (non versionato, vedi `.gitignore`); senza quei file la build ripiega su Libre Caslon Text. Per la produzione usare il font con licenza (`local('Adobe Caslon Pro')` è già il primo della lista).
+5. **Font.** Nomi degli stati (hero), tagline e lead-in delle istruzioni sono in Libre Caslon (Caslon completo): il sottoinsieme di Adobe Caslon estratto dal sample non contiene molte lettere (es. I, O, N, R in grassetto) e avrebbe mescolato due font nella stessa parola. Con i file Adobe Caslon Pro con licenza si torna al font originale ovunque. Resto della nota: Il sample usa Adobe Caslon Pro (licenza Adobe). I PDF di questo round sono stati generati con il sottoinsieme incorporato nel sample PDF (non versionato, vedi `.gitignore`); senza quei file la build ripiega su Libre Caslon Text. Per la produzione usare il font con licenza (`local('Adobe Caslon Pro')` è già il primo della lista).
 6. **Abbondanza (bleed).** Come il sample, i PDF sono al formato rifilato senza abbondanza; per la stampa (KDP/IngramSpark) andrà aggiunto 0.125 in sui lati al vivo (hero page, footer, bandiera TOC).
 
 ## Come usare Alabama come modello per gli altri stati

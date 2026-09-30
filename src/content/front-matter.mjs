@@ -50,6 +50,9 @@ export const toc = {
   ],
 };
 
+// First back-matter page in the manuscript's numbering (Wyoming ended on 234 there).
+export const BACK_MATTER_FIRST_PAGE = 235;
+
 export const welcome = {
   title: ['WELCOME TO', 'OUR PLACE'],
   paragraphs: [

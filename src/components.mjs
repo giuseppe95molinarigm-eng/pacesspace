@@ -56,20 +56,18 @@ export function starRule({ stars = 5, lineLength = 71, starSize = 9.84, pitch = 
 
 /**
  * Footer of the state chapters — reproduced 1:1 from the sample
- * (client: "KEEP THE FOOTER AS IS"). Recto pages sit 9pt right of verso ones,
- * exactly as in the InDesign master.
+ * (client: "KEEP THE FOOTER AS IS"). Positions are the recto ones; on verso
+ * pages the stars and number sit 9pt further left (CSS), as in the InDesign master.
  */
-export function stateFooter(folio, side) {
-  const shift = side === 'verso' ? -9 : 0;
-  const starsLeft = Array.from({ length: 11 }, (_, i) => 52.2 + shift + i * 20.235);
-  const starsRight = Array.from({ length: 11 }, (_, i) => 335.49 + shift + i * 20.235);
+export function stateFooter(folio) {
+  const starsLeft = Array.from({ length: 11 }, (_, i) => 52.2 + i * 20.235);
+  const starsRight = Array.from({ length: 11 }, (_, i) => 335.49 + i * 20.235);
   const s = [...starsLeft, ...starsRight]
     .map((x) => `<span class="fs" style="left:${x.toFixed(2)}pt">${flatStar({ size: 7.56 })}</span>`)
     .join('');
-  const cx = 298.8 + shift;
   return `<footer class="state-footer">
-    <div class="band-red"></div><div class="band-navy"></div>${s}
-    <div class="folio-circle" style="left:${(cx - 14.53).toFixed(2)}pt"><span>${folio}</span></div>
+    <div class="band-red"></div><div class="band-navy"></div>
+    <div class="footer-art">${s}<div class="folio-circle" style="left:${(298.8 - 14.53).toFixed(2)}pt"><span>${folio}</span></div></div>
   </footer>`;
 }
 

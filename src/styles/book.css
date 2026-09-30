@@ -39,6 +39,9 @@
   --caslon: 'Book Caslon', 'Libre Caslon Text', Georgia, serif;
   --cormorant: 'Cormorant Garamond', Georgia, serif;
   --montserrat: 'Montserrat', Arial, sans-serif;
+  /* Display bold and italic in the state chapters: a complete Caslon, so every
+     state name and tagline is set in one consistent face (see README, Fonts). */
+  --caslon-full: 'Libre Caslon Text', 'Book Caslon', Georgia, serif;
 }
 
 @page { size: 8.25in 11in; margin: 0; }
@@ -72,6 +75,8 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .state-footer { position: absolute; left: 0; right: 0; bottom: 0; height: 50.76pt; }
 .state-footer .band-red { position: absolute; left: 0; right: 0; top: 0; height: 3.96pt; background: var(--red-rule); }
 .state-footer .band-navy { position: absolute; left: 0; right: 0; top: 3.96pt; bottom: 0; background: var(--navy-deep); }
+.state-footer .footer-art { position: absolute; inset: 0; }
+.verso .state-footer .footer-art { transform: translateX(-9pt); }
 .state-footer .fs { position: absolute; top: 13.3pt; }
 .state-footer .folio-circle { position: absolute; top: -4.1pt; width: 29.06pt; height: 29.06pt; border-radius: 50%;
   background: #fff; border: .75pt solid var(--gold); display: flex; align-items: center; justify-content: center; }
@@ -137,32 +142,46 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 /* ---------- State: hero page ---------- */
 .hero { background: var(--navy-deep); }
 .hero .frame { position: absolute; left: 0; top: 0; }
+/* The frame sits 9pt toward the spine: mirrored on recto pages. */
+.hero-art { position: absolute; inset: 0; }
+.recto.hero .hero-art { transform: translateX(18pt); }
+.recto.hero > .frame { transform: scaleX(-1); }
 .hero .flag-wave { position: absolute; left: 28.2pt; top: 470pt; width: 519.4pt; height: 288pt; }
-.hero .state-name { position: absolute; left: 27.8pt; width: 520.4pt; top: 78pt; text-align: center; font-weight: 700; font-size: 56pt; line-height: 1; letter-spacing: .035em; color: var(--red); padding-left: .035em; }
+.hero .state-name { font-family: var(--caslon-full); position: absolute; left: 27.8pt; width: 520.4pt; top: 78pt; text-align: center; font-weight: 700; font-size: 56pt; line-height: 1; letter-spacing: .035em; color: var(--red); padding-left: .035em; }
 .hero .star-rule { position: absolute; left: 27.8pt; width: 520.4pt; top: 152pt; }
 .hero .nickname { position: absolute; left: 27.8pt; width: 520.4pt; top: 189pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-style: italic; font-size: 22.5pt; line-height: 1; color: var(--ink); }
 .hero .silhouette { position: absolute; }
+.hero .state-name { white-space: nowrap; }
+.art-placeholder { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; pointer-events: none; }
+.art-placeholder b, .img-placeholder b { display: block; font-weight: 700; font-size: 9pt; letter-spacing: .06em; color: #a33623; }
+.art-placeholder i, .img-placeholder i { display: block; font-size: 9pt; color: #6b6b6b; margin-top: 2pt; }
+.art-placeholder b, .art-placeholder i { display: inline-block; background: rgba(244,239,229,.85); padding: 1pt 5pt; }
+.art-placeholder i { display: table; margin: 2pt auto 0; }
 
 /* ---------- State: story page ---------- */
-.story .live { top: 61pt; }
+.story .live { top: 61pt; bottom: 64pt; }
+.story .split-head { text-align-last: justify; margin-bottom: 0; }
 .story .story-body { position: relative; isolation: isolate; }
 /* Flag = background layer centred behind the text block (not a separate element under it) */
-.story .story-flag { position: absolute; z-index: -1; left: -57.6pt; top: 50%; width: 594pt; transform: translateY(-50%); /* edge to edge */
+.story .live { isolation: isolate; }
+.recto.story .story-flag { left: -57.6pt; }
+.verso.story .story-flag { left: -43.2pt; }
+.story .story-flag { position: absolute; z-index: -1; top: 50%; width: 594pt; transform: translateY(-50%); /* edge to edge, centred on the text area */
   opacity: .10; pointer-events: none; }
 .story .story-flag img { display: block; width: 100%; height: auto; }
 
 /* ---------- State: recipe page ---------- */
 .recipe .live { top: 40pt; bottom: 58pt; display: flex; flex-direction: column; }
 /* Recipe typography = "Option C — Heritage capitals", chosen by the client. */
-.recipe-title { text-align: center; font-family: var(--cormorant); font-weight: 700; font-size: 21pt; line-height: 27pt; letter-spacing: .09em; text-transform: uppercase; color: var(--red); }
-.recipe-tagline { margin: 10pt 36pt 0; padding: 7pt 20pt 6pt; border-top: .5pt solid var(--gold); border-bottom: .5pt solid var(--gold); font-style: italic; font-size: 12pt; line-height: 16pt; color: var(--navy); text-align: center; }
+.recipe-title { text-wrap: balance; text-align: center; font-family: var(--cormorant); font-weight: 700; font-size: 21pt; line-height: 27pt; letter-spacing: .09em; text-transform: uppercase; color: var(--red); }
+.recipe-tagline { margin: 10pt 36pt 0; padding: 7pt 20pt 6pt; border-top: .5pt solid var(--gold); border-bottom: .5pt solid var(--gold); font-family: var(--caslon-full); font-style: italic; font-size: 10.6pt; line-height: 16pt; color: var(--navy); text-align: center; }
 .recipe .star-rule.title-stars { margin-top: 7pt; }
 .recipe-yield { margin-top: 8pt; text-align: center; font-size: 12.5pt; line-height: 17pt; }
 .recipe-h { margin-top: 10pt; font-family: var(--montserrat); font-weight: 700; font-size: 10.5pt; line-height: 18pt; letter-spacing: .22em; color: var(--red); }
 .ingredients { list-style: none; margin-top: 3pt; column-gap: 26pt; font-size: 12pt; line-height: 15pt; }
 .ingredients.cols-2 { columns: 2; }
 .ingredients li { display: flex; gap: 7pt; align-items: baseline; break-inside: avoid; padding: 1.5pt 0; }
-.ingredients li.note { display: block; padding-left: 14pt; }
+.ingredients li.note { display: block; padding-left: 14pt; margin-top: 0; }
 .ingredients li .star { position: relative; top: -.6pt; }
 .steps { list-style: none; margin-top: 3pt; counter-reset: step; font-size: 12pt; line-height: 16pt; }
 .steps li { position: relative; padding-left: 17pt; margin-bottom: 4pt; text-align: justify; counter-increment: step; }
@@ -182,3 +201,37 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .food .details { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
 .food .details figure { height: 100%; }
 .proof .food figure.provisional::after { content: 'PROVISIONAL CROP — final hi-res image to come'; position: absolute; left: 6pt; bottom: 5pt; font: 700 6.5pt var(--montserrat); letter-spacing: .05em; color: #fff; background: rgba(163,54,35,.85); padding: 2pt 4pt; }
+
+/* ---------- Flowed recipe blocks ---------- */
+.recipe .live { display: block; }
+.recipe .live > :first-child { margin-top: 0; }
+.recipe-title.sub { margin-top: 16pt; font-size: 16pt; line-height: 20pt; }
+.title-stars-wrap .star-rule { margin-top: 7pt; }
+.ingredients li.sub { display: block; padding: 5pt 0 1pt; font-family: var(--montserrat); font-weight: 700; font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); break-after: avoid; }
+.ingredients li.sub:first-child { padding-top: 0; }
+.recipe-note { margin-top: 5pt; font-size: 12pt; line-height: 16pt; }
+.step { position: relative; padding-left: 17pt; margin-top: 4pt; font-size: 12pt; line-height: 16pt; text-align: justify; }
+.recipe-h + .step { margin-top: 3pt; }
+.step .n { position: absolute; left: 0; }
+.step .lead-in { font-family: var(--caslon-full); font-style: italic; font-size: 10.6pt; }
+.step-sub { margin-top: 8pt; font-family: var(--montserrat); font-weight: 700; font-size: 8.5pt; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); }
+.callout { margin-top: 12pt; padding: 7pt 0 6pt; border-top: .5pt solid var(--gold); border-bottom: .5pt solid var(--gold); }
+.callout .recipe-h { margin-top: 0; }
+.callout ul { list-style: none; margin-top: 2pt; font-size: 11.5pt; line-height: 15pt; }
+.callout li { display: flex; gap: 7pt; align-items: baseline; padding: 1.5pt 0; }
+
+/* ---------- Food image placeholder (artwork not produced yet) ---------- */
+.food .img-placeholder { flex: 1; border: .75pt dashed #1d3864; background: #f1f0ec; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20pt; }
+.food .img-placeholder span { margin-top: 6pt; font-size: 8pt; color: #8a8a8a; }
+.food .live { left: 57.6pt; right: 43.2pt; }
+.verso.food .live { left: 43.2pt; right: 57.6pt; }
+
+/* Tighter setting, used only when it saves a page that would hold a few lines */
+.compact.story .body-text p, .story.compact p { line-height: 16.2pt; margin-bottom: 7pt; }
+.compact .recipe-tagline { margin-top: 7pt; padding: 5pt 20pt 4pt; }
+.compact .recipe-yield { margin-top: 5pt; }
+.compact .recipe-h { margin-top: 7pt; }
+.compact .ingredients li { padding: .6pt 0; }
+.compact .step { margin-top: 2.5pt; line-height: 15pt; }
+.compact .callout { margin-top: 8pt; padding: 5pt 0 4pt; }
+.compact .recipe-title.sub { margin-top: 11pt; }
