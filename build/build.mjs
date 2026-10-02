@@ -123,7 +123,8 @@ console.log('✓ 00_Internal_Proof_with_markers.pdf');
 // 4. Index of the state files, with what is still open.
 const rows = index.map(({ file, c, L }) => {
   const counts = L.pages.reduce((m, r) => ((m[r] = (m[r] || 0) + 1), m), {});
-  const art = ART[c.slug] ? 'definitive' : 'placeholder';
+  const has = (n) => ['jpg', 'jpeg', 'png', 'webp'].some((e) => existsSync(path.join(root, `assets/img/states/${c.slug}/${n}.${e}`)));
+  const art = ART[c.slug] ? 'definitive' : [has('hero') ? 'hero ✓' : 'hero —', has('dish-1') ? 'food ✓' : 'food —'].join(', ');
   return `| ${file} | ${L.first}–${L.last} | ${L.last - L.first + 1} | ${counts.story || 0} / ${counts.recipe || 0} / ${counts.food || 0} | ${art} |`;
 });
 const notes = [

@@ -9,10 +9,22 @@ const require = createRequire(import.meta.url);
 const topo = require('us-atlas/states-10m.json');
 const states = feature(topo, topo.objects.states).features;
 
+// Alaska: leave out the far Aleutian islands (west of the Alaska Peninsula),
+// otherwise the chain stretches the shape so wide that the state prints tiny.
+function trim(f) {
+  if (f.properties.name !== 'Alaska') return f;
+  const keep = f.geometry.coordinates.filter((poly) => {
+    const lons = poly[0].map(([lon]) => (lon > 0 ? lon - 360 : lon));
+    return lons.reduce((a, b) => a + b, 0) / lons.length > -164;
+  });
+  return { ...f, geometry: { type: 'MultiPolygon', coordinates: keep } };
+}
+
 /** SVG path of the state fitted inside a w × h box (pt), and its real width/height. */
 export function statePath(name, w, h) {
-  const f = states.find((s) => s.properties.name === name);
-  if (!f) throw new Error(`No outline for ${name}`);
+  const found = states.find((s) => s.properties.name === name);
+  if (!found) throw new Error(`No outline for ${name}`);
+  const f = trim(found);
   const [lon, lat] = geoCentroid(f);
   const projection = geoTransverseMercator().rotate([-lon, -lat]).fitSize([w, h], f);
   const path = geoPath(projection);

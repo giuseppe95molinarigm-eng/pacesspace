@@ -29,9 +29,9 @@ pictures are still crops of the main photo: optional prompts for them are at the
 
 ## Alaska — The Last Frontier
 
-**Hero page** — `assets/img/states/alaska/hero.jpg` · min 1980 × 1038 px · ratio 2:1
+**Hero page** — `assets/img/states/alaska/hero.jpg` · min 1981 × 1652 px · ratio 5:4
 
-> Denali towering over autumn tundra in red and gold, a braided glacial river below, alpenglow on the snow. Painterly photorealistic landscape, golden-hour light with glowing dramatic clouds, high vantage point and deep perspective, rich natural greens and warm sunset tones, crisp detail, premium heritage American cookbook style (same look as the Alabama hero image). The picture will be clipped inside the outline of the state: keep the main subject in the centre and the horizon in the upper third, with nothing important near the edges. Aspect ratio 2:1.
+> Denali towering over autumn tundra in red and gold, a braided glacial river below, alpenglow on the snow. Painterly photorealistic landscape, golden-hour light with glowing dramatic clouds, high vantage point and deep perspective, rich natural greens and warm sunset tones, crisp detail, premium heritage American cookbook style (same look as the Alabama hero image). The picture will be clipped inside the outline of the state: keep the main subject in the centre and the horizon in the upper third, with nothing important near the edges. Aspect ratio 5:4.
 
 **Food — full page: Akutaq** — `assets/img/states/alaska/dish-1.jpg` · min 2055 × 2892 px · ratio 5:7
 
