@@ -23,6 +23,14 @@ una pagina quasi vuota), numera le pagine da 12, risolve i rimandi «page XX» e
 al TOC. Le bandiere dietro le storie vengono da `assets/flags/states/`, le sagome degli stati
 dai confini reali (pacchetto us-atlas).
 
+**Illustrazioni:** `illustrations/PROMPTS.md` (da leggere) e `illustrations/prompts.csv` (da incollare o
+usare in batch) contengono, per ogni immagine mancante, il nome del file, la dimensione minima a 300 dpi,
+il formato e il prompt (in inglese). Si rigenerano con `npm run prompts`; i soggetti dei paesaggi sono
+in `src/content/landscapes.mjs`. Salvare ogni immagine in `assets/img/states/<stato>/` con il nome
+indicato (`hero.jpg`, `dish-1.jpg`, …) e lanciare `npm run build`: il paesaggio viene ritagliato dentro
+la sagoma con il contorno oro, le foto riempiono la pagina food, le doppie pagine vengono divise sulle
+due pagine affiancate.
+
 **Immagini:** solo l'Alabama ha le immagini definitive. Negli altri 49 stati la hero page mostra
 la sagoma reale dello stato con il contorno oro e la dicitura «ILLUSTRATION PLACEHOLDER»; le
 pagine food sono segnaposto con la descrizione presa dal manoscritto (una per illustrazione;

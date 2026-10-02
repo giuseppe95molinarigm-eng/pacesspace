@@ -235,3 +235,7 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .compact .step { margin-top: 2.5pt; line-height: 15pt; }
 .compact .callout { margin-top: 8pt; padding: 5pt 0 4pt; }
 .compact .recipe-title.sub { margin-top: 11pt; }
+.food .img-placeholder .file { display: none; }
+.proof .food .img-placeholder .file { display: block; font-family: var(--montserrat); font-size: 7pt; color: #a33623; }
+.food figure.full { flex: 1; }
+.food figure.full img { height: 100%; width: 100%; object-fit: cover; }

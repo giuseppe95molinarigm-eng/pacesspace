@@ -5,7 +5,8 @@
   "description": "Layout source for \"Made in the USA: A Plate for Every State\" by Christina Reed — review round 1 (general pages + Alabama).",
   "type": "module",
   "scripts": {
-    "build": "node build/build.mjs"
+    "build": "node build/build.mjs",
+    "prompts": "node build/prompts.mjs"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",

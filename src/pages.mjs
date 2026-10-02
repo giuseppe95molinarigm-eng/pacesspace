@@ -92,7 +92,17 @@ export function temperaturesPage(k) {
 // Story and recipes are emitted as <template class="flow"> blocks; src/paginate.js
 // pours them into as many pages as they need, then numbers every page.
 
+import { existsSync } from 'node:fs';
 import { statePath } from '../build/shapes.mjs';
+
+// Finished artwork dropped in assets/img/states/<state>/ (hero.jpg, dish-1.jpg, …).
+function stateImage(slug, name) {
+  for (const ext of ['jpg', 'jpeg', 'png', 'webp']) {
+    const f = `assets/img/states/${slug}/${name}.${ext}`;
+    if (existsSync(new URL(`../${f}`, import.meta.url))) return f;
+  }
+  return null;
+}
 
 function scallopRect(x0, y0, x1, y1, r) {
   return `M${x0 + r},${y0} H${x1 - r} A${r},${r} 0 0 0 ${x1},${y0 + r} V${y1 - r} A${r},${r} 0 0 0 ${x1 - r},${y1} H${x0 + r} A${r},${r} 0 0 0 ${x0},${y1 - r} V${y0 + r} A${r},${r} 0 0 0 ${x0 + r},${y0} Z`;
@@ -107,12 +117,23 @@ function silhouette(ch, art) {
     const left = HERO_CENTER_X - PNG_SILHOUETTE.wPt / 2;
     return `<img class="silhouette" src="${art.silhouette}" alt="${esc(ch.name)}" style="left:${left.toFixed(2)}pt;top:${PNG_SILHOUETTE.top}pt;width:${PNG_SILHOUETTE.wPt}pt;height:${PNG_SILHOUETTE.hPt}pt">`;
   }
-  // No artwork yet: the real state outline, gold-outlined, with a placeholder label.
+  // Real state outline, gold-outlined. A landscape in assets/img/states/<state>/hero.jpg
+  // is clipped inside it; without one, the outline carries a placeholder label.
   const { d, x0, y0, width, height } = statePath(ch.name, SHAPE_BOX.w, SHAPE_BOX.h);
   const pad = 4;
   const left = HERO_CENTER_X - width / 2 - pad;
   const top = SHAPE_BOX.top + (SHAPE_BOX.h - height) / 2 - pad;
-  return `<svg class="silhouette" style="left:${left.toFixed(2)}pt;top:${top.toFixed(2)}pt" width="${(width + 2 * pad).toFixed(2)}pt" height="${(height + 2 * pad).toFixed(2)}pt" viewBox="${(x0 - pad).toFixed(2)} ${(y0 - pad).toFixed(2)} ${(width + 2 * pad).toFixed(2)} ${(height + 2 * pad).toFixed(2)}" aria-hidden="true">
+  const box = `style="left:${left.toFixed(2)}pt;top:${top.toFixed(2)}pt" width="${(width + 2 * pad).toFixed(2)}pt" height="${(height + 2 * pad).toFixed(2)}pt" viewBox="${(x0 - pad).toFixed(2)} ${(y0 - pad).toFixed(2)} ${(width + 2 * pad).toFixed(2)} ${(height + 2 * pad).toFixed(2)}"`;
+  const hero = stateImage(ch.slug, 'hero');
+  if (hero) {
+    const id = `clip-${ch.slug}`;
+    return `<svg class="silhouette" ${box} aria-hidden="true">
+      <defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs>
+      <path d="${d}" fill="none" stroke="#bb9554" stroke-width="4.4" stroke-linejoin="round"/>
+      <image href="${hero}" x="${x0}" y="${y0}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/>
+    </svg>`;
+  }
+  return `<svg class="silhouette" ${box} aria-hidden="true">
       <path d="${d}" fill="#e7dfcd" stroke="#bb9554" stroke-width="4.4" stroke-linejoin="round" paint-order="stroke"/>
     </svg>
     <div class="art-placeholder" style="top:${(SHAPE_BOX.top + SHAPE_BOX.h / 2 - 16).toFixed(2)}pt">
@@ -219,16 +240,35 @@ function foodPages(ch, art) {
     return `<section class="page food" data-state="${ch.slug}" data-role="food">
       <div class="live">${figure(f.main)}<div class="details">${f.details.map(figure).join('')}</div></div>${FOOTER}</section>`;
   }
-  // Images not produced yet: placeholder in the same style as the manuscript/sample.
-  const spreadTotal = ch.dishImages.filter((d) => d.spread).length;
-  let spreadIndex = 0;
-  return ch.dishImages.map((d) => {
-    const desc = d.description.replace(/\s*[–-]\s*full[\s-]*page[\s-]*spread/i, '');
-    let extra = '';
-    if (d.spread) { spreadIndex += 1; extra = spreadTotal > 1 ? ` — full-page spread, ${spreadIndex === 1 ? 'left' : 'right'} page` : ' — full page'; }
-    return `<section class="page food" data-state="${ch.slug}" data-role="food">
-      <div class="live"><div class="img-placeholder"><b>ILLUSTRATION PLACEHOLDER</b><i>${esc(desc)}${extra}</i><span>Food only (finished dish, ingredients or preparation) — no people</span></div></div>${FOOTER}</section>`;
+  return dishIllustrations(ch).map((ill, n) => {
+    const file = stateImage(ch.slug, `dish-${n + 1}`);
+    const name = `assets/img/states/${ch.slug}/dish-${n + 1}.jpg`;
+    return Array.from({ length: ill.pages }, (_, half) => {
+      let inner;
+      if (file) {
+        // A spread is one wide image shown across two facing pages.
+        const style = ill.pages === 2 ? `width:200%;margin-left:${half ? '-100%' : '0'}` : '';
+        inner = `<figure class="full"><img src="${file}" alt="${esc(ill.description)}" style="${style}"></figure>`;
+      } else {
+        const where = ill.pages === 2 ? ` — full-page spread, ${half ? 'right' : 'left'} page` : '';
+        inner = `<div class="img-placeholder"><b>ILLUSTRATION PLACEHOLDER</b><i>${esc(ill.description)}${where}</i><span>Food only (finished dish, ingredients or preparation) — no people</span><span class="file">${name}</span></div>`;
+      }
+      return `<section class="page food" data-state="${ch.slug}" data-role="food"><div class="live">${inner}</div>${FOOTER}</section>`;
+    }).join('');
   }).join('');
+}
+
+/** Food illustrations of a chapter; the two "full page spread" entries of the manuscript are one image. */
+export function dishIllustrations(ch) {
+  const out = [];
+  for (const d of ch.dishImages) {
+    const description = d.description.replace(/\s*[–-]\s*full[\s-]*page[\s-]*spread/i, '').trim();
+    const prev = out[out.length - 1];
+    if (d.spread && prev?.spread && prev.pages === 1 && prev.description === description) { prev.pages = 2; continue; }
+    out.push({ description, spread: d.spread, pages: 1 });
+  }
+  // a spread always takes two facing pages, even if listed once
+  return out.map((o) => (o.spread ? { ...o, pages: 2 } : o));
 }
 
 export function stateChapter(ch, art) {
