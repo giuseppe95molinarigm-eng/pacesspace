@@ -283,7 +283,8 @@ function foodPages(ch, art) {
         const where = ill.pages === 2 ? ` — full-page spread, ${half ? 'right' : 'left'} page` : '';
         inner = `<div class="img-placeholder"><b>ILLUSTRATION PLACEHOLDER</b><i>${esc(ill.description)}${where}</i><span>Food only (finished dish, ingredients or preparation) — no people</span><span class="file">${name}</span></div>`;
       }
-      return `<section class="page food" data-state="${ch.slug}" data-role="food"><div class="live">${inner}</div>${FOOTER}</section>`;
+      // Full-bleed photo page: the picture covers the whole page, no footer band.
+      return `<section class="page food bleed" data-state="${ch.slug}" data-role="food"><div class="live">${inner}</div></section>`;
     }).join('');
   }).join('');
 }

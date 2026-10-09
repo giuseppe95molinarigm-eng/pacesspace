@@ -241,3 +241,8 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .proof .food .img-placeholder .file { display: block; font-family: var(--montserrat); font-size: 7pt; color: #a33623; }
 .food figure.full { flex: 1; }
 .food figure.full img { height: 100%; width: 100%; object-fit: cover; }
+
+/* Full-bleed food photo pages: edge to edge, no footer band, no frame */
+.food.bleed .live, .verso.food.bleed .live { inset: 0; display: flex; }
+.food.bleed figure.full { border: 0; flex: 1; }
+.food.bleed .img-placeholder { border: 0; }

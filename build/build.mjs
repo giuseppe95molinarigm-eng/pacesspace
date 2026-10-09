@@ -19,7 +19,7 @@ import alabamaArt from '../src/content/states/alabama.mjs';
 import { readManuscript } from './manuscript.mjs';
 import { stateFooter } from '../src/components.mjs';
 import {
-  coverPage, copyrightPage, tocPage, welcomePage, temperaturesPage, stateChapter,
+  coverPage, copyrightPage, tocPage, welcomePage, temperaturesPage, stateChapter, dishIllustrations,
 } from '../src/pages.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -41,6 +41,8 @@ ${body}</body></html>`;
 
 await rm(path.join(out, 'previews'), { recursive: true, force: true });
 await rm(path.join(out, 'states'), { recursive: true, force: true });
+await rm(path.join(out, 'ready'), { recursive: true, force: true });
+await mkdir(path.join(out, 'ready'), { recursive: true });
 await rm(path.join(out, '02_Alabama_Section.pdf'), { force: true });
 await mkdir(path.join(out, 'previews'), { recursive: true });
 await mkdir(path.join(out, 'states'), { recursive: true });
@@ -86,7 +88,14 @@ for (const [i, c] of chapters.entries()) {
   const idx = Array.from({ length: L.last - L.first + 1 }, (_, k) => L.first - FIRST_STATE_FOLIO + k);
   (await doc.copyPages(bodyPdf, idx)).forEach((p) => doc.addPage(p));
   const file = `${String(i + 1).padStart(2, '0')}_${c.name.replace(/ /g, '_')}.pdf`;
-  await writeFile(path.join(out, 'states', file), await doc.save());
+  const bytes = await doc.save();
+  await writeFile(path.join(out, 'states', file), bytes);
+  // States with every illustration in place go to output/ready/ (safe to send the client).
+  const img = (n) => ['jpg', 'jpeg', 'png', 'webp'].some((e) => existsSync(path.join(root, `assets/img/states/${c.slug}/${n}.${e}`)));
+  const dishes = dishIllustrations(c).length;
+  if (ART[c.slug] || (img('hero') && Array.from({ length: dishes }, (_, k) => img(`dish-${k + 1}`)).every(Boolean))) {
+    await writeFile(path.join(out, 'ready', file), bytes);
+  }
   index.push({ file, c, L });
 }
 console.log(`✓ ${chapters.length} state PDFs (pages ${FIRST_STATE_FOLIO}–${FIRST_STATE_FOLIO + bodyPdf.getPageCount() - 1})`);
