@@ -142,9 +142,12 @@
   document.querySelectorAll('template.flow').forEach(pourBest);
 
   // Long state names shrink to fit the frame.
+  // (Sized at build time; this only guards against a name wider than the frame.)
   document.querySelectorAll('.hero .state-name').forEach((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
     let size = parseFloat(getComputedStyle(el).fontSize);
-    while (el.scrollWidth > el.clientWidth - 40 && size > 30) { size -= 1; el.style.fontSize = `${size}px`; }
+    while (range.getBoundingClientRect().width > el.clientWidth - 20 && size > 30) { size -= 1; el.style.fontSize = `${size}px`; }
   });
 
   // Page numbers and sides.

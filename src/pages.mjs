@@ -109,14 +109,43 @@ function scallopRect(x0, y0, x1, y1, r) {
 }
 
 const HERO_CENTER_X = 288; // centre of the gold frame (verso; mirrored on recto)
-const SHAPE_BOX = { w: 440, h: 490, top: 238 };
-const PNG_SILHOUETTE = { wPt: 311.04, hPt: 492.24, top: 238 }; // Alabama artwork, 300 dpi
+const ART_BOTTOM = 730; // lowest point of the state artwork (pt)
+const PNG_SILHOUETTE = { wPt: 311.04, hPt: 492.24 }; // Alabama artwork, 300 dpi
 
-function silhouette(ch, art) {
+// Advance widths (em) of the Libre Caslon Bold capitals, used to size the state name.
+const CAP_W = { A: .781, B: .751, C: .813, D: .878, E: .731, F: .684, G: .855, H: .923, I: .425, J: .409, K: .807, L: .699, M: 1.073, N: .878, O: .869, P: .694, Q: .869, R: .778, S: .647, T: .778, U: .821, V: .781, W: 1.212, X: .84, Y: .745, Z: .73, ' ': .253 };
+const NAME = { maxWidth: 470, maxSize: 80, minSingle: 58, tracking: 0.02, top: 66 };
+const emWidth = (t) => [...t].reduce((n, c) => n + (CAP_W[c] ?? .8) + NAME.tracking, 0);
+
+/**
+ * Client: state name "much bigger and bolder", star rule directly beneath it.
+ * Short names run up to 80pt; two-word names too long for one line are stacked
+ * so they stay large. Everything below (rule, nickname, state) follows.
+ */
+function heroLayout(name) {
+  const upper = name.toUpperCase();
+  let lines = [upper];
+  let size = Math.min(NAME.maxSize, NAME.maxWidth / emWidth(upper));
+  if (size < NAME.minSingle && upper.includes(' ')) {
+    const words = upper.split(' ');
+    lines = [words.slice(0, -1).join(' '), words[words.length - 1]];
+    size = Math.min(72, NAME.maxWidth / Math.max(...lines.map(emWidth)));
+  }
+  const lineH = size * 0.92;
+  const nameBottom = NAME.top + lineH * lines.length;
+  const ruleTop = nameBottom - size * 0.12 + 5; // caps baseline sits ~0.2em above the line box end
+  const nickTop = ruleTop + 24 + 10;
+  const artTop = nickTop + 22.5 + 20;
+  return { lines, size, lineH, ruleTop, nickTop, artTop, artH: ART_BOTTOM - artTop };
+}
+
+function silhouette(ch, art, L) {
   if (art?.silhouette) {
     const left = HERO_CENTER_X - PNG_SILHOUETTE.wPt / 2;
-    return `<img class="silhouette" src="${art.silhouette}" alt="${esc(ch.name)}" style="left:${left.toFixed(2)}pt;top:${PNG_SILHOUETTE.top}pt;width:${PNG_SILHOUETTE.wPt}pt;height:${PNG_SILHOUETTE.hPt}pt">`;
+    const top = L.artTop + Math.max(0, (L.artH - PNG_SILHOUETTE.hPt) / 2);
+    return `<img class="silhouette" src="${art.silhouette}" alt="${esc(ch.name)}" style="left:${left.toFixed(2)}pt;top:${top.toFixed(2)}pt;width:${PNG_SILHOUETTE.wPt}pt;height:${PNG_SILHOUETTE.hPt}pt">`;
   }
+  const SHAPE_BOX = { w: 440, h: L.artH, top: L.artTop };
   // Real state outline, gold-outlined. A landscape in assets/img/states/<state>/hero.jpg
   // is clipped inside it; without one, the outline carries a placeholder label.
   const { d, x0, y0, width, height } = statePath(ch.name, SHAPE_BOX.w, SHAPE_BOX.h);
@@ -141,6 +170,7 @@ function silhouette(ch, art) {
 }
 
 export function heroPage(ch, art) {
+  const L = { ...heroLayout(ch.name), top: NAME.top };
   // Approved template: no five-star rule, no red single-star rule; gold star rule
   // between name and nickname; large re-centred state outlined in frame gold.
   return `<section class="page hero" data-state="${ch.slug}" data-role="hero">
@@ -152,10 +182,10 @@ export function heroPage(ch, art) {
       <svg class="frame" width="594pt" height="792pt" viewBox="0 0 594 792" aria-hidden="true">
         <path d="${scallopRect(27.255, 33.445, 548.745, 758.555, 17.52)}" fill="none" stroke="#bb9554" stroke-width="1.05"/>
       </svg>
-      <div class="state-name">${esc(ch.name.toUpperCase())}</div>
-      ${starRule({ lineLength: 70.8, gap: 7.5, bigStar: { size: 25.2, tone: 'gold' } })}
-      <div class="nickname">${esc(ch.nickname)}</div>
-      ${silhouette(ch, art)}
+      <div class="state-name" style="top:${L.top}pt;font-size:${L.size.toFixed(1)}pt;line-height:${L.lineH.toFixed(1)}pt">${L.lines.map(esc).join('<br>')}</div>
+      <div class="hero-rule" style="top:${L.ruleTop.toFixed(1)}pt">${starRule({ lineLength: 70.8, gap: 7.5, bigStar: { size: 25.2, tone: 'gold' } })}</div>
+      <div class="nickname" style="top:${L.nickTop.toFixed(1)}pt">${esc(ch.nickname)}</div>
+      ${silhouette(ch, art, L)}
     </div>
   </section>`;
 }

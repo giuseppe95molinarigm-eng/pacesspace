@@ -20,9 +20,15 @@ const FOOD = { w: 493.2, h: 694 };
 const RATIOS = [[1, 1], [4, 5], [3, 4], [2, 3], [9, 16], [5, 4], [4, 3], [3, 2], [16, 9], [2, 1], [5, 7], [7, 5]];
 const nearestRatio = (w, h) => RATIOS.reduce((best, r) => (Math.abs(r[0] / r[1] - w / h) < Math.abs(best[0] / best[1] - w / h) ? r : best)).join(':');
 
-const HERO_STYLE = 'Painterly photorealistic landscape, golden-hour light with glowing dramatic clouds, high vantage point and deep perspective, rich natural greens and warm sunset tones, crisp detail, premium heritage American cookbook style (same look as the Alabama hero image).';
+// Client (round 3): scenes follow each story; vary season and time of day (no default sunset).
+const HERO_STYLE = 'Photorealistic landscape photograph with a subtle painterly finish, natural true-to-season colours, deep perspective, crisp detail, timeless feel for a premium heritage American cookbook: no modern cars, roads, power lines or signs. Keep exactly the season and light described — do not turn it into a sunset.';
 const HERO_FRAMING = 'The picture will be clipped inside the outline of the state: keep the main subject in the centre and the horizon in the upper third, with nothing important near the edges.';
-const FOOD_STYLE = 'Editorial food photograph, photorealistic. Rustic weathered wooden table, a red-and-white gingham napkin, navy enamelware with small white stars, warm natural side light, soft shadows, shallow depth of field, 50 mm lens, rich but natural colours, premium coffee-table cookbook style (same look as the Alabama sliders photo).';
+// Client (round 3): "more Bon Appétit style, less restaurant style".
+const FOOD_STYLE = 'Bon Appétit–style food photography, photorealistic: bright natural window daylight, relaxed home-cook styling, real and a little imperfect (crumbs, drips, a used spoon, torn herbs, a portion already served), simple everyday tableware and linen, true-to-life colours, fresh and appetising. Not glossy, not restaurant plating, no dark rustic set.';
+// Varied per picture so the book does not repeat one set-up.
+const ANGLES = ['shot from directly overhead', 'shot at a 45-degree angle', 'shot at table height, close up', 'shot from overhead with the cook’s utensils at the edge of the frame'];
+const SURFACES = ['a light marble counter', 'a pale linen tablecloth', 'a sage-green painted wooden table', 'a butcher-block kitchen counter', 'a white enamel tabletop', 'a soft blue tiled counter', 'a worn oak farmhouse table', 'a terracotta-coloured tablecloth'];
+let dishCount = 0;
 const NEGATIVE = 'No people, no hands, no faces, no text, no lettering, no logos, no labels, no watermark, no frame or border.';
 
 // "1 ½ lb. boneless pork shoulder, cut into…" → "boneless pork shoulder"
@@ -42,7 +48,7 @@ function ingredientName(text) {
 const SKIP = /^(salt|pepper|salt and pepper|vegetable|oil|water|ice|cooking spray|nonstick)/i;
 
 function keyIngredients(recipe) {
-  const names = recipe.blocks.filter((b) => b.type === 'ingredient' && !b.text.includes(':')).map((b) => ingredientName(b.text))
+  const names = recipe.blocks.filter((b) => b.type === 'ingredient' && !b.text.replace(/\(.*?\)/g, '').includes(':')).map((b) => ingredientName(b.text))
     .filter((n) => n && !SKIP.test(n) && n.length < 45);
   return [...new Set(names)].slice(0, 8).join(', ');
 }
@@ -73,6 +79,10 @@ exactly in the middle of the picture.
 
 **Negative prompt (all images):** ${NEGATIVE}
 
+**Round 3 (client feedback):** landscapes now follow each story, each with its own season and time
+of day; food is Bon Appétit style (bright, home-made, a little imperfect) instead of restaurant style.
+The Alaska, Arizona and Arkansas pictures made earlier follow the old brief: regenerate them.
+
 Alabama is already complete (hero and food photo from the approved sample). Its two smaller food
 pictures are still crops of the main photo: optional prompts for them are at the end.
 `);
@@ -84,7 +94,8 @@ for (const ch of chapters) {
     const { width, height } = statePath(ch.name, 440, 490);
     const w = px(width * 1.08), h = px(height * 1.08);
     const ratio = nearestRatio(w, h);
-    const prompt = `${landscapes[ch.slug]}. ${HERO_STYLE} ${HERO_FRAMING} Aspect ratio ${ratio}.`;
+    const { scene, light } = landscapes[ch.slug];
+    const prompt = `${scene}. Season and light: ${light}. ${HERO_STYLE} ${HERO_FRAMING} Aspect ratio ${ratio}.`;
     const file = `assets/img/states/${ch.slug}/hero.jpg`;
     rows.push([file, ch.name, 'hero landscape', `${w} × ${h}`, ratio, prompt, NEGATIVE]);
     md.push(`**Hero page** — \`${file}\` · min ${w} × ${h} px · ratio ${ratio}\n\n> ${prompt}\n`);
@@ -101,10 +112,11 @@ for (const ch of chapters) {
     const ratio = spread ? '7:5' : '5:7';
     const ings = keyIngredients(recipe);
     const prompt = [
-      `${dish}, the classic ${ch.name} dish, plated and ready to serve${sides.length ? ` with ${sides.join(' and ')} on the side` : ''}.`,
-      ings ? `Recognisable ingredients: ${ings}; a few raw ingredients arranged around the plate.` : '',
+      `${dish}, the classic ${ch.name} dish, as made at home and just served${sides.length ? `, with ${sides.join(' and ')} alongside` : ''}.`,
+      ings ? `A few of its ingredients casually nearby: ${ings}.` : '',
       FOOD_STYLE,
-      spread ? 'Wide horizontal composition for a two-page spread: dish placed left or right of centre, never on the centre line, with generous table space around it.' : 'Vertical composition, dish filling the frame from a three-quarter angle.',
+      `On ${SURFACES[dishCount % SURFACES.length]}, ${ANGLES[dishCount++ % ANGLES.length]}.`,
+      spread ? 'Wide horizontal composition for a two-page spread: dish placed left or right of centre, never on the centre line, with room around it.' : 'Vertical composition.',
       `Aspect ratio ${ratio}.`,
     ].filter(Boolean).join(' ');
     const file = `assets/img/states/${ch.slug}/dish-${n + 1}.jpg`;
