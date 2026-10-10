@@ -17,6 +17,7 @@
 @font-face { font-family: 'Libre Caslon Text'; font-weight: 700; font-style: normal; src: url('../../assets/fonts/libre-caslon-text-latin-700-normal.woff2') format('woff2'); }
 @font-face { font-family: 'Cormorant Garamond'; font-weight: 400; font-style: normal; src: url('../../assets/fonts/cormorant-garamond-latin-400-normal.woff2') format('woff2'); }
 @font-face { font-family: 'Cormorant Garamond'; font-weight: 400; font-style: italic; src: url('../../assets/fonts/cormorant-garamond-latin-400-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-weight: 600; font-style: normal; src: url('../../assets/fonts/cormorant-garamond-latin-600-normal.woff2') format('woff2'); }
 @font-face { font-family: 'Cormorant Garamond'; font-weight: 700; font-style: normal; src: url('../../assets/fonts/cormorant-garamond-latin-700-normal.woff2') format('woff2'); }
 @font-face { font-family: 'Cormorant Garamond'; font-weight: 700; font-style: italic; src: url('../../assets/fonts/cormorant-garamond-latin-700-italic.woff2') format('woff2'); }
 @font-face { font-family: 'Montserrat'; font-weight: 400; src: url('../../assets/fonts/montserrat-latin-400-normal.woff2') format('woff2'); }
@@ -147,10 +148,10 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .recto.hero .hero-art { transform: translateX(18pt); }
 .recto.hero > .frame { transform: scaleX(-1); }
 .hero .flag-wave { position: absolute; left: 28.2pt; top: 470pt; width: 519.4pt; height: 288pt; }
-/* Name: large, extra weight (bold face + a fine stroke of the same colour) */
-.hero .state-name { font-family: var(--caslon-full); position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-weight: 700; letter-spacing: .02em; padding-left: .02em; color: var(--red); -webkit-text-stroke: .022em var(--red); }
+/* Name: book-title face (Cormorant), semibold — smaller and lighter than the cover title */
+.hero .state-name { font-family: var(--cormorant); position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-weight: 600; letter-spacing: .04em; padding-left: .04em; color: var(--red); }
 .hero .hero-rule { position: absolute; left: 27.8pt; width: 520.4pt; }
-.hero .nickname { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-style: italic; font-size: 22.5pt; line-height: 1; color: var(--ink); }
+.hero .nickname { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-style: italic; font-size: 28pt; line-height: 1; color: var(--navy-deep); }
 .hero .silhouette { position: absolute; }
 .hero .state-name { white-space: nowrap; }
 .art-placeholder { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; pointer-events: none; }
@@ -242,7 +243,3 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .food figure.full { flex: 1; }
 .food figure.full img { height: 100%; width: 100%; object-fit: cover; }
 
-/* Full-bleed food photo pages: edge to edge, no footer band, no frame */
-.food.bleed .live, .verso.food.bleed .live { inset: 0; display: flex; }
-.food.bleed figure.full { border: 0; flex: 1; }
-.food.bleed .img-placeholder { border: 0; }

@@ -20,14 +20,25 @@ function trim(f) {
   return { ...f, geometry: { type: 'MultiPolygon', coordinates: keep } };
 }
 
-/** SVG path of the state fitted inside a w × h box (pt), and its real width/height. */
-export function statePath(name, w, h) {
+/**
+ * SVG path of the state fitted inside a w × h box (pt), and its real width/height.
+ * With `area` (pt²), the state is drawn no larger than that surface, so that all
+ * states look about the same size on their hero pages (client request); states
+ * that cannot reach it inside the box (very wide ones) simply fill the box.
+ */
+export function statePath(name, w, h, area = Infinity) {
   const found = states.find((s) => s.properties.name === name);
   if (!found) throw new Error(`No outline for ${name}`);
   const f = trim(found);
   const [lon, lat] = geoCentroid(f);
   const projection = geoTransverseMercator().rotate([-lon, -lat]).fitSize([w, h], f);
-  const path = geoPath(projection);
+  let path = geoPath(projection);
+  const fitted = path.area(f);
+  if (fitted > area) {
+    const k = Math.sqrt(area / fitted);
+    projection.fitSize([w * k, h * k], f);
+    path = geoPath(projection);
+  }
   const [[x0, y0], [x1, y1]] = path.bounds(f);
-  return { d: path(f), x0, y0, width: x1 - x0, height: y1 - y0 };
+  return { d: path(f), x0, y0, width: x1 - x0, height: y1 - y0, area: path.area(f) };
 }

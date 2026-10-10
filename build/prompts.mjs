@@ -15,7 +15,7 @@ const DPI = 300;
 const px = (pt) => Math.ceil((pt / 72) * DPI);
 
 // Food page picture area (pt) and the gap between the two halves of a spread.
-const FOOD = { w: 594, h: 792 }; // full-bleed photo page (8.25 × 11 in)
+const FOOD = { w: 493.2, h: 694 }; // framed photo inside the page margins, footer below
 
 const RATIOS = [[1, 1], [4, 5], [3, 4], [2, 3], [9, 16], [5, 4], [4, 3], [3, 2], [16, 9], [2, 1], [5, 7], [7, 5]];
 const nearestRatio = (w, h) => RATIOS.reduce((best, r) => (Math.abs(r[0] / r[1] - w / h) < Math.abs(best[0] / best[1] - w / h) ? r : best)).join(':');
@@ -109,7 +109,7 @@ for (const ch of chapters) {
     const sides = ch.recipes.filter((r) => r !== recipe && dish.toLowerCase().includes(r.title.toLowerCase())).map((r) => r.title);
     const spread = ill.pages === 2;
     const w = px(FOOD.w * (spread ? 2 : 1)), h = px(FOOD.h);
-    const ratio = spread ? '3:2' : '3:4';
+    const ratio = spread ? '7:5' : '5:7';
     const ings = keyIngredients(recipe);
     const prompt = [
       `${dish}, the classic ${ch.name} dish, as made at home and just served${sides.length ? `, with ${sides.join(' and ')} alongside` : ''}.`,

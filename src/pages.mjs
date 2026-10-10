@@ -110,11 +110,15 @@ function scallopRect(x0, y0, x1, y1, r) {
 
 const HERO_CENTER_X = 288; // centre of the gold frame (verso; mirrored on recto)
 const ART_BOTTOM = 730; // lowest point of the state artwork (pt)
-const PNG_SILHOUETTE = { wPt: 311.04, hPt: 492.24 }; // Alabama artwork, 300 dpi
+const PNG_SILHOUETTE = { wPt: 276.24, hPt: 438.24 }; // Alabama artwork, 300 dpi, sized to STATE_AREA
 
-// Advance widths (em) of the Libre Caslon Bold capitals, used to size the state name.
-const CAP_W = { A: .781, B: .751, C: .813, D: .878, E: .731, F: .684, G: .855, H: .923, I: .425, J: .409, K: .807, L: .699, M: 1.073, N: .878, O: .869, P: .694, Q: .869, R: .778, S: .647, T: .778, U: .821, V: .781, W: 1.212, X: .84, Y: .745, Z: .73, ' ': .253 };
-const NAME = { maxWidth: 470, maxSize: 80, minSingle: 58, tracking: 0.02, top: 66 };
+// Advance widths (em) of the Cormorant Garamond SemiBold capitals, used to size the state name.
+const CAP_W = { A: .711, B: .582, C: .683, D: .7, E: .547, F: .518, G: .725, H: .762, I: .339, J: .333, K: .653, L: .541, M: .85, N: .732, O: .766, P: .549, Q: .766, R: .689, S: .507, T: .64, U: .701, V: .662, W: .918, X: .649, Y: .616, Z: .602, ' ': .234 };
+// Client (round 4): smaller and lighter than the book title (Cormorant Bold 68–114pt), more room
+// under the frame, nickname closer to the state.
+const NAME = { maxWidth: 460, maxSize: 60, minSingle: 46, tracking: 0.04, top: 80 }; // top = minimum
+const NICK = { size: 28, gap: 8 };      // between recipe title (21pt) and state name
+const STATE_AREA = 90000;               // pt²: every state drawn at about the same surface
 const emWidth = (t) => [...t].reduce((n, c) => n + (CAP_W[c] ?? .8) + NAME.tracking, 0);
 
 /**
@@ -131,46 +135,58 @@ function heroLayout(name) {
     lines = [words.slice(0, -1).join(' '), words[words.length - 1]];
     size = Math.min(72, NAME.maxWidth / Math.max(...lines.map(emWidth)));
   }
-  const lineH = size * 0.92;
+  const lineH = size * 0.95;
   const nameBottom = NAME.top + lineH * lines.length;
-  const ruleTop = nameBottom - size * 0.12 + 5; // caps baseline sits ~0.2em above the line box end
-  const nickTop = ruleTop + 24 + 10;
-  const artTop = nickTop + 22.5 + 20;
+  const ruleTop = nameBottom - size * 0.16 + 3; // star rule right under the capitals
+  const nickTop = ruleTop + 24 + NICK.gap;
+  const artTop = nickTop + NICK.size + 14;
   return { lines, size, lineH, ruleTop, nickTop, artTop, artH: ART_BOTTOM - artTop };
 }
 
 function silhouette(ch, art, L) {
   if (art?.silhouette) {
     const left = HERO_CENTER_X - PNG_SILHOUETTE.wPt / 2;
-    const top = L.artTop + Math.max(0, (L.artH - PNG_SILHOUETTE.hPt) / 2);
+    const top = L.artTop;
     return `<img class="silhouette" src="${art.silhouette}" alt="${esc(ch.name)}" style="left:${left.toFixed(2)}pt;top:${top.toFixed(2)}pt;width:${PNG_SILHOUETTE.wPt}pt;height:${PNG_SILHOUETTE.hPt}pt">`;
   }
-  const SHAPE_BOX = { w: 440, h: L.artH, top: L.artTop };
+  const SHAPE_BOX = { w: 470, h: L.artH, top: L.artTop };
   // Real state outline, gold-outlined. A landscape in assets/img/states/<state>/hero.jpg
   // is clipped inside it; without one, the outline carries a placeholder label.
-  const { d, x0, y0, width, height } = statePath(ch.name, SHAPE_BOX.w, SHAPE_BOX.h);
+  const { d, x0, y0, width, height } = statePath(ch.name, SHAPE_BOX.w, SHAPE_BOX.h, STATE_AREA);
   const pad = 4;
   const left = HERO_CENTER_X - width / 2 - pad;
-  const top = SHAPE_BOX.top + (SHAPE_BOX.h - height) / 2 - pad;
+  const top = SHAPE_BOX.top - pad; // right under the nickname (client: less space between them)
   const box = `style="left:${left.toFixed(2)}pt;top:${top.toFixed(2)}pt" width="${(width + 2 * pad).toFixed(2)}pt" height="${(height + 2 * pad).toFixed(2)}pt" viewBox="${(x0 - pad).toFixed(2)} ${(y0 - pad).toFixed(2)} ${(width + 2 * pad).toFixed(2)} ${(height + 2 * pad).toFixed(2)}"`;
   const hero = stateImage(ch.slug, 'hero');
   if (hero) {
     const id = `clip-${ch.slug}`;
     return `<svg class="silhouette" ${box} aria-hidden="true">
       <defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs>
-      <path d="${d}" fill="none" stroke="#bb9554" stroke-width="4.4" stroke-linejoin="round"/>
+      <path d="${d}" fill="none" stroke="#bb9554" stroke-width="2.1" stroke-linejoin="round"/>
       <image href="${hero}" x="${x0}" y="${y0}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/>
     </svg>`;
   }
   return `<svg class="silhouette" ${box} aria-hidden="true">
-      <path d="${d}" fill="#e7dfcd" stroke="#bb9554" stroke-width="4.4" stroke-linejoin="round" paint-order="stroke"/>
+      <path d="${d}" fill="#e7dfcd" stroke="#bb9554" stroke-width="2.1" stroke-linejoin="round" paint-order="stroke"/>
     </svg>
-    <div class="art-placeholder" style="top:${(SHAPE_BOX.top + SHAPE_BOX.h / 2 - 16).toFixed(2)}pt">
+    <div class="art-placeholder" style="top:${(SHAPE_BOX.top + height / 2 - 16).toFixed(2)}pt">
       <b>ILLUSTRATION PLACEHOLDER</b><i>Illustrated ${esc(ch.name)} landscape inside the state shape</i></div>`;
 }
 
+// Height of the state artwork for this layout (pt).
+function stateHeight(ch, art, L) {
+  if (art?.silhouette) return PNG_SILHOUETTE.hPt;
+  return statePath(ch.name, 470, L.artH, STATE_AREA).height;
+}
+
 export function heroPage(ch, art) {
-  const L = { ...heroLayout(ch.name), top: NAME.top };
+  // Name, stars, nickname and state form one block, centred vertically in the
+  // frame: room under the top border, nickname close to the state (client, round 4).
+  const base = heroLayout(ch.name);
+  const h = stateHeight(ch, art, base);
+  const blockTop = NAME.top, blockBottom = base.artTop + h;
+  const dy = Math.max(0, (60 + 735) / 2 - (blockTop + blockBottom) / 2);
+  const L = { ...base, top: NAME.top + dy, ruleTop: base.ruleTop + dy, nickTop: base.nickTop + dy, artTop: base.artTop + dy };
   // Approved template: no five-star rule, no red single-star rule; gold star rule
   // between name and nickname; large re-centred state outlined in frame gold.
   return `<section class="page hero" data-state="${ch.slug}" data-role="hero">
@@ -283,8 +299,8 @@ function foodPages(ch, art) {
         const where = ill.pages === 2 ? ` — full-page spread, ${half ? 'right' : 'left'} page` : '';
         inner = `<div class="img-placeholder"><b>ILLUSTRATION PLACEHOLDER</b><i>${esc(ill.description)}${where}</i><span>Food only (finished dish, ingredients or preparation) — no people</span><span class="file">${name}</span></div>`;
       }
-      // Full-bleed photo page: the picture covers the whole page, no footer band.
-      return `<section class="page food bleed" data-state="${ch.slug}" data-role="food"><div class="live">${inner}</div></section>`;
+      // Framed photo with the book footer (client: not full page).
+      return `<section class="page food" data-state="${ch.slug}" data-role="food"><div class="live">${inner}</div>${FOOTER}</section>`;
     }).join('');
   }).join('');
 }
