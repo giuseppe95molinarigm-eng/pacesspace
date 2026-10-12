@@ -199,7 +199,7 @@ export function heroPage(ch, art) {
     <svg class="frame" width="594pt" height="792pt" viewBox="0 0 594 792" aria-hidden="true">
       <defs><clipPath id="panel-${ch.slug}"><path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}"/></clipPath></defs>
       <path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}" fill="#f4efe5"/>
-      <image href="assets/img/common/hero-flag-wave.jpg" x="${FRAME.x0}" y="${FRAME.y1 - FLAG_H}" width="${FRAME.x1 - FRAME.x0}" height="${FLAG_H}" preserveAspectRatio="xMidYMax slice" clip-path="url(#panel-${ch.slug})"/>
+      <image href="assets/img/common/hero-flag-wave.png" x="${FRAME.x0}" y="${FRAME.y1 - FLAG_H}" width="${FRAME.x1 - FRAME.x0}" height="${FLAG_H}" preserveAspectRatio="xMidYMax slice" clip-path="url(#panel-${ch.slug})"/>
       <path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}" fill="none" stroke="#bb9554" stroke-width="1"/>
     </svg>
     <div class="hero-art">
