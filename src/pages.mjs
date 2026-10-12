@@ -110,7 +110,7 @@ function scallopRect(x0, y0, x1, y1, r) {
 
 const HERO_CENTER_X = 288; // centre of the gold frame (verso; mirrored on recto)
 const ART_BOTTOM = 730; // lowest point of the state artwork (pt)
-const PNG_SILHOUETTE = { wPt: 276.24, hPt: 438.24 }; // Alabama artwork, 300 dpi, sized to STATE_AREA
+const PNG_SILHOUETTE = { wPt: 276.0, hPt: 437.04 }; // Alabama artwork, 300 dpi, sized to STATE_AREA
 
 // Advance widths (em) of the Cormorant Garamond SemiBold capitals, used to size the state name.
 const CAP_W = { A: .711, B: .582, C: .683, D: .7, E: .547, F: .518, G: .725, H: .762, I: .339, J: .333, K: .653, L: .541, M: .85, N: .732, O: .766, P: .549, Q: .766, R: .689, S: .507, T: .64, U: .701, V: .662, W: .918, X: .649, Y: .616, Z: .602, ' ': .234 };
@@ -118,6 +118,7 @@ const CAP_W = { A: .711, B: .582, C: .683, D: .7, E: .547, F: .518, G: .725, H: 
 // under the frame, nickname closer to the state.
 const NAME = { maxWidth: 460, maxSize: 60, minSingle: 46, tracking: 0.04, top: 80 }; // top = minimum
 const NICK = { size: 28, gap: 8 };      // between recipe title (21pt) and state name
+const TEXT_LIFT = 28;                  // one nickname line
 const STATE_AREA = 90000;               // pt²: every state drawn at about the same surface
 const emWidth = (t) => [...t].reduce((n, c) => n + (CAP_W[c] ?? .8) + NAME.tracking, 0);
 
@@ -144,7 +145,7 @@ function heroLayout(name) {
 }
 
 function silhouette(ch, art, L) {
-  if (art?.silhouette) {
+  if (art?.silhouette && !stateImage(ch.slug, 'hero')) {
     const left = HERO_CENTER_X - PNG_SILHOUETTE.wPt / 2;
     const top = L.artTop;
     return `<img class="silhouette" src="${art.silhouette}" alt="${esc(ch.name)}" style="left:${left.toFixed(2)}pt;top:${top.toFixed(2)}pt;width:${PNG_SILHOUETTE.wPt}pt;height:${PNG_SILHOUETTE.hPt}pt">`;
@@ -175,7 +176,7 @@ function silhouette(ch, art, L) {
 
 // Height of the state artwork for this layout (pt).
 function stateHeight(ch, art, L) {
-  if (art?.silhouette) return PNG_SILHOUETTE.hPt;
+  if (art?.silhouette && !stateImage(ch.slug, 'hero')) return PNG_SILHOUETTE.hPt;
   return statePath(ch.name, 470, L.artH, STATE_AREA).height;
 }
 
@@ -186,7 +187,9 @@ export function heroPage(ch, art) {
   const h = stateHeight(ch, art, base);
   const blockTop = NAME.top, blockBottom = base.artTop + h;
   const dy = Math.max(0, (60 + 735) / 2 - (blockTop + blockBottom) / 2);
-  const L = { ...base, top: NAME.top + dy, ruleTop: base.ruleTop + dy, nickTop: base.nickTop + dy, artTop: base.artTop + dy };
+  // Client (round 5): text block one line higher, image unchanged → an empty line between them.
+  const lift = Math.min(TEXT_LIFT, NAME.top + dy - 56);
+  const L = { ...base, top: NAME.top + dy - lift, ruleTop: base.ruleTop + dy - lift, nickTop: base.nickTop + dy - lift, artTop: base.artTop + dy };
   // Approved template: no five-star rule, no red single-star rule; gold star rule
   // between name and nickname; large re-centred state outlined in frame gold.
   return `<section class="page hero" data-state="${ch.slug}" data-role="hero">
@@ -281,7 +284,8 @@ function figure(img) {
 }
 
 function foodPages(ch, art) {
-  if (art?.foodImages) {
+  // New artwork in assets/img/states/<state>/ replaces the sample's (Alabama).
+  if (art?.foodImages && !stateImage(ch.slug, 'dish-1')) {
     const f = art.foodImages;
     return `<section class="page food" data-state="${ch.slug}" data-role="food">
       <div class="live">${figure(f.main)}<div class="details">${f.details.map(figure).join('')}</div></div>${FOOTER}</section>`;

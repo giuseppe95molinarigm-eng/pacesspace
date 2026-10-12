@@ -1,11 +1,12 @@
 // Landscape inside each state's outline on its hero page.
 // Client: the scene must follow the environment described in that state's story,
 // and the pictures must vary — so each entry fixes its own season and time of day.
-// { scene: what is shown (from the story), light: season + time of day }
+// { scene: what is shown (from the story), light: season + time of day,
+//   ref: optional reference photo supplied by the client — give it to the image tool as inspiration }
 export default {
-  alabama: { scene: 'the Tennessee River bending west through the wooded hills of the Tennessee Valley near Decatur, a big sycamore by the water', light: 'late summer, sunset' },
-  alaska: { scene: 'the western coast of Alaska where the Bering Sea meets snow-covered tundra, drifting sea ice and an endless sky', light: 'deep winter, low sun at midday with long blue shadows and a pastel sky' },
-  arizona: { scene: 'the Sonoran Desert around old Tucson, saguaros and mesquite, the Santa Catalina Mountains behind', light: 'spring, clear bright morning with brittlebush and saguaro blossoms in bloom' },
+  alabama: { scene: 'the Tennessee Valley countryside of northern Alabama: an early-1900s steam locomotive pulling a short freight train of red boxcars along the L&N line, a tall plume of white smoke, a weathered clapboard shack with a rusty tin roof and porch beside the tracks, a railroad-crossing sign, gravel ballast, tall bare and just-budding trees', light: 'early spring, bright clear late morning with a deep blue sky', ref: 'illustrations/references/alabama-hero.jpg' },
+  alaska: { scene: 'a wide Alaskan river valley: a channel of open blue-green water winding through snow and shelf ice, snow-laden spruce forest on both banks, a wall of snowy mountains beyond', light: 'deep winter at first light, peaks glowing soft pink under pastel clouds', ref: 'illustrations/references/alaska-hero.jpg' },
+  arizona: { scene: 'a forest of tall saguaro cacti above golden, back-lit desert brush near Tucson, the rugged Santa Catalina Mountains behind, dusted with fresh snow and wrapped in low clouds', light: 'winter, soft early-morning light', ref: 'illustrations/references/arizona-hero.jpg' },
   arkansas: { scene: 'a slow muddy bend of the White River in the Arkansas Delta, bald cypress at the water’s edge and flat cotton fields beyond', light: 'high summer, hazy late afternoon with towering white cumulus clouds' },
   california: { scene: 'the rocky Pacific coast of Baja and San Diego, wooden fishing boats pulled up on a sandy cove and cold surf', light: 'early summer dawn, marine-layer fog lifting off the water' },
   colorado: { scene: 'a gold-rush valley in the Colorado Rockies, weathered mine headframe and log cabins below snowy peaks', light: 'winter afternoon after fresh snow, crisp deep-blue sky' },

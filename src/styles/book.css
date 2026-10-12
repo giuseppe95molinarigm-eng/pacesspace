@@ -151,7 +151,7 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 /* Name: book-title face (Cormorant), semibold — smaller and lighter than the cover title */
 .hero .state-name { font-family: var(--cormorant); position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-weight: 600; letter-spacing: .04em; padding-left: .04em; color: var(--red); }
 .hero .hero-rule { position: absolute; left: 27.8pt; width: 520.4pt; }
-.hero .nickname { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-style: italic; font-size: 28pt; line-height: 1; color: var(--navy-deep); }
+.hero .nickname { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-style: italic; font-size: 28pt; line-height: 1; color: var(--navy-table); } /* the border navy read as black in print: a clearer navy */
 .hero .silhouette { position: absolute; }
 .hero .state-name { white-space: nowrap; }
 .art-placeholder { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; pointer-events: none; }
