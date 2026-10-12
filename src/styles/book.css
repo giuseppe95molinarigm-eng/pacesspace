@@ -25,6 +25,10 @@
 
 /* ---------- Tokens (sampled from the approved PDF) ---------- */
 :root {
+  /* Hardcover margins (client, round 6): wide inside margin so no text sits in the fold.
+     Inside (spine) 0.875in, outside 0.625in, mirrored on odd/even pages. */
+  --m-in: 63pt;
+  --m-out: 45pt;
   --navy: #023353;        /* headings, folios */
   --navy-deep: #091234;   /* hero background, footer band */
   --navy-table: #1d3864;
@@ -58,8 +62,8 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 @media screen { .page { margin: 24px auto; box-shadow: 0 2px 14px rgba(0,0,0,.35); } }
 
 /* live area: recto = inside (left) 57.6 / outside 43.2 — verso mirrored */
-.recto .live { position: absolute; left: 57.6pt; right: 40pt; }
-.verso .live { position: absolute; left: 43.2pt; right: 57.6pt; }
+.recto .live { position: absolute; left: var(--m-in); right: var(--m-out); }
+.verso .live { position: absolute; left: var(--m-out); right: var(--m-in); }
 
 .body-text p { font-size: 12.5pt; line-height: 17pt; text-align: justify; hyphens: manual; margin-bottom: 9pt; }
 .body-text p:last-child { margin-bottom: 0; }
@@ -108,9 +112,9 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .toc { background: var(--paper-toc); }
 .toc .bg { position: absolute; left: -1.3pt; top: 75.9pt; width: 596.5pt; height: 717.3pt; background: url('../../assets/img/common/toc-flag-background.jpg') center top / 100% 100% no-repeat; }
 .page-title { font-family: var(--cormorant); font-weight: 700; font-size: 39pt; line-height: 50pt; color: var(--navy); text-align: center; letter-spacing: .01em; }
-.toc .page-title { position: absolute; left: 43.2pt; right: 57.6pt; top: 64pt; }
-.toc .star-rule { position: absolute; left: 43.2pt; right: 57.6pt; top: 131.5pt; }
-.toc .cols { position: absolute; top: 196pt; left: 43.2pt; right: 57.6pt; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 22.8pt; }
+.toc .page-title { position: absolute; left: var(--m-out); right: var(--m-in); top: 64pt; }
+.toc .star-rule { position: absolute; left: var(--m-out); right: var(--m-in); top: 131.5pt; }
+.toc .cols { position: absolute; top: 196pt; left: var(--m-out); right: var(--m-in); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 22.8pt; }
 .toc-row { display: flex; align-items: baseline; font-size: 12pt; line-height: 18pt; color: var(--navy); }
 .toc-row .t { flex: none; padding-right: 2pt; white-space: nowrap; }
 /* Dot leaders: set right-to-left so the dots are anchored to the page number and
@@ -121,17 +125,17 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .proof .toc-row.check .n { background: #ffe38a; outline: 1pt solid #e0b000; }
 
 /* ---------- Welcome / kitchen notes ---------- */
-.welcome .page-title { position: absolute; left: 57.6pt; right: 40pt; top: 88.5pt; }
-.welcome .star-rule { position: absolute; left: 57.6pt; right: 40pt; top: 205.7pt; }
+.welcome .page-title { position: absolute; left: var(--m-in); right: var(--m-out); top: 88.5pt; }
+.welcome .star-rule { position: absolute; left: var(--m-in); right: var(--m-out); top: 205.7pt; }
 .welcome .body-text { top: 246pt; }
 .welcome .closing { margin-top: 18pt; text-align: center; font-style: italic; font-size: 12.5pt; line-height: 21.5pt; }
 
-.kitchen .kicker { position: absolute; left: 57.6pt; right: 40pt; top: 65pt; text-align: center; font-family: var(--montserrat); font-weight: 700; font-size: 18pt; letter-spacing: .06em; color: var(--rust); line-height: 21pt; }
-.kitchen .page-title { position: absolute; left: 57.6pt; right: 40pt; top: 91.6pt; line-height: 46pt; }
-.kitchen .star-rule { position: absolute; left: 57.6pt; right: 40pt; top: 204.8pt; }
+.kitchen .kicker { position: absolute; left: var(--m-in); right: var(--m-out); top: 65pt; text-align: center; font-family: var(--montserrat); font-weight: 700; font-size: 18pt; letter-spacing: .06em; color: var(--rust); line-height: 21pt; }
+.kitchen .page-title { position: absolute; left: var(--m-in); right: var(--m-out); top: 91.6pt; line-height: 46pt; }
+.kitchen .star-rule { position: absolute; left: var(--m-in); right: var(--m-out); top: 204.8pt; }
 .kitchen .body-text { top: 258.5pt; }
 .kitchen .intro { font-style: italic; }
-.kitchen table { width: 493.2pt; border-collapse: collapse; margin: 16pt 0 17pt; font-size: 11.5pt; line-height: 14pt; border: .5pt solid var(--navy-table); }
+.kitchen table { width: 100%; border-collapse: collapse; margin: 16pt 0 17pt; font-size: 11.5pt; line-height: 14pt; border: .5pt solid var(--navy-table); }
 .kitchen th { background: var(--navy-table); color: #fff; font-weight: 700; text-align: left; padding: 5pt 7.2pt 4.5pt; height: 24pt; }
 .kitchen th + th, .kitchen td + td { border-left: .5pt solid #c9ced8; }
 .kitchen td { padding: 4.5pt 7.2pt 4pt; height: 22.9pt; border-top: .5pt solid #dfe2e8; background: rgba(255,255,255,.35); }
@@ -145,16 +149,13 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .hero .frame { position: absolute; left: 0; top: 0; }
 /* The frame sits 9pt toward the spine: mirrored on recto pages. */
 .hero-art { position: absolute; inset: 0; }
-.recto.hero .hero-art { transform: translateX(18pt); }
-.recto.hero > .frame { transform: scaleX(-1); }
-.hero .flag-wave { position: absolute; left: 28.2pt; top: 470pt; width: 519.4pt; height: 288pt; }
 /* Name: book-title face (Cormorant), semibold — smaller and lighter than the cover title */
-.hero .state-name { font-family: var(--cormorant); position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-weight: 600; letter-spacing: .04em; padding-left: .04em; color: var(--red); }
-.hero .hero-rule { position: absolute; left: 27.8pt; width: 520.4pt; }
-.hero .nickname { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-style: italic; font-size: 28pt; line-height: 1; color: var(--navy-table); } /* the border navy read as black in print: a clearer navy */
+.hero .state-name { font-family: var(--cormorant); position: absolute; left: 21pt; width: 552pt; text-align: center; font-weight: 600; letter-spacing: .04em; padding-left: .04em; color: var(--red); }
+.hero .hero-rule { position: absolute; left: 21pt; width: 552pt; }
+.hero .nickname { position: absolute; left: 21pt; width: 552pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-style: italic; font-size: 28pt; line-height: 1; color: var(--navy-table); } /* the border navy read as black in print: a clearer navy */
 .hero .silhouette { position: absolute; }
 .hero .state-name { white-space: nowrap; }
-.art-placeholder { position: absolute; left: 27.8pt; width: 520.4pt; text-align: center; pointer-events: none; }
+.art-placeholder { position: absolute; left: 21pt; width: 552pt; text-align: center; pointer-events: none; }
 .art-placeholder b, .img-placeholder b { display: block; font-weight: 700; font-size: 9pt; letter-spacing: .06em; color: #a33623; }
 .art-placeholder i, .img-placeholder i { display: block; font-size: 9pt; color: #6b6b6b; margin-top: 2pt; }
 .art-placeholder b, .art-placeholder i { display: inline-block; background: rgba(244,239,229,.85); padding: 1pt 5pt; }
@@ -166,8 +167,8 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .story .story-body { position: relative; isolation: isolate; }
 /* Flag = background layer centred behind the text block (not a separate element under it) */
 .story .live { isolation: isolate; }
-.recto.story .story-flag { left: -57.6pt; }
-.verso.story .story-flag { left: -43.2pt; }
+.recto.story .story-flag { left: calc(-1 * var(--m-in)); }
+.verso.story .story-flag { left: calc(-1 * var(--m-out)); }
 /* Client: flag aligned with the top of the page (edge to edge), not centred */
 .story .story-flag { position: absolute; z-index: -1; top: -61pt; width: 594pt;
   opacity: .10; pointer-events: none; }
@@ -226,8 +227,8 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 /* ---------- Food image placeholder (artwork not produced yet) ---------- */
 .food .img-placeholder { flex: 1; border: .75pt dashed #1d3864; background: #f1f0ec; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20pt; }
 .food .img-placeholder span { margin-top: 6pt; font-size: 8pt; color: #8a8a8a; }
-.food .live { left: 57.6pt; right: 43.2pt; }
-.verso.food .live { left: 43.2pt; right: 57.6pt; }
+.food .live { left: var(--m-in); right: var(--m-out); }
+.verso.food .live { left: var(--m-out); right: var(--m-in); }
 
 /* Tighter setting, used only when it saves a page that would hold a few lines */
 .compact.story .body-text p, .story.compact p { line-height: 16.2pt; margin-bottom: 7pt; }

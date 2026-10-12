@@ -3,6 +3,7 @@
 // RecipeTagline, IngredientItem, …), so text edits in Word flow straight into the layout.
 import { readFile } from 'node:fs/promises';
 import JSZip from 'jszip';
+import corrections from '../src/content/corrections.mjs';
 
 const decode = (s) => s
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
@@ -108,5 +109,28 @@ export async function readManuscript(docxPath) {
     if (c.earlyCallout && c.recipes[0]) c.recipes[0].blocks.push(...c.earlyCallout);
     delete c.earlyCallout;
   }
+  for (const c of chapters) applyCorrections(c, corrections[c.slug] || []);
   return { chapters, skipped };
+}
+
+function applyCorrections(ch, list) {
+  const hit = (text, find) => (find instanceof RegExp ? find.test(text) : text.includes(find));
+  const fix = (text, k) => (k.find instanceof RegExp ? text.replace(k.find, k.replace) : text.split(k.find).join(k.replace));
+  for (const k of list) {
+    let done = false;
+    if (k.in === 'story') {
+      ch.story = ch.story.map((p) => (hit(p, k.find) ? ((done = true), fix(p, k)) : p));
+    } else {
+      for (const r of ch.recipes) {
+        r.blocks = r.blocks.filter((b) => {
+          if (b.type !== k.in || !hit(b.text, k.find)) return true;
+          done = true;
+          if (k.remove) return false;
+          b.text = fix(b.text, k);
+          return true;
+        });
+      }
+    }
+    if (!done) throw new Error(`Correction not applied for ${ch.name}: ${k.find}`);
+  }
 }

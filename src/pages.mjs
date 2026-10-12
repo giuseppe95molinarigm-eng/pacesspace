@@ -108,7 +108,10 @@ function scallopRect(x0, y0, x1, y1, r) {
   return `M${x0 + r},${y0} H${x1 - r} A${r},${r} 0 0 0 ${x1},${y0 + r} V${y1 - r} A${r},${r} 0 0 0 ${x1 - r},${y1} H${x0 + r} A${r},${r} 0 0 0 ${x0},${y1 - r} V${y0 + r} A${r},${r} 0 0 0 ${x0 + r},${y0} Z`;
 }
 
-const HERO_CENTER_X = 288; // centre of the gold frame (verso; mirrored on recto)
+// Client (round 6): a single gold line, equal navy on both sides → frame centred on the page.
+const FRAME = { x0: 21, y0: 23.5, x1: 573, y1: 768.5, r: 18 };
+const FLAG_H = (FRAME.x1 - FRAME.x0) * 1123 / 2009; // flag-wave artwork keeps its proportions
+const HERO_CENTER_X = 297;
 const ART_BOTTOM = 730; // lowest point of the state artwork (pt)
 const PNG_SILHOUETTE = { wPt: 276.0, hPt: 437.04 }; // Alabama artwork, 300 dpi, sized to STATE_AREA
 
@@ -194,13 +197,12 @@ export function heroPage(ch, art) {
   // between name and nickname; large re-centred state outlined in frame gold.
   return `<section class="page hero" data-state="${ch.slug}" data-role="hero">
     <svg class="frame" width="594pt" height="792pt" viewBox="0 0 594 792" aria-hidden="true">
-      <path class="mirror" d="${scallopRect(20.14, 23.54, 555.86, 768.46, 18)}" fill="#f4efe5" stroke="#bb9554" stroke-width="1"/>
+      <defs><clipPath id="panel-${ch.slug}"><path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}"/></clipPath></defs>
+      <path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}" fill="#f4efe5"/>
+      <image href="assets/img/common/hero-flag-wave.jpg" x="${FRAME.x0}" y="${FRAME.y1 - FLAG_H}" width="${FRAME.x1 - FRAME.x0}" height="${FLAG_H}" preserveAspectRatio="xMidYMax slice" clip-path="url(#panel-${ch.slug})"/>
+      <path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}" fill="none" stroke="#bb9554" stroke-width="1"/>
     </svg>
     <div class="hero-art">
-      <img class="flag-wave" src="assets/img/common/hero-flag-wave.jpg" alt="">
-      <svg class="frame" width="594pt" height="792pt" viewBox="0 0 594 792" aria-hidden="true">
-        <path d="${scallopRect(27.255, 33.445, 548.745, 758.555, 17.52)}" fill="none" stroke="#bb9554" stroke-width="1.05"/>
-      </svg>
       <div class="state-name" style="top:${L.top}pt;font-size:${L.size.toFixed(1)}pt;line-height:${L.lineH.toFixed(1)}pt">${L.lines.map(esc).join('<br>')}</div>
       <div class="hero-rule" style="top:${L.ruleTop.toFixed(1)}pt">${starRule({ lineLength: 70.8, gap: 7.5, bigStar: { size: 25.2, tone: 'gold' } })}</div>
       <div class="nickname" style="top:${L.nickTop.toFixed(1)}pt">${esc(ch.nickname)}</div>
