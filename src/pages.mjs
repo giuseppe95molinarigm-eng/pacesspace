@@ -108,10 +108,12 @@ function scallopRect(x0, y0, x1, y1, r) {
   return `M${x0 + r},${y0} H${x1 - r} A${r},${r} 0 0 0 ${x1},${y0 + r} V${y1 - r} A${r},${r} 0 0 0 ${x1 - r},${y1} H${x0 + r} A${r},${r} 0 0 0 ${x0},${y1 - r} V${y0 + r} A${r},${r} 0 0 0 ${x0 + r},${y0} Z`;
 }
 
-// Client (round 6): a single gold line, equal navy on both sides → frame centred on the page.
-const FRAME = { x0: 21, y0: 23.5, x1: 573, y1: 768.5, r: 18 };
+// Client (round 7): single gold line; navy band wider on the spine side (as in the sample:
+// 20pt outside, 38pt toward the spine). Drawn for a left-hand page; right-hand pages shift
+// the whole page content 18pt (CSS), so the wide band is always next to the spine.
+const FRAME = { x0: 20, y0: 23.5, x1: 556, y1: 768.5, r: 18 };
 const FLAG_H = (FRAME.x1 - FRAME.x0) * 1123 / 2009; // flag-wave artwork keeps its proportions
-const HERO_CENTER_X = 297;
+const HERO_CENTER_X = (FRAME.x0 + FRAME.x1) / 2;
 const ART_BOTTOM = 730; // lowest point of the state artwork (pt)
 const PNG_SILHOUETTE = { wPt: 276.0, hPt: 437.04 }; // Alabama artwork, 300 dpi, sized to STATE_AREA
 
@@ -195,7 +197,7 @@ export function heroPage(ch, art) {
   const L = { ...base, top: NAME.top + dy - lift, ruleTop: base.ruleTop + dy - lift, nickTop: base.nickTop + dy - lift, artTop: base.artTop + dy };
   // Approved template: no five-star rule, no red single-star rule; gold star rule
   // between name and nickname; large re-centred state outlined in frame gold.
-  return `<section class="page hero" data-state="${ch.slug}" data-role="hero">
+  return `<section class="page hero" data-state="${ch.slug}" data-role="hero"><div class="hero-inner">
     <svg class="frame" width="594pt" height="792pt" viewBox="0 0 594 792" aria-hidden="true">
       <defs><clipPath id="panel-${ch.slug}"><path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}"/></clipPath></defs>
       <path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}" fill="#f4efe5"/>
@@ -208,7 +210,7 @@ export function heroPage(ch, art) {
       <div class="nickname" style="top:${L.nickTop.toFixed(1)}pt">${esc(ch.nickname)}</div>
       ${silhouette(ch, art, L)}
     </div>
-  </section>`;
+  </div></section>`;
 }
 
 // Footer shell; paginate.js writes the page number and sets recto/verso.
