@@ -52,13 +52,13 @@ function parseCsv(text) {
 }
 
 async function api(url, body) {
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < 10; attempt++) {
     const res = await fetch(url, {
       method: body ? 'POST' : 'GET',
       headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json', Prefer: 'wait=60' },
       body: body ? JSON.stringify(body) : undefined,
     });
-    if (res.status === 429 || res.status >= 500) { await new Promise((r) => setTimeout(r, 4000 * (attempt + 1))); continue; }
+    if (res.status === 429 || res.status >= 500) { await new Promise((r) => setTimeout(r, 6000 * (attempt + 1))); continue; }
     const json = await res.json();
     if (!res.ok) throw new Error(`${res.status} ${JSON.stringify(json)}`);
     return json;
@@ -76,6 +76,7 @@ async function run(model, prompt, ratio) {
   }
   if (p.status !== 'succeeded') throw new Error(`${model}: ${p.status} ${p.error || ''}`);
   const url = Array.isArray(p.output) ? p.output[0] : p.output;
+  if (!url) throw new Error(`${model}: no image returned (likely filtered)`);
   const img = Buffer.from(await (await fetch(url)).arrayBuffer());
   return { img, ar, seconds: p.metrics?.predict_time };
 }
