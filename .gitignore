@@ -4,3 +4,5 @@ dist/
 # not redistributed). Drop your licensed copy / proof files here to match the sample.
 assets/fonts/local/
 illustrations/candidates/
+output/00_Internal_Proof_with_markers.pdf
+output/ready/
