@@ -8,8 +8,8 @@ Generated from `manuscript/Made_in_the_USA_BASE.docx`. Pages are numbered from 1
 | 01_Alabama.pdf | 12–15 | 4 | 1 / 1 / 1 | definitive |
 | 02_Alaska.pdf | 16–19 | 4 | 1 / 1 / 1 | hero ✓, food ✓ |
 | 03_Arizona.pdf | 20–23 | 4 | 1 / 1 / 1 | hero ✓, food ✓ |
-| 04_Arkansas.pdf | 24–28 | 5 | 1 / 2 / 1 | hero ✓, food — |
-| 05_California.pdf | 29–34 | 6 | 1 / 2 / 2 | hero —, food — |
+| 04_Arkansas.pdf | 24–28 | 5 | 1 / 2 / 1 | hero ✓, food ✓ |
+| 05_California.pdf | 29–34 | 6 | 1 / 2 / 2 | hero ✓, food ✓ |
 | 06_Colorado.pdf | 35–38 | 4 | 1 / 1 / 1 | hero —, food — |
 | 07_Connecticut.pdf | 39–43 | 5 | 1 / 2 / 1 | hero —, food — |
 | 08_Delaware.pdf | 44–47 | 4 | 1 / 1 / 1 | hero —, food — |

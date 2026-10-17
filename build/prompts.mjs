@@ -22,7 +22,7 @@ const nearestRatio = (w, h) => RATIOS.reduce((best, r) => (Math.abs(r[0] / r[1] 
 
 // Client (round 3): scenes follow each story; vary season and time of day (no default sunset).
 const HERO_STYLE = 'Photorealistic landscape photograph with a subtle painterly finish, natural true-to-season colours, deep perspective, crisp detail, timeless feel for a premium heritage American cookbook: no modern cars, paved roads, power lines or modern signage. Keep exactly the season and light described — do not turn it into a sunset.';
-const HERO_FRAMING = 'The picture will be clipped inside the outline of the state: keep the main subject in the centre and the horizon in the upper third, with nothing important near the edges.';
+const HERO_FRAMING = 'A full, rectangular landscape photograph that fills the whole frame edge to edge: keep the main subject near the centre and the horizon in the upper third, with nothing important near the edges (the layout will crop it). Do not draw any map, outline, silhouette or cut-out shape.';
 // Client (rounds 3 and 5): Bon Appétit style, natural early-morning or late-afternoon light, and the
 // food-photography composition rules she listed (rule of thirds, balance, negative space, leading
 // lines, focal point, movement, layers & depth, framing, repetition, golden ratio / triangle / spiral,
@@ -41,7 +41,7 @@ function shotFor(dish) {
   return '45° hero shot';
 }
 let dishCount = 0;
-const NEGATIVE = 'No people, no hands, no faces, no text, no lettering, no logos, no labels, no watermark, no frame or border.';
+const NEGATIVE = 'No people, no hands, no faces, no text, no lettering, no logos, no labels or packaging with writing (plain unlabeled bottles and jars only), no watermark, no frame or border.';
 
 // "1 ½ lb. boneless pork shoulder, cut into…" → "boneless pork shoulder"
 function ingredientName(text) {
