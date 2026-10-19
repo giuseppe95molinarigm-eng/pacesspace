@@ -8,6 +8,7 @@ import { readManuscript } from './manuscript.mjs';
 import { statePath } from './shapes.mjs';
 import { dishIllustrations } from '../src/pages.mjs';
 import landscapes from '../src/content/landscapes.mjs';
+import foodShots from '../src/content/food-shots.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(root, 'illustrations');
@@ -27,12 +28,14 @@ const HERO_FRAMING = 'A full, rectangular landscape photograph that fills the wh
 // food-photography composition rules she listed (rule of thirds, balance, negative space, leading
 // lines, focal point, movement, layers & depth, framing, repetition, golden ratio / triangle / spiral,
 // dynamic symmetry, shot angle, orientation, props, surfaces, colour theory, depth of field).
-const FOOD_STYLE = 'Bon Appétit–style editorial food photography, photorealistic, relaxed home-cooked styling, real and a little imperfect (crumbs, a drip, a used spoon, a portion already served). Not glossy, not restaurant plating, no studio flash.';
-const FOOD_RULES = 'Composition: one clear focal point on the dish, placed on a rule-of-thirds intersection rather than dead centre; generous negative space; leading lines and shapes (cutlery, a folded napkin, the edge of a board) guiding the eye to the dish; layers and depth with an out-of-focus ingredient in the foreground, the dish, and soft props behind; a balanced asymmetrical arrangement; a little repetition (a scatter of herbs, berries or slices) and a sense of movement (rising steam, a drip, scattered crumbs). Only props and ingredients that belong to the recipe, on a natural surface; a harmonious colour palette with one complementary accent colour; shallow depth of field with the focal point tack-sharp.';
+const FOOD_STYLE = 'Bon Appétit–style editorial food photography, photorealistic, relaxed home-cooked styling, real and a little imperfect (crumbs, a drip, a portion already served). Not glossy, not restaurant plating, no studio flash.';
+// Round 8 (feedback tracker): the recipe is the hero — the finished dish fills most of the frame,
+// few props that belong to the recipe, no stray cutlery, no garnish the recipe does not list.
+const FOOD_RULES = 'Composition: the finished dish is the clear hero and fills most of the frame (about two thirds of the picture), cropped close and fully inside the frame — nothing important cut off at the edges; a balanced, calm arrangement with clear space around the dish; shallow depth of field with the dish tack-sharp. Keep props to the minimum listed: no extra bowls, jars, spices, raw ingredients, herbs, cloths or plants. No forks, knives or spoons on or beside the plate unless one is named here. No garnish, herb or topping that is not named here. Natural surface, harmonious colour palette.';
 // Shot, light, surface and composition device vary from picture to picture.
 const LIGHTS = ['soft natural window light in the early morning, cool and fresh, gentle side light', 'warm natural window light in the late afternoon, low golden side light with long soft shadows'];
 const SURFACES = ['a light marble counter', 'a pale linen tablecloth', 'a sage-green painted wooden table', 'a butcher-block kitchen counter', 'a white enamel tabletop', 'a soft blue tiled counter', 'a worn oak farmhouse table', 'a terracotta-coloured tablecloth'];
-const DEVICES = ['arranged along a golden spiral that ends on the dish', 'arranged on golden-triangle diagonals', 'framed by props around the edges of the picture', 'with dynamic-symmetry diagonals running through the dish', 'following the golden-ratio (phi) grid'];
+const DEVICES = ['arranged along a golden spiral that ends on the dish', 'arranged on golden-triangle diagonals', 'with dynamic-symmetry diagonals running through the dish', 'following the golden-ratio (phi) grid'];
 // Flat dishes read best from above, tall ones straight on, the rest from the 45° "hero" angle.
 function shotFor(dish) {
   const d = dish.toLowerCase();
@@ -126,14 +129,16 @@ for (const ch of chapters) {
     const ratio = spread ? '7:5' : '5:7';
     const ings = keyIngredients(recipe);
     const k = dishCount++;
+    const spec = foodShots[ch.slug]?.[n + 1];
     const prompt = [
-      `${dish}, the classic ${ch.name} dish, as made at home and just served${sides.length ? `, with ${sides.join(' and ')} alongside` : ''}.`,
-      ings ? `A few of its ingredients nearby as props: ${ings}.` : '',
+      spec
+        ? `${dish}, the classic ${ch.name} dish, as made at home and just served: ${spec.show}.${spec.props && spec.props !== 'nothing else' ? ` Only props: ${spec.props}.` : ' No other props.'}`
+        : `${dish}, the classic ${ch.name} dish, as made at home and just served${sides.length ? `, with ${sides.join(' and ')} alongside` : ''}. Ingredients: ${ings}.`,
       FOOD_STYLE,
-      `${shotFor(dish)}, ${spread ? 'horizontal' : 'vertical'} orientation, on ${SURFACES[k % SURFACES.length]}. Light: ${LIGHTS[k % LIGHTS.length]}.`,
+      `${spec?.shot || shotFor(dish)}, ${spread ? 'horizontal' : 'vertical'} orientation, on ${SURFACES[k % SURFACES.length]}. Light: ${LIGHTS[k % LIGHTS.length]}.`,
       FOOD_RULES,
       `Elements ${DEVICES[k % DEVICES.length]}.`,
-      spread ? 'Two-page spread: keep the dish left or right of centre, never on the centre line (the book spine).' : '',
+      spread ? 'Two-page spread: ONE single continuous photograph of one table, one camera angle and one light (not two pictures side by side, no ingredient flat lay); the finished dish is large and dominant, placed left or right of centre, never on the centre line (the book spine).' : '',
       `Aspect ratio ${ratio}.`,
     ].filter(Boolean).join(' ');
     const file = `assets/img/states/${ch.slug}/dish-${n + 1}.jpg`;

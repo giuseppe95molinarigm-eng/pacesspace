@@ -134,3 +134,26 @@ function applyCorrections(ch, list) {
     if (!done) throw new Error(`Correction not applied for ${ch.name}: ${k.find}`);
   }
 }
+
+/**
+ * Back matter after the last state (The Table We Set Together, Menus, Allergens):
+ * one section per "BonusEyebrow", its paragraphs typed by their Word style.
+ */
+export async function readBackMatter(docxPath) {
+  const paras = await paragraphs(docxPath);
+  const start = paras.findIndex((p) => p.style === 'BonusEyebrow');
+  const sections = [];
+  let sec = null;
+  for (const { style, text } of paras.slice(start)) {
+    if (style === 'Titolo1') { sec = null; continue; }
+    if (style === 'BonusEyebrow') { sec = { eyebrow: text, title: '', blocks: [] }; sections.push(sec); continue; }
+    if (!sec) continue;
+    if (style === 'BonusTitle') sec.title = text;
+    else if (style === 'BonusDivider') { if (sec.blocks.length) sec.blocks.push({ type: 'ornament' }); }
+    else if (style === 'GroupItem') {
+      const [recipe, state] = text.split(/\s+·\s+/);
+      sec.blocks.push({ type: 'item', recipe: recipe.trim(), state: (state || '').trim() });
+    } else sec.blocks.push({ type: style, text });
+  }
+  return sections;
+}

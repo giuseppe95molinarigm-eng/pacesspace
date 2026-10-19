@@ -9,9 +9,32 @@ const require = createRequire(import.meta.url);
 const topo = require('us-atlas/states-10m.json');
 const states = feature(topo, topo.objects.states).features;
 
+// Rhode Island: at print size the 10m outline of Narragansett Bay breaks the state into
+// jagged slivers (client: "star-shaped cutout"). The mainland and bay islands are drawn as one
+// clean outline (their hull, as on most state maps at this scale); Block Island stays separate.
+function hull(points) {
+  const p = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [], upper = [];
+  for (const q of p) { while (lower.length > 1 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop(); lower.push(q); }
+  for (const q of p.reverse()) { while (upper.length > 1 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop(); upper.push(q); }
+  return lower.slice(0, -1).concat(upper.slice(0, -1));
+}
+function rhodeIsland(f) {
+  const polys = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates];
+  const mean = (poly) => poly[0].reduce((m, [, lat]) => m + lat, 0) / poly[0].length;
+  const main = polys.filter((poly) => mean(poly) > 41.3);
+  const block = polys.filter((poly) => mean(poly) <= 41.3);
+  const ring = hull(main.flatMap((poly) => poly[0]));
+  ring.push(ring[0]);
+  // d3-geo wants clockwise exterior rings: the monotone-chain hull is counter-clockwise (lon/lat).
+  return { ...f, geometry: { type: 'MultiPolygon', coordinates: [[ring.reverse()], ...block] } };
+}
+
 // Alaska: leave out the far Aleutian islands (west of the Alaska Peninsula),
 // otherwise the chain stretches the shape so wide that the state prints tiny.
 function trim(f) {
+  if (f.properties.name === 'Rhode Island') return rhodeIsland(f);
   if (f.properties.name !== 'Alaska') return f;
   const keep = f.geometry.coordinates.filter((poly) => {
     const lons = poly[0].map(([lon]) => (lon > 0 ? lon - 360 : lon));
@@ -40,5 +63,12 @@ export function statePath(name, w, h, area = Infinity) {
     path = geoPath(projection);
   }
   const [[x0, y0], [x1, y1]] = path.bounds(f);
-  return { d: path(f), x0, y0, width: x1 - x0, height: y1 - y0, area: path.area(f) };
+  // Each island / separate piece, for states drawn piece by piece (Hawaii).
+  const polys = f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [f.geometry.coordinates];
+  const parts = polys.map((coordinates) => {
+    const g = { type: 'Polygon', coordinates };
+    const [[a, b], [c, e]] = path.bounds(g);
+    return { d: path(g), x0: a, y0: b, width: c - a, height: e - b };
+  });
+  return { d: path(f), x0, y0, width: x1 - x0, height: y1 - y0, area: path.area(f), parts };
 }

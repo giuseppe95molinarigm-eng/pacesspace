@@ -1,7 +1,5 @@
 // Page templates. Each returns one <section class="page">; content comes from src/content.
-import { star, flatStar, starRule, stateFooter, plainFolio, esc } from './components.mjs';
-
-const side = (folio) => (folio % 2 === 0 ? 'verso' : 'recto');
+import { flatStar, starRule, stateFooter, esc } from './components.mjs';
 
 // ---------------------------------------------------------------- front matter
 
@@ -11,7 +9,7 @@ export function coverPage(c) {
   // Measured on the output: 30pt above / 27pt below gives the same 39pt between
   // each rule and the subtitle capitals (the line box has more room below the caps).
   const RULE_TO_SUBTITLE = 30;
-  return `<section class="page cover recto">
+  return `<section class="page cover recto" data-section="title">
     <div class="made-in">${esc(c.titleTop)}</div>
     <div class="the-usa"><span class="the">${esc(c.titleThe)}</span> <span class="usa">${esc(c.titleUsa)}</span></div>
     <div class="subtitle-group">
@@ -26,8 +24,11 @@ export function coverPage(c) {
   </section>`;
 }
 
+// Client (round 8): the star footer on every general page except the title page.
+const GENERAL_FOOTER = stateFooter('');
+
 export function copyrightPage(c) {
-  return `<section class="page copyright verso">
+  return `<section class="page copyright verso" data-section="copyright">
     <div class="live">
       <p class="book-title">${esc(c.title)}</p>
       ${c.lines.map((l) => `<p>${esc(l)}</p>`).join('')}
@@ -37,36 +38,37 @@ export function copyrightPage(c) {
       </div>
       ${c.closing.map((l) => `<p>${esc(l)}</p>`).join('')}
     </div>
+    ${GENERAL_FOOTER}
   </section>`;
 }
 
-export function tocPage(t, folio = 4) {
-  const row = ([title, n, opts = {}]) =>
-    `<div class="toc-row${opts.check ? ' check' : ''}"><span class="t">${esc(title)}</span><span class="lead"></span><span class="n">${n}</span></div>`;
-  return `<section class="page toc ${side(folio)}">
-    <div class="bg"></div>
+/** rows: [title, ref] — the page number is written in from the final layout (data-ref). */
+export function tocPage(t) {
+  const row = ([title, ref]) =>
+    `<div class="toc-row"><span class="t">${esc(title)}</span><span class="lead"></span><span class="n" data-ref="${ref}">000</span></div>`;
+  return `<section class="page toc verso" data-section="toc">
     <h1 class="page-title">TABLE OF CONTENTS</h1>
     ${starRule()}
     <div class="cols"><div>${t.left.map(row).join('')}</div><div>${t.right.map(row).join('')}</div></div>
-    ${plainFolio(folio, side(folio))}
+    ${GENERAL_FOOTER}
   </section>`;
 }
 
 export function welcomePage(w) {
   // Single-star rule above the title removed at the client's request.
-  return `<section class="page welcome ${side(w.folio)}">
+  return `<section class="page welcome recto" data-section="welcome">
     <h1 class="page-title">${w.title.map(esc).join('<br>')}</h1>
     ${starRule()}
     <div class="live body-text">
       ${w.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('')}
       <div class="closing">${w.closing.map(esc).join('<br>')}</div>
     </div>
-    ${plainFolio(w.folio, side(w.folio))}
+    ${GENERAL_FOOTER}
   </section>`;
 }
 
 export function temperaturesPage(k) {
-  return `<section class="page kitchen ${side(k.folio)}">
+  return `<section class="page kitchen recto" data-section="temperatures">
     <div class="kicker">${esc(k.kicker)}</div>
     <h1 class="page-title">${k.title.map(esc).join('<br>')}</h1>
     ${starRule()}
@@ -83,7 +85,7 @@ export function temperaturesPage(k) {
         ${flatStar({ size: 12.8, color: '#a33522' })}
       </div>
     </div>
-    ${plainFolio(k.folio, side(k.folio))}
+    ${GENERAL_FOOTER}
   </section>`;
 }
 
@@ -93,6 +95,7 @@ export function temperaturesPage(k) {
 // pours them into as many pages as they need, then numbers every page.
 
 import { existsSync } from 'node:fs';
+import { SINGLE_PHOTO_PAGE } from './content/food-shots.mjs';
 import { statePath } from '../build/shapes.mjs';
 
 // Finished artwork dropped in assets/img/states/<state>/ (hero.jpg, dish-1.jpg, …).
@@ -114,89 +117,80 @@ function scallopRect(x0, y0, x1, y1, r) {
 const FRAME = { x0: 20, y0: 23.5, x1: 556, y1: 768.5, r: 18 };
 const FLAG_H = (FRAME.x1 - FRAME.x0) * 1123 / 2009; // flag-wave artwork keeps its proportions
 const HERO_CENTER_X = (FRAME.x0 + FRAME.x1) / 2;
-const ART_BOTTOM = 730; // lowest point of the state artwork (pt)
-const PNG_SILHOUETTE = { wPt: 276.0, hPt: 437.04 }; // Alabama artwork, 300 dpi, sized to STATE_AREA
 
 // Advance widths (em) of the Cormorant Garamond SemiBold capitals, used to size the state name.
 const CAP_W = { A: .711, B: .582, C: .683, D: .7, E: .547, F: .518, G: .725, H: .762, I: .339, J: .333, K: .653, L: .541, M: .85, N: .732, O: .766, P: .549, Q: .766, R: .689, S: .507, T: .64, U: .701, V: .662, W: .918, X: .649, Y: .616, Z: .602, ' ': .234 };
-// Client (round 4): smaller and lighter than the book title (Cormorant Bold 68–114pt), more room
-// under the frame, nickname closer to the state.
-const NAME = { maxWidth: 460, maxSize: 60, minSingle: 46, tracking: 0.04, top: 80 }; // top = minimum
-const NICK = { size: 28, gap: 8 };      // between recipe title (21pt) and state name
-const TEXT_LIFT = 28;                  // one nickname line
-const STATE_AREA = 90000;               // pt²: every state drawn at about the same surface
+// Client (round 8, L9): one repeating template — name, star rule and nickname sit at the same
+// place on every hero page; names stay on one line (long ones are set a little smaller).
+const NAME = { maxWidth: 460, maxSize: 60, tracking: 0.04, baseline: 128 };
+const RULE_TOP = 134;
+const NICK_TOP = 166;
 const emWidth = (t) => [...t].reduce((n, c) => n + (CAP_W[c] ?? .8) + NAME.tracking, 0);
+// Fixed photo zone under the nickname; each outline is centred on the zone's centre point.
+const ZONE = { top: 214, bottom: 704, w: 500 }; // centre sits close under the title block
+// Same visual weight on every page: about the same surface, a little more for wide states and
+// a little less for tall ones, a floor for the smallest (Delaware, Rhode Island).
+const STATE_AREA = 92000; // pt²
+const weightArea = (aspect) => STATE_AREA * Math.min(1.25, Math.max(0.85, aspect ** 0.2));
+// Island and peninsula states, sized on purpose rather than by surface (client, L9).
+const SPECIAL = {
+  hawaii: { w: 500, h: 380 },   // the whole island chain across the zone, every island filled
+  alaska: { w: 480, h: 420 },
+  michigan: { w: 430, h: 470 }, // both peninsulas large; the Upper Peninsula carries the story
+};
 
-/**
- * Client: state name "much bigger and bolder", star rule directly beneath it.
- * Short names run up to 80pt; two-word names too long for one line are stacked
- * so they stay large. Everything below (rule, nickname, state) follows.
- */
 function heroLayout(name) {
   const upper = name.toUpperCase();
-  let lines = [upper];
-  let size = Math.min(NAME.maxSize, NAME.maxWidth / emWidth(upper));
-  if (size < NAME.minSingle && upper.includes(' ')) {
-    const words = upper.split(' ');
-    lines = [words.slice(0, -1).join(' '), words[words.length - 1]];
-    size = Math.min(72, NAME.maxWidth / Math.max(...lines.map(emWidth)));
-  }
-  const lineH = size * 0.95;
-  const nameBottom = NAME.top + lineH * lines.length;
-  const ruleTop = nameBottom - size * 0.16 + 3; // star rule right under the capitals
-  const nickTop = ruleTop + 24 + NICK.gap;
-  const artTop = nickTop + NICK.size + 14;
-  return { lines, size, lineH, ruleTop, nickTop, artTop, artH: ART_BOTTOM - artTop };
+  const size = Math.min(NAME.maxSize, NAME.maxWidth / emWidth(upper));
+  // Baseline locked: the line box starts higher for bigger type (Cormorant ascent ≈ .794 em at this leading).
+  return { lines: [upper], size, lineH: size * 0.95, top: NAME.baseline - size * 0.794, ruleTop: RULE_TOP, nickTop: NICK_TOP };
 }
 
-function silhouette(ch, art, L) {
-  if (art?.silhouette && !stateImage(ch.slug, 'hero')) {
-    const left = HERO_CENTER_X - PNG_SILHOUETTE.wPt / 2;
-    const top = L.artTop;
-    return `<img class="silhouette" src="${art.silhouette}" alt="${esc(ch.name)}" style="left:${left.toFixed(2)}pt;top:${top.toFixed(2)}pt;width:${PNG_SILHOUETTE.wPt}pt;height:${PNG_SILHOUETTE.hPt}pt">`;
+/** Outline of the state for its hero page, scaled for visual weight and centred in the zone. */
+export function heroShape(ch) {
+  const zoneH = ZONE.bottom - ZONE.top;
+  let shape;
+  if (SPECIAL[ch.slug]) {
+    shape = statePath(ch.name, SPECIAL[ch.slug].w, SPECIAL[ch.slug].h);
+  } else {
+    const probe = statePath(ch.name, 1000, 1000);
+    const aspect = probe.width / probe.height;
+    shape = statePath(ch.name, ZONE.w, zoneH, weightArea(aspect));
+    if (shape.height < 0.82 * zoneH && aspect < 0.75) shape = statePath(ch.name, ZONE.w, 0.82 * zoneH); // thin states: never small
   }
-  const SHAPE_BOX = { w: 470, h: L.artH, top: L.artTop };
+  const cy = (ZONE.top + ZONE.bottom) / 2;
+  return { ...shape, left: HERO_CENTER_X - shape.width / 2, top: cy - shape.height / 2 };
+}
+
+function silhouette(ch) {
   // Real state outline, gold-outlined. A landscape in assets/img/states/<state>/hero.jpg
   // is clipped inside it; without one, the outline carries a placeholder label.
-  const { d, x0, y0, width, height } = statePath(ch.name, SHAPE_BOX.w, SHAPE_BOX.h, STATE_AREA);
+  const { d, x0, y0, width, height, left, top, parts } = heroShape(ch);
   const pad = 4;
-  const left = HERO_CENTER_X - width / 2 - pad;
-  const top = SHAPE_BOX.top - pad; // right under the nickname (client: less space between them)
-  const box = `style="left:${left.toFixed(2)}pt;top:${top.toFixed(2)}pt" width="${(width + 2 * pad).toFixed(2)}pt" height="${(height + 2 * pad).toFixed(2)}pt" viewBox="${(x0 - pad).toFixed(2)} ${(y0 - pad).toFixed(2)} ${(width + 2 * pad).toFixed(2)} ${(height + 2 * pad).toFixed(2)}"`;
+  const box = `style="left:${(left - pad).toFixed(2)}pt;top:${(top - pad).toFixed(2)}pt" width="${(width + 2 * pad).toFixed(2)}pt" height="${(height + 2 * pad).toFixed(2)}pt" viewBox="${(x0 - pad).toFixed(2)} ${(y0 - pad).toFixed(2)} ${(width + 2 * pad).toFixed(2)} ${(height + 2 * pad).toFixed(2)}"`;
   const hero = stateImage(ch.slug, 'hero');
   if (hero) {
     const id = `clip-${ch.slug}`;
+    // Hawaii (client, L9): one picture across the chain would leave the small islands with
+    // empty sea or sky, so every island carries its own framing of the same scene.
+    const pieces = PER_ISLAND.includes(ch.slug) ? parts.filter((p) => p.width > 3) : [{ d, x0, y0, width, height }];
     return `<svg class="silhouette" ${box} aria-hidden="true">
-      <defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs>
+      <defs>${pieces.map((p, i) => `<clipPath id="${id}-${i}"><path d="${p.d}"/></clipPath>`).join('')}</defs>
       <path d="${d}" fill="none" stroke="#bb9554" stroke-width="2.1" stroke-linejoin="round"/>
-      <image href="${hero}" x="${x0}" y="${y0}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/>
+      ${pieces.map((p, i) => `<image href="${hero}" x="${p.x0}" y="${p.y0}" width="${p.width}" height="${p.height}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id}-${i})"/>`).join('\n      ')}
     </svg>`;
   }
   return `<svg class="silhouette" ${box} aria-hidden="true">
       <path d="${d}" fill="#e7dfcd" stroke="#bb9554" stroke-width="2.1" stroke-linejoin="round" paint-order="stroke"/>
     </svg>
-    <div class="art-placeholder" style="top:${(SHAPE_BOX.top + height / 2 - 16).toFixed(2)}pt">
+    <div class="art-placeholder" style="top:${(top + height / 2 - 16).toFixed(2)}pt">
       <b>ILLUSTRATION PLACEHOLDER</b><i>Illustrated ${esc(ch.name)} landscape inside the state shape</i></div>`;
 }
+const PER_ISLAND = ['hawaii'];
 
-// Height of the state artwork for this layout (pt).
-function stateHeight(ch, art, L) {
-  if (art?.silhouette && !stateImage(ch.slug, 'hero')) return PNG_SILHOUETTE.hPt;
-  return statePath(ch.name, 470, L.artH, STATE_AREA).height;
-}
-
-export function heroPage(ch, art) {
-  // Name, stars, nickname and state form one block, centred vertically in the
-  // frame: room under the top border, nickname close to the state (client, round 4).
-  const base = heroLayout(ch.name);
-  const h = stateHeight(ch, art, base);
-  const blockTop = NAME.top, blockBottom = base.artTop + h;
-  const dy = Math.max(0, (60 + 735) / 2 - (blockTop + blockBottom) / 2);
-  // Client (round 5): text block one line higher, image unchanged → an empty line between them.
-  const lift = Math.min(TEXT_LIFT, NAME.top + dy - 56);
-  const L = { ...base, top: NAME.top + dy - lift, ruleTop: base.ruleTop + dy - lift, nickTop: base.nickTop + dy - lift, artTop: base.artTop + dy };
-  // Approved template: no five-star rule, no red single-star rule; gold star rule
-  // between name and nickname; large re-centred state outlined in frame gold.
+export function heroPage(ch) {
+  const L = heroLayout(ch.name);
+  // Approved template: gold star rule between name and nickname; state outlined in frame gold.
   return `<section class="page hero" data-state="${ch.slug}" data-role="hero"><div class="hero-inner">
     <svg class="frame" width="594pt" height="792pt" viewBox="0 0 594 792" aria-hidden="true">
       <defs><clipPath id="panel-${ch.slug}"><path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}"/></clipPath></defs>
@@ -205,10 +199,10 @@ export function heroPage(ch, art) {
       <path d="${scallopRect(FRAME.x0, FRAME.y0, FRAME.x1, FRAME.y1, FRAME.r)}" fill="none" stroke="#bb9554" stroke-width="1"/>
     </svg>
     <div class="hero-art">
-      <div class="state-name" style="top:${L.top}pt;font-size:${L.size.toFixed(1)}pt;line-height:${L.lineH.toFixed(1)}pt">${L.lines.map(esc).join('<br>')}</div>
+      <div class="state-name" style="top:${L.top.toFixed(1)}pt;font-size:${L.size.toFixed(1)}pt;line-height:${L.lineH.toFixed(1)}pt">${L.lines.map(esc).join('<br>')}</div>
       <div class="hero-rule" style="top:${L.ruleTop.toFixed(1)}pt">${starRule({ lineLength: 70.8, gap: 7.5, bigStar: { size: 25.2, tone: 'gold' } })}</div>
       <div class="nickname" style="top:${L.nickTop.toFixed(1)}pt">${esc(ch.nickname)}</div>
-      ${silhouette(ch, art, L)}
+      ${silhouette(ch)}
     </div>
   </div></section>`;
 }
@@ -277,40 +271,45 @@ function recipeFlow(ch) {
   return `<template class="flow" data-kind="recipe" data-state="${ch.slug}">${ch.recipes.map((r, i) => recipeBlocks(r, i > 0)).join('')}</template>`;
 }
 
-function figure(img) {
-  if (!img.crop) return `<figure class="main"><img src="${img.src}" alt="${esc(img.alt)}"></figure>`;
-  // Frames fill the space left on the page; `crop` picks which part of the photo shows.
-  const [x, y, w, h] = img.crop;
-  const [sw, sh] = img.sourceSize;
-  const pos = (off, size, total) => (total > size ? (off / (total - size)) * 100 : 50).toFixed(1);
-  const style = `width:100%;height:100%;object-fit:cover;object-position:${pos(x, w, sw)}% ${pos(y, h, sh)}%`;
-  return `<figure class="${img.provisional ? 'provisional' : ''}"><img src="${img.src}" alt="${esc(img.alt)}" style="${style}"></figure>`;
-}
+// Photo pages use the text margins (client, L5). A spread is one picture laid across both pages
+// from outer margin to outer margin: the strip that falls in the two inside margins is hidden,
+// so the scene stays continuous across the gutter.
+const PHOTO = { w: 594 - 63 - 45, gutter: 2 * 63 };
 
-function foodPages(ch, art) {
-  // New artwork in assets/img/states/<state>/ replaces the sample's (Alabama).
-  if (art?.foodImages && !stateImage(ch.slug, 'dish-1')) {
-    const f = art.foodImages;
-    return `<section class="page food" data-state="${ch.slug}" data-role="food">
-      <div class="live">${figure(f.main)}<div class="details">${f.details.map(figure).join('')}</div></div>${FOOTER}</section>`;
-  }
+function foodPages(ch) {
   return dishIllustrations(ch).map((ill, n) => {
     const file = stateImage(ch.slug, `dish-${n + 1}`);
     const name = `assets/img/states/${ch.slug}/dish-${n + 1}.jpg`;
     return Array.from({ length: ill.pages }, (_, half) => {
       let inner;
       if (file) {
-        // A spread is one wide image shown across two facing pages.
-        const style = ill.pages === 2 ? `width:200%;margin-left:${half ? '-100%' : '0'}` : '';
-        inner = `<figure class="full"><img src="${file}" alt="${esc(ill.description)}" style="${style}"></figure>`;
+        const total = 2 * PHOTO.w + PHOTO.gutter;
+        const style = ill.pages === 2
+          ? `width:${total}pt;max-width:none;margin-left:${half ? -(PHOTO.w + PHOTO.gutter) : 0}pt`
+          : '';
+        inner = `<figure class="full${ill.pages === 2 ? ' spread' : ''}"><img src="${file}" alt="${esc(ill.description)}" style="${style}"></figure>`;
       } else {
         const where = ill.pages === 2 ? ` — full-page spread, ${half ? 'right' : 'left'} page` : '';
         inner = `<div class="img-placeholder"><b>ILLUSTRATION PLACEHOLDER</b><i>${esc(ill.description)}${where}</i><span>Food only (finished dish, ingredients or preparation) — no people</span><span class="file">${name}</span></div>`;
       }
+      const spread = ill.pages === 2 ? ` data-spread="${half ? 'right' : 'left'}"` : '';
       // Framed photo with the book footer (client: not full page).
-      return `<section class="page food" data-state="${ch.slug}" data-role="food"><div class="live">${inner}</div>${FOOTER}</section>`;
+      return `<section class="page food" data-state="${ch.slug}" data-role="food"${spread}><div class="live">${inner}</div>${FOOTER}</section>`;
     }).join('');
   }).join('');
+}
+
+// Client (L2, option b): a chapter with an odd number of pages ends on a full-bleed navy page
+// with the star ornament and a short closing line. paginate.js keeps it only where needed.
+function closingPage(ch) {
+  const nick = ch.nickname.replace(/^The /, 'the ');
+  return `<template class="closing" data-state="${ch.slug}"><section class="page closing-page" data-state="${ch.slug}" data-role="closing">
+    <div class="closing-inner">
+      ${starRule({ lineLength: 70.8, gap: 7.5, bigStar: { size: 25.2, tone: 'gold' } })}
+      <p class="closing-line">From ${esc(nick)} to your table.</p>
+      <div class="closing-stars">${starRule({ cls: 'gold-rule' })}</div>
+    </div>
+  </section></template>`;
 }
 
 /** Food illustrations of a chapter; the two "full page spread" entries of the manuscript are one image. */
@@ -323,9 +322,10 @@ export function dishIllustrations(ch) {
     out.push({ description, spread: d.spread, pages: 1 });
   }
   // a spread always takes two facing pages, even if listed once
-  return out.map((o) => (o.spread ? { ...o, pages: 2 } : o));
+  const single = SINGLE_PHOTO_PAGE.includes(ch.slug);
+  return out.map((o) => (o.spread && !single ? { ...o, pages: 2 } : { ...o, pages: single ? 1 : o.pages }));
 }
 
-export function stateChapter(ch, art) {
-  return heroPage(ch, art) + storyFlow(ch) + recipeFlow(ch) + foodPages(ch, art);
+export function stateChapter(ch) {
+  return heroPage(ch) + storyFlow(ch) + recipeFlow(ch) + foodPages(ch) + closingPage(ch);
 }

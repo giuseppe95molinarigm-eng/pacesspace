@@ -109,13 +109,12 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .copyright .registration p { margin-bottom: 4pt; }
 
 /* ---------- Table of contents ---------- */
-.toc { background: var(--paper-toc); }
-.toc .bg { position: absolute; left: -1.3pt; top: 75.9pt; width: 596.5pt; height: 717.3pt; background: url('../../assets/img/common/toc-flag-background.jpg') center top / 100% 100% no-repeat; }
+.toc { background: var(--paper); } /* client: plain paper like the rest of the book */
 .page-title { font-family: var(--cormorant); font-weight: 700; font-size: 39pt; line-height: 50pt; color: var(--navy); text-align: center; letter-spacing: .01em; }
 .toc .page-title { position: absolute; left: var(--m-out); right: var(--m-in); top: 64pt; }
 .toc .star-rule { position: absolute; left: var(--m-out); right: var(--m-in); top: 131.5pt; }
-.toc .cols { position: absolute; top: 196pt; left: var(--m-out); right: var(--m-in); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 22.8pt; }
-.toc-row { display: flex; align-items: baseline; font-size: 12pt; line-height: 18pt; color: var(--navy); }
+.toc .cols { position: absolute; top: 180pt; left: var(--m-out); right: var(--m-in); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 22.8pt; }
+.toc-row { display: flex; align-items: baseline; font-size: 12pt; line-height: 17.6pt; color: var(--navy); }
 .toc-row .t { flex: none; padding-right: 2pt; white-space: nowrap; }
 /* Dot leaders: set right-to-left so the dots are anchored to the page number and
    always end the same distance before it, whatever the number of digits. */
@@ -164,7 +163,7 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .art-placeholder i { display: table; margin: 2pt auto 0; }
 
 /* ---------- State: story page ---------- */
-.story .live { top: 61pt; bottom: 64pt; }
+.story .live { top: 61pt; bottom: 68pt; } /* client (Idaho): more room above the footer */
 .story .split-head { text-align-last: justify; margin-bottom: 0; }
 .story .story-body { position: relative; isolation: isolate; }
 /* Flag = background layer centred behind the text block (not a separate element under it) */
@@ -177,7 +176,9 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .story .story-flag img { display: block; width: 100%; height: auto; }
 
 /* ---------- State: recipe page ---------- */
-.recipe .live { top: 40pt; bottom: 58pt; display: flex; flex-direction: column; }
+.recipe .live { top: 40pt; bottom: 68pt; display: flex; flex-direction: column; }
+/* Continuation pages: text starts at the standard 0.625in top margin (client, L4) */
+.recipe.cont .live { top: 47pt; }
 /* Recipe typography = "Option C — Heritage capitals", chosen by the client. */
 .recipe-title { text-wrap: balance; text-align: center; font-family: var(--cormorant); font-weight: 700; font-size: 21pt; line-height: 27pt; letter-spacing: .09em; text-transform: uppercase; color: var(--red); }
 .recipe-tagline { margin: 10pt 36pt 0; padding: 7pt 20pt 6pt; border-top: .5pt solid var(--gold); border-bottom: .5pt solid var(--gold); font-family: var(--caslon-full); font-style: italic; font-size: 10.6pt; line-height: 16pt; color: var(--navy); text-align: center; }
@@ -199,7 +200,8 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .sub-recipe .recipe-yield { margin-top: 4pt; }
 
 /* ---------- State: food image page ---------- */
-.food .live { top: 40pt; bottom: 58pt; display: flex; flex-direction: column; gap: 12pt; }
+/* Photo pages: same margins as the text pages (client, L5) */
+.food .live { top: 45pt; bottom: 68pt; display: flex; flex-direction: column; gap: 12pt; }
 .food figure { position: relative; overflow: hidden; border: .75pt solid var(--red-rule); background: #ddd; }
 .food figure img { display: block; }
 .food .main { width: 100%; aspect-ratio: 1536 / 834; }
@@ -244,5 +246,74 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .food .img-placeholder .file { display: none; }
 .proof .food .img-placeholder .file { display: block; font-family: var(--montserrat); font-size: 7pt; color: #a33623; }
 .food figure.full { flex: 1; }
+.food figure.spread img { max-width: none; }
 .food figure.full img { height: 100%; width: 100%; object-fit: cover; }
 
+
+/* Second, tighter setting (client, L3): used only when it saves a nearly empty page */
+.tight .recipe-title { line-height: 24pt; }
+.tight .recipe-tagline { margin-top: 5pt; padding: 4pt 18pt 3pt; line-height: 15pt; }
+.tight .title-stars-wrap .star-rule { margin-top: 4pt; }
+.tight .recipe-h { margin-top: 5pt; line-height: 16pt; }
+.tight .ingredients { line-height: 14pt; }
+.tight .ingredients li { padding: .2pt 0; }
+.tight .step, .tight .recipe-note { margin-top: 2pt; line-height: 14.6pt; }
+.tight .step-sub { margin-top: 5pt; }
+.tight .callout { margin-top: 6pt; padding: 4pt 0 3pt; }
+.tight .callout ul { line-height: 14pt; }
+
+/* ---------- State: closing page (client, L2 option b) ---------- */
+.closing-page { background: var(--navy-deep); }
+.closing-inner { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22pt; }
+.closing-page .closing-line { font-family: var(--cormorant); font-style: italic; font-weight: 700; font-size: 24pt; line-height: 30pt; color: var(--cream); text-align: center; max-width: 380pt; }
+.closing-page .closing-stars { opacity: .9; }
+
+/* ---------- General pages added in round 8 ---------- */
+.dedication .live { top: 150pt; bottom: 90pt; text-align: center; }
+.dedication .live > .star { margin: 0 auto 30pt; }
+.dedication .to { font-family: var(--cormorant); font-weight: 700; font-style: italic; font-size: 19pt; line-height: 24pt; color: var(--navy); margin-top: 22pt; }
+.dedication .text { font-style: italic; font-size: 12.5pt; line-height: 18pt; margin: 6pt 18pt 0; }
+.dedication .closing { margin-top: 34pt; }
+.dedication .closing p { font-family: var(--cormorant); font-weight: 700; font-size: 16pt; line-height: 23pt; color: var(--red); }
+
+.prose .live { top: 61pt; bottom: 68pt; }
+.prose .live > :first-child { margin-top: 0; }
+.prose .kicker { text-align: center; font-family: var(--montserrat); font-weight: 700; font-size: 15pt; letter-spacing: .06em; color: var(--rust); line-height: 20pt; margin-top: 4pt; }
+.prose .page-title { margin-top: 6pt; line-height: 44pt; font-size: 36pt; }
+.prose .title-rule { margin: 14pt 0 24pt; }
+.prose p { font-size: 12.5pt; line-height: 17pt; text-align: justify; hyphens: manual; margin-bottom: 9pt; }
+.prose .split-head { text-align-last: justify; margin-bottom: 0; }
+.prose p.deck { font-style: italic; text-align: center; margin: 0 18pt 14pt; }
+.prose .prose-h { margin: 20pt 0 6pt; text-align: center; font-family: var(--cormorant); font-weight: 700; font-size: 19pt; line-height: 24pt; letter-spacing: .09em; text-transform: uppercase; color: var(--red); }
+.prose .prose-h.divider { margin-top: 26pt; padding-top: 10pt; border-top: .5pt solid var(--gold); }
+.prose .prose-sub { margin: 12pt 0 4pt; font-family: var(--montserrat); font-weight: 700; font-size: 10.5pt; line-height: 16pt; letter-spacing: .22em; text-transform: uppercase; color: var(--red); }
+.prose .callout { margin-top: 14pt; }
+.prose .callout li { text-align: left; }
+.prose .ornament { display: flex; justify-content: center; margin: 18pt 0 12pt; }
+.prose .closing-line { text-align: center; font-style: italic; margin-bottom: 2pt; }
+.prose .group-name { margin: 16pt 0 2pt; font-family: var(--cormorant); font-weight: 700; font-size: 17pt; line-height: 22pt; color: var(--navy); }
+.prose p.group-desc { font-style: italic; font-size: 11.5pt; line-height: 15pt; text-align: left; margin-bottom: 4pt; }
+.prose p.placeholder { text-align: center; font-style: italic; color: #777; }
+.ix-row { display: flex; align-items: last baseline; font-size: 11.5pt; line-height: 15.5pt; color: var(--ink); padding: 1pt 0; }
+.ix-row .t { flex: 0 1 auto; }
+.ix-row .t i { color: var(--navy); }
+.ix-row .lead { flex: 1 1 14pt; min-width: 14pt; overflow: hidden; white-space: nowrap; direction: rtl; margin: 0 3pt; letter-spacing: .05em; color: var(--gold); }
+.ix-row .lead::before { content: '..........................................................................................................'; }
+.ix-row .n { flex: none; font-variant-numeric: lining-nums; color: var(--navy); }
+.ix-row.item { padding-left: 12pt; }
+.ix-list { list-style: none; columns: 2; column-gap: 26pt; }
+.ix-list li { break-inside: avoid; }
+.ix-list li .ix-row { font-size: 10.5pt; line-height: 14pt; }
+.ix-list li.sub { margin-top: 7pt; font-family: var(--montserrat); font-weight: 700; font-size: 8.5pt; line-height: 13pt; letter-spacing: .14em; text-transform: uppercase; color: var(--red); break-after: avoid; }
+.ix-list li.sub:first-child { margin-top: 0; }
+
+/* Our Culinary Map — one map across pages 10–11 */
+.map .map-head { position: absolute; top: 61pt; left: var(--m-out); right: var(--m-in); text-align: center; }
+.map .map-head .star-rule { margin-top: 14pt; }
+.map .map-intro { margin: 14pt 30pt 0; font-style: italic; font-size: 12.5pt; line-height: 17pt; color: var(--ink); }
+.map .map-art { position: absolute; left: 0; top: 0; width: 1188pt; height: 792pt; }
+.usmap .states path { fill: var(--navy-table); stroke: var(--cream); stroke-width: .8; stroke-linejoin: round; }
+.usmap text { font-family: var(--montserrat); font-weight: 700; font-size: 8pt; letter-spacing: .06em; fill: var(--cream); text-anchor: middle; }
+.usmap text.off { fill: var(--navy); text-anchor: start; }
+.usmap .leader { stroke: var(--gold); stroke-width: .6; }
+.usmap .dot { fill: var(--gold); }

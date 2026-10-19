@@ -22,36 +22,78 @@ export const copyright = {
   closing: ['First Edition.', 'Printed in the United States of America.'],
 };
 
-// Table of contents. Page numbers are data, not layout: update them here once
-// the final pagination is locked and the page re-flows on its own.
-// `check: true` marks an entry whose number must be confirmed (it is
-// highlighted only in the internal proof build, never in the client PDFs).
-export const toc = {
-  left: [
-    ['Welcome to Our Place', 6], ['Alabama', 13], ['Alaska', 17], ['Arizona', 21],
-    ['Arkansas', 25], ['California', 29], ['Colorado', 35], ['Connecticut', 39],
-    ['Delaware', 43], ['Florida', 47], ['Georgia', 51], ['Hawaii', 55], ['Idaho', 59],
-    ['Illinois', 65], ['Indiana', 69], ['Iowa', 73], ['Kansas', 77], ['Kentucky', 81],
-    ['Louisiana', 87], ['Maine', 93], ['Maryland', 97], ['Massachusetts', 101],
-    ['Michigan', 105], ['Minnesota', 109], ['Mississippi', 113], ['Missouri', 119],
-    ['Montana', 125], ['Nebraska', 129], ['Nevada', 133],
+// Table of contents: the entries are built from the chapters and the back matter at build
+// time, and every page number is filled in from the final layout (see build.mjs).
+
+// Page 3 (client: missing page). Text from the manuscript.
+export const dedication = {
+  stanzas: [
+    ['To my friends —', 'whose steady support has carried me through every season of this work. Your kindness and belief have been their own kind of ingredient, folded quietly into every page of this book.'],
+    ['To my husband —', 'whose encouragement never wavered. You believed in this long before I did, and you never once stopped even when I thought I had. This book exists because you kept telling me it could.'],
+    ['And to those who came before —', 'the native peoples who first knew this land and its harvests, the settlers who carried their recipes across rivers and through mountain gaps, and the countless communities whose kitchens shaped these dishes long before any of us thought to write them down.'],
   ],
-  right: [
-    ['New Hampshire', 139], ['New Jersey', 143], ['New Mexico', 147], ['New York', 151],
-    ['North Carolina', 155], ['North Dakota', 159], ['Ohio', 163], ['Oklahoma', 167],
-    ['Oregon', 171], ['Pennsylvania', 175], ['Rhode Island', 181], ['South Carolina', 185],
-    ['South Dakota', 191], ['Tennessee', 195], ['Texas', 199], ['Utah', 203],
-    ['Vermont', 207], ['Virginia', 211], ['Washington', 215], ['West Virginia', 219],
-    ['Wisconsin', 225], ['Wyoming', 231],
-    ['The Table We Set Together', 235, { check: true }],
-    ['Menus for the Occasion', 235, { check: true }],
-    ['A Guide for Allergens', 238], ['Recipe Index', 242], ['Ingredient Index', 243],
-    ['State Index', 244], ['Acknowledgments', 245],
-  ],
+  closing: ['This book belongs to all of them.', 'I am only holding the pen for a little while.'],
 };
 
-// First back-matter page in the manuscript's numbering (Wyoming ended on 234 there).
-export const BACK_MATTER_FIRST_PAGE = 235;
+// Pages 6–8, Notes from the Kitchen (client: missing pages). Text from the manuscript.
+export const notes = [
+  {
+    kicker: 'NOTES FROM THE KITCHEN',
+    title: ['READY TO PUSH', 'UP YOUR SLEEVES'],
+    blocks: [
+      ['p', 'A few words before you begin — not rules, exactly, but the small kitchen truths that run quietly beneath every recipe in this book.'],
+      ['p', 'Read them once, and the fifty chapters ahead will go a little smoother. Then feel free to forget them, the way you forget the words to a song you already know by heart.'],
+      ['h2', 'A Word on Salt'],
+      ['deck', 'The one ingredient in nearly every recipe here — and the one most often misunderstood.'],
+      ['p', 'When we simply call for salt, we mean kosher salt: the coarse, flaky kind cooks reach for by the pinch. It seasons evenly, it forgives a heavy hand, and it is what these recipes were written and tested with.'],
+      ['p', 'The distinction matters more than it sounds. Kosher salt and ordinary table salt do not measure the same. Because table salt is finer and packs together tightly, a teaspoon of it can be nearly twice as salty as a teaspoon of kosher. If table salt is all you have, start with about half of what a recipe calls for, then taste and build from there.'],
+      ['p', 'Whenever a recipe asks for salt “to taste,” trust your own tongue over the measurement. Your palate, your pot, your table.'],
+    ],
+  },
+  {
+    kicker: 'NOTES FROM THE KITCHEN',
+    title: ['THE TWO POTS', 'YOU’LL REACH FOR MOST'],
+    blocks: [
+      ['deck', 'You do not need a cupboard of specialized equipment to cook your way across this country. Two vessels will carry you through the great majority of these fifty chapters.'],
+      ['h3', 'A heavy Dutch oven'],
+      ['p', 'Thick-walled and deep, a Dutch oven holds heat steady and even — exactly what a Kentucky burgoo, a Louisiana gumbo, or a New England chowder asks for over a long, slow simmer. Its high sides make it just as at home holding a few inches of frying oil. If you buy one good pot, buy this one.'],
+      ['h3', 'A cast-iron skillet'],
+      ['p', 'Nothing sears, crisps, or holds a screaming heat quite like cast iron. It gives Oklahoma cornbread its lacquered crust, carries Rhode Island johnnycakes and West Virginia buckwheat cakes from stovetop to table, and takes the final sear on a Nevada prime rib without flinching. Season it, keep it dry, and it will outlast you — and quite possibly your grandchildren.'],
+    ],
+  },
+  {
+    kicker: 'NOTES FROM THE KITCHEN',
+    title: ['FRYING, SIMPLY'],
+    blocks: [
+      ['deck', 'More than twenty dishes in this book pass through hot oil — and frying has a fearsome reputation it does not deserve.'],
+      ['p', 'Catfish in Arkansas, finger steaks in Idaho, chimichangas in the Sonoran Desert, hot chicken in Nashville. Done with a little attention, frying is one of the most rewarding things you can do in a kitchen.'],
+      ['h3', 'Choosing your oil'],
+      ['p', 'Reach for a neutral oil with a high smoke point — vegetable, canola, peanut, or a blend, we primarily call for vegetable and peanut oil for frying. These fry clean and let the food, not the fat, do the talking. When a recipe wants a particular oil for flavor or tradition, it will say so; otherwise, any neutral oil will serve you well.'],
+      ['h3', 'Minding the temperature'],
+      ['p', 'Temperature is everything. Too cool, and food drinks the oil and turns greasy; too hot, and the outside scorches before the inside is done. Most frying in this book happens between 350°F (175°C) and 375°F (190°C) — a clip-on thermometer takes the guesswork out entirely, and is worth the few dollars it costs.'],
+      ['p', 'No thermometer? The old tests still work. Drop a small cube of bread into the oil: at the right heat it should turn golden in about a minute. Or dip in the handle of a wooden spoon — a steady ring of tiny bubbles gathering around the wood means the oil is ready.'],
+      ['callout', 'STAY SAFE', [
+        'Use a deep, heavy pot and never fill it more than halfway — oil rises when food goes in.',
+        'Lower food away from you, and keep a lid within arm’s reach.',
+        'Never pour water on an oil fire.',
+        'Fry in small batches so the oil stays hot, and rest each finished piece on a wire rack rather than paper, so the crust stays crisp instead of steaming soft.',
+      ]],
+    ],
+  },
+];
+
+// Pages 10–11 (client: missing spread). Title and line from the manuscript; the map is drawn
+// from the US Census outlines in the book's colours.
+export const map = {
+  title: 'OUR CULINARY MAP',
+  intro: 'A look at the fifty stops on this table-spanning journey, from coastline to farmland to mountain pass.',
+};
+
+// Back matter not written yet in the manuscript.
+export const acknowledgments = {
+  title: 'ACKNOWLEDGMENTS',
+  placeholder: '[Acknowledgments — to be provided by the author, if desired.]',
+};
 
 export const welcome = {
   title: ['WELCOME TO', 'OUR PLACE'],
@@ -65,7 +107,6 @@ export const welcome = {
     'After all, the best way to understand a place has always been the same.',
   ],
   closing: ['Pull up a chair.', 'Pass the plate.', 'Stay awhile.'],
-  folio: 5,
 };
 
 export const temperatures = {
@@ -88,5 +129,4 @@ export const temperatures = {
   },
   after: 'Doneness is a matter of taste as much as safety — pull meat a few degrees early and let it rest, and it will climb to just where you want it.',
   closing: 'Now — To the hearth. Let’s begin.',
-  folio: 9,
 };

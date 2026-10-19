@@ -1,41 +1,35 @@
 # Made in the USA: A Plate for Every State — layout
 
 Sorgente dell'impaginato del cookbook di Christina Reed (formato 8.25 × 11 in, verticale).
-**Round 1:** correzioni alle pagine generali + **sezione Alabama completa** (capitolo modello).
-Gli altri stati **non** sono stati impaginati: si procede solo dopo l'approvazione di Alabama.
+**Round 8 (CookbookFeedbackTracker):** libro completo e numerato in continuo — pagine generali 1–11,
+50 stati da pag. 12, fondo libro (chiusura, menu, allergeni, indici, ringraziamenti).
 
 ## File da inviare alla cliente (`output/`)
 
 | File | Contenuto |
 |---|---|
-| `01_General_Pages_Corrected.pdf` | Cover, Copyright, Table of Contents (numeri reali degli stati), Welcome, pag. 9 |
-| `states/01_Alabama.pdf` … `states/50_Wyoming.pdf` | Un PDF per stato (la cliente approva uno stato alla volta) |
-| `states/INDEX.md` | Pagine di ogni stato, numero di pagine, cose da verificare |
-| `00_Internal_Proof_with_markers.pdf` | **Solo uso interno**: tutto il libro con i punti aperti evidenziati |
+| `00_Front_Matter.pdf` | Pag. 1–11: title page, copyright, dedica, indice, Welcome, Notes from the Kitchen (6–9), mappa (10–11) |
+| `states/01_Alabama.pdf` … `states/50_Wyoming.pdf` | Un PDF per stato; ogni stato ha un numero pari di pagine e la hero sempre a sinistra |
+| `99_Back_Matter.pdf` | The Table We Set Together, Menus, Allergens, Recipe/Ingredient/State Index, Acknowledgments |
+| `Made_in_the_USA_Complete.pdf` | Tutto il libro in un file (non in git: oltre 100 MB) |
+| `states/INDEX.md` | Pagine di ogni sezione e stato, cose da verificare |
 
 ## Come nasce l'impaginato
 
 Testi dal manoscritto `manuscript/Made_in_the_USA_BASE.docx`, letti tramite gli stili di Word
-(HeroStateName, RecipeTagline, IngredientItem…): se il Word cambia, basta rilanciare la build.
-`src/paginate.js` distribuisce storia e ricette su quante pagine servono (una ricetta lunga
-continua sulla pagina successiva, con interlinea leggermente più stretta se serve per evitare
-una pagina quasi vuota), numera le pagine da 12, risolve i rimandi «page XX» e fornisce i numeri
-al TOC. Le bandiere dietro le storie vengono da `assets/flags/states/`, le sagome degli stati
-dai confini reali (pacchetto us-atlas).
+(HeroStateName, RecipeTagline, IngredientItem, BonusTitle, GroupItem…): se il Word cambia, basta
+rilanciare la build. Tutto il libro è un unico documento: `src/paginate.js` distribuisce i testi
+sulle pagine (spaziatura più stretta, poi bilanciamento, per evitare pagine quasi vuote), aggiunge la
+pagina di chiusura blu agli stati con un numero dispari di pagine (prima di una doppia pagina foto,
+che deve iniziare a sinistra), numera le pagine e scrive i numeri reali in indice, mappa, menu e indici
+analitici. Le pagine generali nuove e il fondo libro sono in `src/matter.mjs`.
 
-**Illustrazioni:** `illustrations/PROMPTS.md` (da leggere) e `illustrations/prompts.csv` (da incollare o
-usare in batch) contengono, per ogni immagine mancante, il nome del file, la dimensione minima a 300 dpi,
-il formato e il prompt (in inglese). Si rigenerano con `npm run prompts`; i soggetti dei paesaggi sono
-in `src/content/landscapes.mjs`. Salvare ogni immagine in `assets/img/states/<stato>/` con il nome
-indicato (`hero.jpg`, `dish-1.jpg`, …) e lanciare `npm run build`: il paesaggio viene ritagliato dentro
-la sagoma con il contorno oro, le foto riempiono la pagina food, le doppie pagine vengono divise sulle
-due pagine affiancate.
-
-**Immagini:** solo l'Alabama ha le immagini definitive. Negli altri 49 stati la hero page mostra
-la sagoma reale dello stato con il contorno oro e la dicitura «ILLUSTRATION PLACEHOLDER»; le
-pagine food sono segnaposto con la descrizione presa dal manoscritto (una per illustrazione;
-le «full page spread» occupano due pagine). Per aggiungere le immagini di uno stato: file come
-`src/content/states/alabama.mjs` e voce in `ART` in `build/build.mjs`.
+**Illustrazioni:** `illustrations/PROMPTS.md` e `illustrations/prompts.csv` (generati con `npm run prompts`)
+contengono nome file, dimensione minima a 300 dpi, formato e prompt. Paesaggi in
+`src/content/landscapes.mjs`; cosa mostra ogni foto di piatto (secondo il tracker della cliente) in
+`src/content/food-shots.mjs`. Generazione: `REPLICATE_API_TOKEN=… node build/generate-images.mjs
+--states <stati> --only <hero|dish-1>` (Imagen 4 Ultra); l'immagine scelta va in
+`assets/img/states/<stato>/` a risoluzione di stampa.
 
 ## Correzioni applicate
 

@@ -9,7 +9,7 @@
   function newPage(kind, state, flag) {
     const sec = document.createElement('section');
     sec.className = `page ${kind}`;
-    sec.dataset.state = state;
+    if (state) sec.dataset.state = state;
     sec.dataset.role = kind;
     fill(sec, kind, flag);
     return sec;
@@ -35,7 +35,8 @@
     const last = blocksIn(holder(sec)).pop();
     if (!last) return true;
     const mb = parseFloat(getComputedStyle(last).marginBottom) || 0;
-    return last.getBoundingClientRect().bottom - Math.min(mb, 0) <= live.bottom + 0.5;
+    const reserve = Number(sec.dataset.reserve || 0);
+    return last.getBoundingClientRect().bottom - Math.min(mb, 0) <= live.bottom - reserve + 0.5;
   }
 
   // Split a paragraph at a word boundary so its first part fills the page.
@@ -76,34 +77,51 @@
     return list.children.length ? list : 'done';
   }
 
-  // If a flow spills only a few lines onto an extra page, set it again with
-  // slightly tighter spacing and keep that version when it saves the page.
+  const usedShare = (sec) => {
+    const live = sec.querySelector('.live').getBoundingClientRect();
+    const lastBlock = blocksIn(holder(sec)).pop();
+    return lastBlock ? (lastBlock.getBoundingClientRect().bottom - live.top) / live.height : 0;
+  };
+  // A flow that spills only a few lines onto an extra page (client, L3) is set again:
+  // first with tighter spacing, then tighter still; if neither saves the page, the page
+  // before it gives up some lines so the last page is not left nearly empty.
   function pourBest(tpl) {
-    const spare = tpl.cloneNode(true);
-    const pages = pour(tpl, false);
+    const spare = () => tpl.cloneNode(true);
+    const copies = [spare(), spare(), spare()];
+    let pages = pour(tpl, {});
     if (pages.length < 2) return;
-    const last = pages[pages.length - 1];
-    const live = last.querySelector('.live').getBoundingClientRect();
-    const lastBlock = blocksIn(holder(last)).pop();
-    const used = lastBlock ? (lastBlock.getBoundingClientRect().bottom - live.top) / live.height : 0;
+    const used = usedShare(pages[pages.length - 1]);
     if (used > 0.35) return;
-    pages[0].before(spare);
-    pages.forEach((p) => p.remove());
-    const tight = pour(spare, true);
-    if (tight.length < pages.length) return;
-    tight[0].before(...pages);
-    tight.forEach((p) => p.remove());
+    const swap = (copy, opts) => {
+      pages[0].before(copy);
+      const old = pages;
+      old.forEach((p) => p.remove());
+      const next = pour(copy, opts);
+      return next;
+    };
+    for (const level of ['compact', 'compact tight']) {
+      const next = swap(copies.shift(), { cls: level });
+      if (next.length < pages.length) return;
+      pages = next;
+    }
+    // Could not save the page: balance the last two pages instead.
+    const H = pages[pages.length - 1].querySelector('.live').getBoundingClientRect().height;
+    const reserve = Math.max(0, (0.45 - usedShare(pages[pages.length - 1])) * H);
+    swap(copies.shift(), { cls: 'compact tight', reserve: { index: pages.length - 2, px: reserve } });
   }
 
-  function pour(tpl, compact) {
+  function pour(tpl, opts) {
     const kind = tpl.dataset.kind;
     const state = tpl.dataset.state;
     const flag = tpl.dataset.flag;
     const queue = [...tpl.content.children].map((n) => document.importNode(n, true));
     const made = [];
     const mk = (where, ref) => {
-      const p = newPage(kind, state, flag);
-      if (compact) p.classList.add('compact');
+      const p = newPage(kind, state, flag, made.length);
+      if (tpl.dataset.section) p.dataset.section = tpl.dataset.section;
+      if (opts.cls) p.classList.add(...opts.cls.split(' '));
+      if (made.length) p.classList.add('cont'); // continuation page: text starts at the standard top margin
+      if (opts.reserve && opts.reserve.index === made.length) p.dataset.reserve = opts.reserve.px;
       made.push(p);
       return place(p, where, ref);
     };
@@ -139,7 +157,22 @@
     return made;
   }
 
-  document.querySelectorAll('template.flow').forEach(pourBest);
+  // Every state chapter has an even number of pages, so every hero page is a left-hand page
+  // (client, L1/L2). An odd chapter gets its closing page: last, or just before a photo spread,
+  // which must start on a left-hand page to face its other half.
+  function finishState(tpl) {
+    const state = tpl.dataset.state;
+    const pages = [...document.querySelectorAll(`section.page[data-state="${state}"]`)];
+    if (pages.length % 2 === 0) { tpl.remove(); return; }
+    const spreadStart = pages.findIndex((p) => p.dataset.spread === 'left');
+    const sec = document.importNode(tpl.content.firstElementChild, true);
+    if (spreadStart > 0) place(sec, 'before', pages[spreadStart]);
+    else place(sec, 'after', pages[pages.length - 1]);
+    tpl.remove();
+  }
+  document.querySelectorAll('template.flow, template.closing').forEach((tpl) => {
+    if (tpl.classList.contains('closing')) finishState(tpl); else pourBest(tpl);
+  });
 
   // Long state names shrink to fit the frame.
   // (Sized at build time; this only guards against a name wider than the frame.)
@@ -181,5 +214,19 @@
       return `${pre}${name}${mid}${hit.folio}`;
     });
   });
+  // Page numbers written after layout: table of contents, map legend, menus, indexes.
+  const firstOf = (sel) => { const p = document.querySelector(sel); return p ? p.dataset.folio : null; };
+  const recipeFolio = (title) => (layout.recipes.find((r) => r.title === title) || {}).folio;
+  document.querySelectorAll('[data-ref]').forEach((el) => {
+    const ref = el.dataset.ref;
+    const type = ref.slice(0, ref.indexOf(':'));
+    const key = ref.slice(ref.indexOf(':') + 1);
+    const n = type === 'state' ? firstOf(`section.page[data-state="${key}"]`)
+      : type === 'section' ? firstOf(`section.page[data-section="${key}"]`)
+      : type === 'recipe' ? recipeFolio(key) : null;
+    if (n) el.textContent = n; else layout.unresolved.push(`page reference ${el.dataset.ref}`);
+  });
+  layout.sections = {};
+  pages.forEach((p) => { if (p.dataset.section) (layout.sections[p.dataset.section] ||= []).push(Number(p.dataset.folio)); });
   window.__layout = layout;
 })();
