@@ -30,7 +30,7 @@ export const dedication = {
   stanzas: [
     ['To my friends —', 'whose steady support has carried me through every season of this work. Your kindness and belief have been their own kind of ingredient, folded quietly into every page of this book.'],
     ['To my husband —', 'whose encouragement never wavered. You believed in this long before I did, and you never once stopped even when I thought I had. This book exists because you kept telling me it could.'],
-    ['And to those who came before —', 'the native peoples who first knew this land and its harvests, the settlers who carried their recipes across rivers and through mountain gaps, and the countless communities whose kitchens shaped these dishes long before any of us thought to write them down.'],
+    ['And to those who came before —', 'the Native peoples who first knew this land and its harvests, the settlers who carried their recipes across rivers and through mountain gaps, and the countless communities whose kitchens shaped these dishes long before any of us thought to write them down.'],
   ],
   closing: ['This book belongs to all of them.', 'I am only holding the pen for a little while.'],
 };
@@ -39,7 +39,7 @@ export const dedication = {
 export const notes = [
   {
     kicker: 'NOTES FROM THE KITCHEN',
-    title: ['READY TO PUSH', 'UP YOUR SLEEVES'],
+    title: ['READY TO ROLL', 'UP YOUR SLEEVES'],
     blocks: [
       ['p', 'A few words before you begin — not rules, exactly, but the small kitchen truths that run quietly beneath every recipe in this book.'],
       ['p', 'Read them once, and the fifty chapters ahead will go a little smoother. Then feel free to forget them, the way you forget the words to a song you already know by heart.'],
@@ -52,7 +52,7 @@ export const notes = [
   },
   {
     kicker: 'NOTES FROM THE KITCHEN',
-    title: ['THE TWO POTS', 'YOU’LL REACH FOR MOST'],
+    title: ['THE TWO VESSELS', 'YOU’LL REACH FOR MOST'],
     blocks: [
       ['deck', 'You do not need a cupboard of specialized equipment to cook your way across this country. Two vessels will carry you through the great majority of these fifty chapters.'],
       ['h3', 'A heavy Dutch oven'],
@@ -68,15 +68,15 @@ export const notes = [
       ['deck', 'More than twenty dishes in this book pass through hot oil — and frying has a fearsome reputation it does not deserve.'],
       ['p', 'Catfish in Arkansas, finger steaks in Idaho, chimichangas in the Sonoran Desert, hot chicken in Nashville. Done with a little attention, frying is one of the most rewarding things you can do in a kitchen.'],
       ['h3', 'Choosing your oil'],
-      ['p', 'Reach for a neutral oil with a high smoke point — vegetable, canola, peanut, or a blend, we primarily call for vegetable and peanut oil for frying. These fry clean and let the food, not the fat, do the talking. When a recipe wants a particular oil for flavor or tradition, it will say so; otherwise, any neutral oil will serve you well.'],
+      ['p', 'Reach for a neutral oil with a high smoke point — vegetable, canola, peanut, or a blend. We primarily call for vegetable and peanut oil for frying. These fry clean and let the food, not the fat, do the talking. When a recipe wants a particular oil for flavor or tradition, it will say so; otherwise, any neutral oil will serve you well.'],
       ['h3', 'Minding the temperature'],
       ['p', 'Temperature is everything. Too cool, and food drinks the oil and turns greasy; too hot, and the outside scorches before the inside is done. Most frying in this book happens between 350°F (175°C) and 375°F (190°C) — a clip-on thermometer takes the guesswork out entirely, and is worth the few dollars it costs.'],
       ['p', 'No thermometer? The old tests still work. Drop a small cube of bread into the oil: at the right heat it should turn golden in about a minute. Or dip in the handle of a wooden spoon — a steady ring of tiny bubbles gathering around the wood means the oil is ready.'],
       ['callout', 'STAY SAFE', [
         'Use a deep, heavy pot and never fill it more than halfway — oil rises when food goes in.',
         'Lower food away from you, and keep a lid within arm’s reach.',
-        'Never pour water on an oil fire.',
-        'Fry in small batches so the oil stays hot, and rest each finished piece on a wire rack rather than paper, so the crust stays crisp instead of steaming soft.',
+        'Never pour water on an oil fire. Slide a lid over the pot and turn off the heat.',
+        'Fry in small batches so the oil stays hot, and rest each finished piece on a wire rack when you can, so the crust stays crisp instead of steaming soft.',
       ]],
     ],
   },
@@ -128,5 +128,5 @@ export const temperatures = {
     ],
   },
   after: 'Doneness is a matter of taste as much as safety — pull meat a few degrees early and let it rest, and it will climb to just where you want it.',
-  closing: 'Now — To the hearth. Let’s begin.',
+  closing: 'Now—to the hearth. Let’s begin.',
 };

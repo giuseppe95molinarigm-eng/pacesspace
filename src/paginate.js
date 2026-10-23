@@ -60,6 +60,33 @@
     return tail;
   }
 
+  // Split a recipe step: the number and lead-in stay with the first part, the rest of the
+  // text continues at the top of the next page.
+  function splitStep(p, sec, box) {
+    const text = p.querySelector('.step-text');
+    if (!text) return null;
+    const words = text.textContent.split(/\s+/);
+    const head = p.cloneNode(true);
+    head.classList.add('split-head');
+    const headText = head.querySelector('.step-text');
+    box.appendChild(head);
+    let lo = 0, hi = words.length - 1;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      headText.textContent = words.slice(0, mid).join(' ');
+      if (fits(sec)) lo = mid; else hi = mid - 1;
+    }
+    headText.textContent = words.slice(0, lo).join(' ');
+    const lineH = parseFloat(getComputedStyle(head).lineHeight) || 16;
+    if (lo < 4 || head.getBoundingClientRect().height < lineH * 1.9) { head.remove(); return null; }
+    const tail = document.createElement('p');
+    tail.className = 'step step-cont';
+    tail.dataset.split = 'step';
+    tail.innerHTML = '<span class="step-text"></span>';
+    tail.firstChild.textContent = words.slice(lo).join(' ');
+    return tail;
+  }
+
   // Split a list: keep as many items as fit here, return a list with the rest.
   function splitItems(list, sec, box) {
     const part = list.cloneNode(false);
@@ -120,6 +147,8 @@
       const p = newPage(kind, state, flag, made.length);
       if (tpl.dataset.section) p.dataset.section = tpl.dataset.section;
       if (opts.cls) p.classList.add(...opts.cls.split(' '));
+      if (tpl.dataset.cls) p.classList.add(...tpl.dataset.cls.split(' '));
+      if (tpl.dataset.option) p.dataset.option = tpl.dataset.option;
       if (made.length) p.classList.add('cont'); // continuation page: text starts at the standard top margin
       if (opts.reserve && opts.reserve.index === made.length) p.dataset.reserve = opts.reserve.px;
       made.push(p);
@@ -129,6 +158,11 @@
     let box = holder(sec);
     while (queue.length) {
       const b = queue.shift();
+      // A recipe the client wants on its own page (Idaho: Fry Sauce and French Fries).
+      if (b.hasAttribute && b.hasAttribute('data-break-before') && blocksIn(box).length) {
+        sec = mk('after', sec);
+        box = holder(sec);
+      }
       box.appendChild(b);
       if (fits(sec)) continue;
       box.removeChild(b);
@@ -136,6 +170,7 @@
       let rest = null;
       if (b.dataset.split === 'text') rest = splitText(b, sec, box);
       else if (b.dataset.split === 'items') rest = splitItems(b, sec, box);
+      else if (b.dataset.split === 'step') rest = splitStep(b, sec, box);
       if (rest === 'done') continue;
       if (emptyPage && !rest) { box.appendChild(b); continue; } // too big for any page: keep it
       // keep headings/titles with what follows
@@ -160,13 +195,43 @@
   // Every state chapter has an even number of pages, so every hero page is a left-hand page
   // (client, L1/L2). An odd chapter gets its closing page: last, or just before a photo spread,
   // which must start on a left-hand page to face its other half.
+  // Every state chapter has an even number of pages, so every hero page is a left-hand page
+  // (client, L1/L2). Photos come before the recipe (round 9). A chapter that would be odd:
+  //  1. moves its only photo onto the last recipe page when there is room (Michigan, …);
+  //  2. otherwise ends on the navy closing page.
+  // A photo spread must start on a left-hand page to face its other half.
+  const statePages = (state) => [...document.querySelectorAll(`section.page[data-state="${state}"]`)];
+  function inlinePhoto(state) {
+    const pages = statePages(state);
+    const photo = pages.find((p) => p.dataset.photo === 'single');
+    const recipes = pages.filter((p) => p.dataset.role === 'recipe');
+    if (!photo || !recipes.length) return false;
+    const last = recipes[recipes.length - 1];
+    const live = last.querySelector('.live').getBoundingClientRect();
+    const end = blocksIn(holder(last)).pop().getBoundingClientRect().bottom;
+    if (live.bottom - end < 0.42 * live.height) return false;
+    const fig = photo.querySelector('figure');
+    fig.classList.add('inline');
+    fig.style.height = `${live.bottom - end - 18}px`;
+    holder(last).appendChild(fig);
+    last.classList.add('with-photo');
+    photo.remove();
+    return true;
+  }
   function finishState(tpl) {
     const state = tpl.dataset.state;
-    const pages = [...document.querySelectorAll(`section.page[data-state="${state}"]`)];
+    let pages = statePages(state);
+    const spread = pages.filter((p) => p.dataset.spread);
+    if (spread.length && pages.indexOf(spread[0]) % 2) {
+      // Spread would start on a right-hand page: it goes after the recipe instead.
+      pages[pages.length - 1].after(...spread);
+      pages = statePages(state);
+    }
+    if (pages.length % 2 && inlinePhoto(state)) pages = statePages(state);
     if (pages.length % 2 === 0) { tpl.remove(); return; }
-    const spreadStart = pages.findIndex((p) => p.dataset.spread === 'left');
     const sec = document.importNode(tpl.content.firstElementChild, true);
-    if (spreadStart > 0) place(sec, 'before', pages[spreadStart]);
+    const spreadStart = pages.findIndex((p) => p.dataset.spread === 'left');
+    if (spreadStart > 0 && spreadStart % 2) place(sec, 'before', pages[spreadStart]);
     else place(sec, 'after', pages[pages.length - 1]);
     tpl.remove();
   }

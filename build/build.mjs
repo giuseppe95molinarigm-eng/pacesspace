@@ -16,8 +16,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
 import { PDFDocument } from 'pdf-lib';
 
-import * as fm from '../src/content/front-matter.mjs';
-import { readManuscript, readBackMatter } from './manuscript.mjs';
+import * as frontMatter from '../src/content/front-matter.mjs';
+import { readManuscript, readBackMatter, styleText } from './manuscript.mjs';
 import { stateFooter } from '../src/components.mjs';
 import {
   coverPage, copyrightPage, tocPage, welcomePage, temperaturesPage, stateChapter, dishIllustrations,
@@ -32,7 +32,45 @@ const MANUSCRIPT = path.join(root, 'manuscript/Made_in_the_USA_BASE.docx');
 const FIRST_STATE_FOLIO = 12; // pages 10–11 are the culinary map spread; Alabama's hero is a left page
 
 const { chapters, skipped } = await readManuscript(MANUSCRIPT);
-const back = await readBackMatter(MANUSCRIPT);
+const fm = { ...frontMatter };
+const back = fixBackMatter(await readBackMatter(MANUSCRIPT));
+// Book-wide style (closed em dashes, ranges kept on one line) on the front-matter text too.
+const styled = (v) => (typeof v === 'string' ? styleText(v) : Array.isArray(v) ? v.map(styled)
+  : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, styled(x)])) : v);
+for (const k of ['copyright', 'dedication', 'notes', 'map', 'welcome', 'temperatures']) fm[k] = styled(fm[k]);
+
+// Client corrections to the back matter (CookbookFeedbackTrackerv2, #235–#249).
+function fixBackMatter(sections) {
+  const sec = (title) => sections.find((x) => x.title === title);
+  const text = (s, find, replace) => {
+    const b = s.blocks.find((x) => x.text && x.text.includes(find));
+    if (!b) throw new Error(`Back matter: "${find}" not found`);
+    b.text = b.text.replace(find, replace);
+  };
+  const items = (s, group) => {
+    const i = s.blocks.findIndex((b) => b.type === 'GroupName' && b.text === group);
+    let j = i + 1;
+    while (s.blocks[j] && s.blocks[j].type !== 'GroupName' && s.blocks[j].type !== 'SectionLabel') j++;
+    return { at: (pos) => i + pos, end: j };
+  };
+  const menus = sec('Menus for the Occasion');
+  text(menus, 'Dial back to one or two for a small meal or all four when family and friends are joining.', 'Choose one or two for a small meal, or serve all four when family and friends are joining.');
+  menus.blocks.filter((b) => b.recipe === 'Maryland Steamed Crabs').forEach((b) => { b.recipe = 'Steamed Crabs'; });
+  const al = sec('A Guide for Allergens');
+  al.title = 'A Guide to Allergens';
+  text(al, 'a gluten to avoid, a shellfish to fear, a nut', 'gluten to avoid, shellfish to steer clear of, a nut');
+  text(al, 'This guide sorts all fifty-six recipes', 'This guide sorts every dish in the book (sauces and sides are listed with the dish they serve)');
+  text(al, 'No gluten, dairy, egg, shellfish, fish, peanut, tree nut, or soy in the recipe as written.', 'No wheat, dairy, egg, shellfish, fish, peanut, tree nut, soy, or sesame in the recipe as written.');
+  al.blocks = al.blocks.filter((b, k) => !(b.recipe === 'Funeral Potatoes' && al.blocks.slice(0, k).reverse().find((x) => x.type === 'GroupName')?.text === 'Gluten-Free'));
+  const catfish = { type: 'item', recipe: 'Fried Catfish with Arkansas-Style Tartar Sauce', state: 'Arkansas' };
+  al.blocks.splice(items(al, 'Gluten-Free').at(2), 0, { ...catfish });
+  al.blocks.splice(items(al, 'A Note on Peanut Oil').at(3), 0, { ...catfish });
+  const chislic = al.blocks.find((b) => b.recipe === 'Chislic');
+  chislic.mark = '*';
+  al.blocks.splice(items(al, 'Free of All Major Allergens').end, 0, { type: 'footnote', text: '*Fried in vegetable oil, not peanut oil.' });
+  for (const s of sections) for (const b of s.blocks) if (b.text) b.text = styleText(b.text);
+  return sections;
+}
 
 // Asset paths in the templates are relative to the repo root, hence the <base>.
 function html({ title, body }) {
@@ -59,8 +97,7 @@ const tocRows = [
   ['Welcome to Our Place', 'section:welcome'], ['Notes from the Kitchen', 'section:notes-1'], ['Our Culinary Map', 'section:map'],
   ...chapters.map((c) => [c.name, `state:${c.slug}`]),
   ['The Table We Set Together', 'section:table'], ['Menus for the Occasion', 'section:menus'],
-  ['A Guide for Allergens', 'section:allergens'], ['Recipe Index', 'section:recipe-index'],
-  ['Ingredient Index', 'section:ingredient-index'], ['State Index', 'section:state-index'],
+  ['A Guide to Allergens', 'section:allergens'], ['Recipe Index', 'section:recipe-index'],
   ['Acknowledgments', 'section:acknowledgments'],
 ];
 const half = Math.ceil(tocRows.length / 2);

@@ -109,31 +109,116 @@ export async function readManuscript(docxPath) {
     if (c.earlyCallout && c.recipes[0]) c.recipes[0].blocks.push(...c.earlyCallout);
     delete c.earlyCallout;
   }
-  for (const c of chapters) applyCorrections(c, corrections[c.slug] || []);
+  for (const c of chapters) {
+    if (!process.env.RAW) applyCorrections(c, corrections[c.slug] || []);
+    c.story = c.story.filter((p) => p.trim());
+    // Client (round 9): no "Serve with … (page XX)" lines; the recipes sit together anyway.
+    for (const r of c.recipes) r.blocks = r.blocks.filter((b) => !(b.type === 'note' && /page XX/.test(b.text)));
+    if (!process.env.RAW) applyHouseStyle(c);
+  }
   return { chapters, skipped };
 }
 
+// Every editable string of a chapter, as [get, set] pairs.
+function textFields(ch) {
+  const f = [];
+  ch.story.forEach((_, i) => f.push([() => ch.story[i], (v) => { ch.story[i] = v; }]));
+  for (const r of ch.recipes) {
+    for (const k of ['title', 'tagline', 'yield']) f.push([() => r[k], (v) => { r[k] = v; }]);
+    for (const b of r.blocks) {
+      if (b.parts) b.parts.forEach((_, i) => f.push([() => b.parts[i], (v) => { b.parts[i] = v; }]));
+      else if (b.text !== undefined) f.push([() => b.text, (v) => { b.text = v; }]);
+    }
+  }
+  return f;
+}
+const blockText = (b) => b.text ?? (b.parts ? b.parts.join(': ') : '');
+const hit = (text, find) => (find instanceof RegExp ? find.test(text) : text.includes(find));
+
+/**
+ * Client corrections (src/content/corrections.mjs). Each entry is one of:
+ *   { find, replace }              text change anywhere in the chapter (must match)
+ *   { remove }                     drop the recipe blocks whose text matches
+ *   { before, insert: {type,text} }   add a block before the block starting with `before`
+ *   { after, insert: {type,text} }    … or after it
+ *   { move, before }               move an ingredient group (sub-heading + items) before another
+ *   { story: [...] }               new story text
+ *   { storyNote }                  a story paragraph moved into a boxed note under the story
+ *   { breakBefore }                the recipe starting with this title begins on a new page
+ */
 function applyCorrections(ch, list) {
-  const hit = (text, find) => (find instanceof RegExp ? find.test(text) : text.includes(find));
-  const fix = (text, k) => (k.find instanceof RegExp ? text.replace(k.find, k.replace) : text.split(k.find).join(k.replace));
   for (const k of list) {
     let done = false;
-    if (k.in === 'story') {
-      ch.story = ch.story.map((p) => (hit(p, k.find) ? ((done = true), fix(p, k)) : p));
+    if (k.story) { ch.story = k.story; done = true; }
+    else if (k.yieldFor) {
+      const r = ch.recipes.find((x) => x.title.startsWith(k.yieldFor));
+      if (r) { r.yield = k.yield; done = true; }
+    } else if (k.retype) {
+      for (const r of ch.recipes) for (const b of r.blocks) if (b.text === k.retype) { b.type = k.type; done = true; }
+    }
+    else if (k.storyNote) {
+      const i = ch.story.findIndex((p) => hit(p, k.storyNote));
+      if (i >= 0) { (ch.storyNotes ||= []).push(ch.story[i]); ch.story.splice(i, 1); done = true; }
+    } else if (k.breakBefore) {
+      const r = ch.recipes.find((x) => x.title.startsWith(k.breakBefore));
+      if (r) { r.newPage = true; done = true; }
+    } else if (k.find !== undefined) {
+      let n = 0;
+      for (const [get, set] of textFields(ch)) {
+        const t = get();
+        if (typeof t === 'string' && hit(t, k.find) && (!k.nth || ++n === k.nth)) {
+          set(k.find instanceof RegExp ? t.replace(k.find, k.replace) : t.split(k.find).join(k.replace));
+          done = true;
+        }
+      }
     } else {
       for (const r of ch.recipes) {
-        r.blocks = r.blocks.filter((b) => {
-          if (b.type !== k.in || !hit(b.text, k.find)) return true;
-          done = true;
-          if (k.remove) return false;
-          b.text = fix(b.text, k);
-          return true;
-        });
+        if (k.remove) {
+          const n = r.blocks.length;
+          r.blocks = r.blocks.filter((b) => !hit(blockText(b), k.remove));
+          done ||= r.blocks.length < n;
+        } else if (k.insert) {
+          const at = r.blocks.findIndex((b) => blockText(b).startsWith(k.before ?? k.after));
+          if (at >= 0) { r.blocks.splice(k.before ? at : at + 1, 0, { ...k.insert }); done = true; }
+        } else if (k.move) {
+          const from = r.blocks.findIndex((b) => b.type === 'ingredient-sub' && b.text === k.move);
+          if (from < 0) continue;
+          let end = from + 1;
+          while (end < r.blocks.length && r.blocks[end].type === 'ingredient') end++;
+          const group = r.blocks.splice(from, end - from);
+          const to = r.blocks.findIndex((b) => b.type === 'ingredient-sub' && b.text === k.before);
+          r.blocks.splice(to, 0, ...group);
+          done = to >= 0;
+        }
       }
     }
-    if (!done) throw new Error(`Correction not applied for ${ch.name}: ${k.find}`);
+    if (!done) throw new Error(`Correction not applied for ${ch.name}: ${JSON.stringify(k).slice(0, 120)}`);
   }
 }
+
+// ---------------------------------------------------------------- house style (client, round 9)
+// Words kept capitalised when a step title is set in sentence case.
+const PROPER = /^(Alabama|Arkansas|Arizona|Idaho|Key|Kalua|Nashville|Pecorino|Romano|Old|Bay|French|Denver|Philly|Vermont|Cheddar|Dutch|Carolina|Gold|Cajun|Creole|Instant|Pot|Kringle|Danish|Texas|Utica|Cincinnati|New|England|Maine|Montana|Wyoming|Sonoran|Jo|Hawaiian|Worcestershire|Dijon|Old Bay|American)$/;
+const sentenceCase = (lead) => lead.split(' ').map((w, i) => {
+  if (i === 0) return w[0].toUpperCase() + w.slice(1).toLowerCase();
+  return PROPER.test(w.replace(/[^A-Za-z]/g, '')) ? w : w.toLowerCase();
+}).join(' ').replace(/ & /g, ' and ');
+
+const WJ = '⁠'; // word joiner: no line break at this point
+function houseStyle(t) {
+  return t
+    .replace(/\s+—\s+/g, '—')                          // closed em dashes
+    .replace(/(\d) ([½¼¾⅓⅔⅛])/g, '$1$2')              // closed mixed numbers (1½)
+    .replace(/(\S)–(?=\S)/g, `$1${WJ}–${WJ}`)          // ranges never break at the dash
+    .replace(/°F \/ (\d)/g, '°F / $1');     // 110°F / 43°C stays on one line
+}
+
+export function applyHouseStyle(ch) {
+  for (const r of ch.recipes) for (const b of r.blocks) if (b.type === 'step' && b.parts[0]) b.parts[0] = sentenceCase(b.parts[0]);
+  for (const [get, set] of textFields(ch)) { const t = get(); if (typeof t === 'string') set(houseStyle(t)); }
+  ch.storyNotes = (ch.storyNotes || []).map(houseStyle);
+}
+export const styleText = houseStyle;
 
 /**
  * Back matter after the last state (The Table We Set Together, Menus, Allergens):

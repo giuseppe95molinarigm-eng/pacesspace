@@ -94,7 +94,7 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .cover .the-usa { position: absolute; left: 0; right: 0; top: 101pt; font-family: var(--cormorant); font-weight: 700; font-size: 114pt; line-height: 1.2; text-align: center; letter-spacing: .005em; }
 .cover .the-usa .the { color: var(--navy); }
 .cover .the-usa .usa { color: var(--red); }
-.cover .subtitle-group { position: absolute; left: 0; right: 0; top: 270pt; display: flex; flex-direction: column; align-items: center; }
+.cover .subtitle-group { position: absolute; left: 0; right: 0; top: 250pt; display: flex; flex-direction: column; align-items: center; }
 .cover .subtitle { font-family: var(--cormorant); font-weight: 700; font-size: 31.9pt; letter-spacing: .075em; color: var(--navy); line-height: 1; }
 .cover .tagline-group { display: flex; flex-direction: column; align-items: center; }
 .cover .tagline { font-family: var(--cormorant); font-style: italic; font-size: 17pt; color: var(--ink); white-space: pre; line-height: 1; }
@@ -109,7 +109,7 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .copyright .registration p { margin-bottom: 4pt; }
 
 /* ---------- Table of contents ---------- */
-.toc { background: var(--paper); } /* client: plain paper like the rest of the book */
+.toc { background: #fff; } /* client (round 9): white background */
 .page-title { font-family: var(--cormorant); font-weight: 700; font-size: 39pt; line-height: 50pt; color: var(--navy); text-align: center; letter-spacing: .01em; }
 .toc .page-title { position: absolute; left: var(--m-out); right: var(--m-in); top: 64pt; }
 .toc .star-rule { position: absolute; left: var(--m-out); right: var(--m-in); top: 131.5pt; }
@@ -129,8 +129,8 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .welcome .body-text { top: 246pt; }
 .welcome .closing { margin-top: 18pt; text-align: center; font-style: italic; font-size: 12.5pt; line-height: 21.5pt; }
 
-.kitchen .kicker { position: absolute; left: var(--m-in); right: var(--m-out); top: 65pt; text-align: center; font-family: var(--montserrat); font-weight: 700; font-size: 18pt; letter-spacing: .06em; color: var(--rust); line-height: 21pt; }
-.kitchen .page-title { position: absolute; left: var(--m-in); right: var(--m-out); top: 91.6pt; line-height: 46pt; }
+.kitchen .kicker { position: absolute; left: var(--m-in); right: var(--m-out); top: 65pt; text-align: center; font-family: var(--montserrat); font-weight: 700; font-size: 15pt; letter-spacing: .06em; color: var(--rust); line-height: 20pt; } /* same as pages 6–8 */
+.kitchen .page-title { position: absolute; left: var(--m-in); right: var(--m-out); top: 91.6pt; line-height: 44pt; font-size: 36pt; }
 .kitchen .star-rule { position: absolute; left: var(--m-in); right: var(--m-out); top: 204.8pt; }
 .kitchen .body-text { top: 258.5pt; }
 .kitchen .intro { font-style: italic; }
@@ -317,3 +317,51 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .usmap text.off { fill: var(--navy); text-anchor: start; }
 .usmap .leader { stroke: var(--gold); stroke-width: .6; }
 .usmap .dot { fill: var(--gold); }
+
+/* ---------- Round 9 ---------- */
+/* Ingredient groups stay together in one column */
+.ingredients > li.group { display: block; padding: 0; break-inside: avoid; }
+.ingredients > li.group > ul { list-style: none; }
+.ingredients > li.group + li.group { padding-top: 5pt; }
+.ingredients > li.group li.sub { padding-top: 0; }
+.tight .ingredients > li.group + li.group { padding-top: 3pt; }
+/* A step continued from the previous page: no number, same indent */
+.step-cont { margin-top: 0; }
+.step.split-head { text-align-last: justify; }
+/* Photo set on the last recipe page when that saves a page (client: Michigan, Pennsylvania, Wisconsin) */
+.recipe .live figure.inline { margin-top: 16pt; width: 100%; overflow: hidden; border: .75pt solid var(--red-rule); }
+.recipe .live figure.inline img { display: block; width: 100% !important; height: 100% !important; margin: 0 !important; object-fit: cover; }
+/* Serving suggestion boxed under the story */
+.story .story-note { margin-top: 14pt; background: rgba(251,250,247,.92); }
+.story .story-note p { font-style: italic; text-align: left; margin: 2pt 0 0; font-size: 12pt; line-height: 16pt; }
+/* Notes on the photo page (Connecticut) */
+.food .photo-note { margin: 0; }
+.food .photo-tips { font-size: 11.5pt; line-height: 15pt; }
+.food .photo-tips p { font-style: italic; margin-bottom: 4pt; }
+.food .photo-tips ul, .food .photo-note ul { list-style: none; font-size: 11.5pt; line-height: 15pt; }
+.food .photo-tips li, .food .photo-note li { display: flex; gap: 7pt; align-items: baseline; padding: 1.2pt 0; }
+.food .photo-note li span, .food .photo-tips li span { flex: 1; }
+/* Story pages: a second, tighter setting to keep a story on one page */
+.tight.story .body-text p, .story.tight p { line-height: 15.8pt; margin-bottom: 6pt; }
+
+/* Culinary map styles (options for the client, round 9) */
+.usmap.mosaic .borders path { fill: none; stroke: var(--gold); stroke-width: .9; stroke-linejoin: round; }
+.usmap.mosaic text { fill: #fff; paint-order: stroke; stroke: rgba(9,18,52,.75); stroke-width: 2.2pt; }
+.usmap.mosaic text.off { fill: var(--navy); stroke: none; }
+.usmap.heritage .states path { stroke: var(--cream); stroke-width: .9; }
+.usmap.atlas .sea { fill: #e3eaee; stroke: var(--gold); stroke-width: .75; }
+.usmap.atlas .states path { fill: #f6f0e2; stroke: var(--navy-table); stroke-width: .55; }
+.usmap.atlas text { fill: var(--navy-table); font-weight: 400; letter-spacing: .1em; }
+.usmap.atlas .compass circle { fill: none; stroke: var(--gold); stroke-width: .75; }
+.usmap.atlas .compass .main { fill: var(--navy-table); }
+.usmap.atlas .compass .minor { fill: var(--gold); }
+.usmap.atlas .compass text { fill: var(--red); font-family: var(--cormorant); font-weight: 700; font-size: 14pt; }
+/* Notes & Tips styles (options for the client, round 9) */
+.notes-a .callout { border: .75pt solid var(--gold); border-radius: 6pt; background: var(--cream); padding: 8pt 12pt 7pt; }
+.notes-b .callout { border: .75pt solid var(--navy-table); padding: 0 0 6pt; background: #fff; }
+.notes-b .callout .recipe-h { margin: 0 0 5pt; padding: 3pt 10pt 2pt; background: var(--navy-table); color: #fff; }
+.notes-b .callout ul { padding: 0 10pt; }
+.food .photo-overlay { position: absolute; left: 14pt; right: 14pt; bottom: 14pt; padding: 9pt 13pt 8pt; background: rgba(251,250,247,.94); border-top: 2pt solid var(--gold); }
+.food .photo-overlay ul { list-style: none; font-size: 11pt; line-height: 14.5pt; }
+.food .photo-overlay li { display: flex; gap: 7pt; align-items: baseline; padding: 1pt 0; }
+.food figure.full { position: relative; }

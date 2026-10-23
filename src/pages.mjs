@@ -8,7 +8,7 @@ export function coverPage(c) {
   // is grouped with the lower rule so the two always move together.
   // Measured on the output: 30pt above / 27pt below gives the same 39pt between
   // each rule and the subtitle capitals (the line box has more room below the caps).
-  const RULE_TO_SUBTITLE = 30;
+  const RULE_TO_SUBTITLE = 22; // client (round 9): star lines tighter around the subtitle
   return `<section class="page cover recto" data-section="title">
     <div class="made-in">${esc(c.titleTop)}</div>
     <div class="the-usa"><span class="the">${esc(c.titleThe)}</span> <span class="usa">${esc(c.titleUsa)}</span></div>
@@ -95,7 +95,8 @@ export function temperaturesPage(k) {
 // pours them into as many pages as they need, then numbers every page.
 
 import { existsSync } from 'node:fs';
-import { SINGLE_PHOTO_PAGE } from './content/food-shots.mjs';
+import { SINGLE_PHOTO_PAGE, ONE_PHOTO, PHOTO_NOTES, INLINE_PHOTO } from './content/food-shots.mjs';
+import { styleText } from '../build/manuscript.mjs';
 import { statePath } from '../build/shapes.mjs';
 
 // Finished artwork dropped in assets/img/states/<state>/ (hero.jpg, dish-1.jpg, …).
@@ -186,7 +187,7 @@ function silhouette(ch) {
     <div class="art-placeholder" style="top:${(top + height / 2 - 16).toFixed(2)}pt">
       <b>ILLUSTRATION PLACEHOLDER</b><i>Illustrated ${esc(ch.name)} landscape inside the state shape</i></div>`;
 }
-const PER_ISLAND = ['hawaii'];
+const PER_ISLAND = []; // states drawn island by island (none since round 9: Hawaii has one scene again)
 
 export function heroPage(ch) {
   const L = heroLayout(ch.name);
@@ -211,7 +212,9 @@ export function heroPage(ch) {
 const FOOTER = stateFooter('', 'recto');
 
 function storyFlow(ch) {
-  const paras = ch.story.map((p) => `<p data-split="text">${esc(p)}</p>`).join('');
+  const paras = ch.story.map((p) => `<p data-split="text">${esc(p)}</p>`).join('')
+    // Client (round 9): serving suggestions at the end of a story sit in a boxed note.
+    + (ch.storyNotes || []).map((t) => `<div class="callout story-note"><h3 class="recipe-h">SERVING SUGGESTION</h3><p>${esc(t)}</p></div>`).join('');
   return `<template class="flow" data-kind="story" data-state="${ch.slug}" data-flag="assets/flags/states/${ch.slug}.png">${paras}</template>`;
 }
 
@@ -220,15 +223,24 @@ function ingredientList(items) {
   const entries = items.filter((b) => b.type === 'ingredient');
   const avg = entries.reduce((n, b) => n + b.text.length, 0) / Math.max(entries.length, 1);
   const cols = entries.length > 5 && avg < 48 ? ' cols-2' : '';
-  const lis = items.map((b) => b.type === 'ingredient-sub' ? `<li class="sub">${esc(b.text)}</li>`
+  const li = (b) => b.type === 'ingredient-sub' ? `<li class="sub">${esc(b.text)}</li>`
     : b.type === 'ingredient-note' ? `<li class="note recipe-note">${esc(b.text)}</li>`
-    : `<li>${flatStar({ size: 7, color: '#bb9554', opacity: 0.6 })}<span>${esc(b.text)}</span></li>`).join('');
+    : `<li>${flatStar({ size: 7, color: '#bb9554', opacity: 0.6 })}<span>${esc(b.text)}</span></li>`;
+  // Client (round 9): a group (sub-heading and its items) never breaks across columns.
+  const groups = [];
+  for (const b of items) {
+    if (b.type === 'ingredient-sub' || !groups.length) groups.push([]);
+    groups[groups.length - 1].push(b);
+  }
+  // A list without sub-headings flows freely across the two columns.
+  const lis = groups.length === 1 && groups[0][0].type !== 'ingredient-sub' ? groups[0].map(li).join('')
+    : groups.map((g) => `<li class="group"><ul>${g.map(li).join('')}</ul></li>`).join('');
   return `<ul class="ingredients${cols}" data-split="items">${lis}</ul>`;
 }
 
 function recipeBlocks(r, isSub) {
   const out = [];
-  out.push(`<h2 class="recipe-title${isSub ? ' sub' : ''}" data-keep data-title="${esc(r.title)}">${esc(r.title)}</h2>`);
+  out.push(`<h2 class="recipe-title${isSub ? ' sub' : ''}" data-keep data-title="${esc(r.title)}"${r.newPage ? ' data-break-before' : ''}>${esc(r.title)}</h2>`);
   if (r.tagline) out.push(`<p class="recipe-tagline" data-keep>${esc(r.tagline)}</p>`);
   // Client's order: title, tagline, yield, five stars, ingredients, instructions.
   if (r.yield) out.push(`<p class="recipe-yield" data-keep>${esc(r.yield)}</p>`);
@@ -255,7 +267,8 @@ function recipeBlocks(r, isSub) {
       case 'step': {
         step += 1;
         const [lead, text] = b.parts;
-        out.push(`<p class="step"><span class="n">${step}.</span>${lead ? `<span class="lead-in">${esc(lead)}</span>: ` : ''}${esc(text)}</p>`);
+        // data-split="step": a long step continues on the next page instead of moving whole.
+        out.push(`<p class="step" data-split="step"><span class="n">${step}.</span>${lead ? `<span class="lead-in">${esc(lead)}</span>: ` : ''}<span class="step-text">${esc(text)}</span></p>`);
         break;
       }
       case 'callout-title': callout = { title: b.text, items: [] }; break;
@@ -267,8 +280,8 @@ function recipeBlocks(r, isSub) {
   return out.join('');
 }
 
-function recipeFlow(ch) {
-  return `<template class="flow" data-kind="recipe" data-state="${ch.slug}">${ch.recipes.map((r, i) => recipeBlocks(r, i > 0)).join('')}</template>`;
+export function recipeFlow(ch, attrs = '') {
+  return `<template class="flow" data-kind="recipe" data-state="${ch.slug}"${attrs}>${ch.recipes.map((r, i) => recipeBlocks(r, i > 0)).join('')}</template>`;
 }
 
 // Photo pages use the text margins (client, L5). A spread is one picture laid across both pages
@@ -276,8 +289,11 @@ function recipeFlow(ch) {
 // so the scene stays continuous across the gutter.
 const PHOTO = { w: 594 - 63 - 45, gutter: 2 * 63 };
 
-function foodPages(ch) {
-  return dishIllustrations(ch).map((ill, n) => {
+const tipList = (items) => `<ul>${items.map((t) => `<li>${flatStar({ size: 7, color: '#bb9554', opacity: 0.6 })}<span>${esc(t)}</span></li>`).join('')}</ul>`;
+
+function foodPages(ch, notes = null) {
+  const ills = dishIllustrations(ch);
+  return ills.map((ill, n) => {
     const file = stateImage(ch.slug, `dish-${n + 1}`);
     const name = `assets/img/states/${ch.slug}/dish-${n + 1}.jpg`;
     return Array.from({ length: ill.pages }, (_, half) => {
@@ -293,8 +309,15 @@ function foodPages(ch) {
         inner = `<div class="img-placeholder"><b>ILLUSTRATION PLACEHOLDER</b><i>${esc(ill.description)}${where}</i><span>Food only (finished dish, ingredients or preparation) — no people</span><span class="file">${name}</span></div>`;
       }
       const spread = ill.pages === 2 ? ` data-spread="${half ? 'right' : 'left'}"` : '';
+      // The photo may move onto the last recipe page when that saves a page (client's list).
+      const single = INLINE_PHOTO.includes(ch.slug) && ills.length === 1 && ill.pages === 1 && !notes ? ' data-photo="single"' : '';
+      if (notes && n === 0) {
+        const above = notes.callout ? `<div class="callout photo-note"><h3 class="recipe-h">${esc(notes.callout.title)}</h3>${tipList(notes.callout.items)}</div>` : '';
+        const below = notes.below ? `<div class="photo-tips"><p>${esc(styleText(notes.below.intro))}</p>${tipList(notes.below.items.map(styleText))}</div>` : '';
+        inner = above + inner + below;
+      }
       // Framed photo with the book footer (client: not full page).
-      return `<section class="page food" data-state="${ch.slug}" data-role="food"${spread}><div class="live">${inner}</div>${FOOTER}</section>`;
+      return `<section class="page food" data-state="${ch.slug}" data-role="food"${spread}${single}><div class="live">${inner}</div>${FOOTER}</section>`;
     }).join('');
   }).join('');
 }
@@ -323,9 +346,23 @@ export function dishIllustrations(ch) {
   }
   // a spread always takes two facing pages, even if listed once
   const single = SINGLE_PHOTO_PAGE.includes(ch.slug);
+  if (ONE_PHOTO.includes(ch.slug)) out.length = 1;
   return out.map((o) => (o.spread && !single ? { ...o, pages: 2 } : { ...o, pages: single ? 1 : o.pages }));
 }
 
 export function stateChapter(ch) {
-  return heroPage(ch) + storyFlow(ch) + recipeFlow(ch) + foodPages(ch) + closingPage(ch);
+  // Client (round 9): the dish is shown before its recipe, so the reader sees what they are making.
+  let notes = null;
+  const extra = PHOTO_NOTES[ch.slug];
+  if (extra) {
+    notes = { below: extra.below };
+    if (extra.moveRecipeNotes) {
+      const r = ch.recipes[0];
+      const at = r.blocks.findIndex((b) => b.type === 'callout-title');
+      const items = r.blocks.slice(at + 1).filter((b) => b.type === 'callout-item').map((b) => b.text);
+      notes.callout = { title: r.blocks[at].text, items };
+      ch = { ...ch, recipes: [{ ...r, blocks: r.blocks.filter((b) => b.type !== 'callout-title' && b.type !== 'callout-item') }, ...ch.recipes.slice(1)] };
+    }
+  }
+  return heroPage(ch) + storyFlow(ch) + foodPages(ch, notes) + recipeFlow(ch) + closingPage(ch);
 }

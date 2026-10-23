@@ -1,8 +1,11 @@
 # Made in the USA: A Plate for Every State — layout
 
 Sorgente dell'impaginato del cookbook di Christina Reed (formato 8.25 × 11 in, verticale).
-**Round 8 (CookbookFeedbackTracker):** libro completo e numerato in continuo — pagine generali 1–11,
-50 stati da pag. 12, fondo libro (chiusura, menu, allergeni, indici, ringraziamenti).
+**Round 9 (CookbookFeedbackTrackerv2):** correzioni di testo in `src/content/corrections.mjs` (una riga
+per voce del tracker, con il numero #), regole di stile di tutto il libro in `build/manuscript.mjs`
+(trattini chiusi, frazioni chiuse, titoli degli step in sentence case, intervalli che non vanno a capo),
+foto prima della ricetta, indici per ingredienti e stati rimossi. Le opzioni per mappa e Notes & Tips
+si generano con `node build/options.mjs` → `output/Options_Map_and_Notes.pdf`.
 
 ## File da inviare alla cliente (`output/`)
 
@@ -10,7 +13,7 @@ Sorgente dell'impaginato del cookbook di Christina Reed (formato 8.25 × 11 in, 
 |---|---|
 | `00_Front_Matter.pdf` | Pag. 1–11: title page, copyright, dedica, indice, Welcome, Notes from the Kitchen (6–9), mappa (10–11) |
 | `states/01_Alabama.pdf` … `states/50_Wyoming.pdf` | Un PDF per stato; ogni stato ha un numero pari di pagine e la hero sempre a sinistra |
-| `99_Back_Matter.pdf` | The Table We Set Together, Menus, Allergens, Recipe/Ingredient/State Index, Acknowledgments |
+| `99_Back_Matter.pdf` | The Table We Set Together, Menus, A Guide to Allergens, Recipe Index, Acknowledgments |
 | `Made_in_the_USA_Complete.pdf` | Tutto il libro in un file (non in git: oltre 100 MB) |
 | `states/INDEX.md` | Pagine di ogni sezione e stato, cose da verificare |
 

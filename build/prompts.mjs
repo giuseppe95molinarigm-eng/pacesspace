@@ -115,7 +115,9 @@ for (const ch of chapters) {
     const refNote = ref ? ' Use the attached reference photo for the subject, mood and light: create a new, original image inspired by it, not a copy.' : '';
     const prompt = `${scene}. Season and light: ${light}.${refNote} ${HERO_STYLE} ${HERO_FRAMING} Aspect ratio ${ratio}.`;
     const file = `assets/img/states/${ch.slug}/hero.jpg`;
-    rows.push([file, ch.name, 'hero landscape', `${w} × ${h}`, ratio, prompt, NEGATIVE, ref || '']);
+    // A crowd belongs in the Philadelphia street scene (client, round 9); people stay out of every other picture.
+    const negative = landscapes[ch.slug].people ? NEGATIVE.replace('No people, no hands, no faces, ', 'No close-up faces, ') : NEGATIVE;
+    rows.push([file, ch.name, 'hero landscape', `${w} × ${h}`, ratio, prompt, negative, ref || '']);
     md.push(`**Hero page** — \`${file}\` · min ${w} × ${h} px · ratio ${ratio}${ref ? ` · **attach reference:** \`${ref}\`` : ''}\n\n> ${prompt}\n`);
   }
 

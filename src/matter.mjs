@@ -1,9 +1,9 @@
 // General pages added in round 8 (dedication, Notes from the Kitchen, Our Culinary Map) and the
-// back matter (closing essay, menus, allergen guide, indexes, acknowledgments).
+// back matter (closing essay, menus, allergen guide, recipe index, acknowledgments).
 // Long sections are <template class="flow"> blocks, poured into pages by src/paginate.js;
 // every page number is a data-ref filled in from the final layout.
 import { createRequire } from 'node:module';
-import { feature } from 'topojson-client';
+import { feature, neighbors } from 'topojson-client';
 import { geoAlbersUsa, geoPath } from 'd3-geo';
 import { flatStar, starRule, stateFooter, esc } from './components.mjs';
 
@@ -54,12 +54,41 @@ const OFFSHORE = ['VT', 'NH', 'MA', 'RI', 'CT', 'NJ', 'DE', 'MD'];
 // Label nudges (pt) where the centroid sits awkwardly.
 const NUDGE = { FL: [14, 6], LA: [-8, 0], MI: [10, 18], KY: [4, 2], WV: [-2, 4], VA: [6, 2], ID: [0, 14], CA: [-6, 0], NY: [8, 0], HI: [-34, 4] };
 
-function mapSvg(chapters) {
+// Map styles (client, round 9: "other options for the Culinary Map"):
+//   navy     — round 8: navy states, cream labels
+//   mosaic   — every state filled with its own hero landscape, gold borders
+//   heritage — the book's red, navy, gold and sage, no two neighbours alike
+//   atlas    — vintage atlas: cream land, pale sea, navy hairlines, compass rose
+const HERITAGE = ['#1d3864', '#a33623', '#bb9554', '#6f8a73'];
+const slugOf = (name) => name.toLowerCase().replace(/[^a-z]+/g, '-');
+
+function mapSvg(chapters, style = 'navy') {
+  const all = topo.objects.states.geometries;
+  const keep = all.map((g, i) => (POSTAL[g.properties.name] ? i : -1)).filter((i) => i >= 0);
   const states = feature(topo, topo.objects.states).features.filter((f) => POSTAL[f.properties.name]);
   const box = [[78, 182], [1040, 716]]; // across the spread (1188 × 792 pt)
   const projection = geoAlbersUsa().fitExtent(box, { type: 'FeatureCollection', features: states });
   const path = geoPath(projection);
-  const shapes = states.map((f) => `<path d="${path(f)}"/>`).join('');
+  let shapes;
+  if (style === 'mosaic') {
+    shapes = states.map((f, i) => {
+      const [[x0, y0], [x1, y1]] = path.bounds(f);
+      const img = `assets/img/states/${slugOf(f.properties.name)}/hero.jpg`;
+      return `<clipPath id="mc${i}"><path d="${path(f)}"/></clipPath><image href="${img}" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" preserveAspectRatio="xMidYMid slice" clip-path="url(#mc${i})"/>`;
+    }).join('') + `<g class="borders">${states.map((f) => `<path d="${path(f)}"/>`).join('')}</g>`;
+  } else if (style === 'heritage') {
+    // Greedy colouring over the real neighbours, so no two touching states share a colour.
+    const nb = neighbors(all);
+    const colour = {};
+    for (const i of keep) {
+      const used = new Set(nb[i].map((j) => colour[j]));
+      colour[i] = HERITAGE.findIndex((_, c) => !used.has(c));
+    }
+    shapes = keep.map((i, k) => `<path d="${path(states[k])}" style="fill:${HERITAGE[Math.max(0, colour[i])]}"/>`).join('');
+  } else {
+    shapes = states.map((f) => `<path d="${path(f)}"/>`).join('');
+  }
+  const extra = style === 'atlas' ? compass(1020, 640) : '';
   const labels = [];
   const offshore = [];
   for (const f of states) {
@@ -79,14 +108,26 @@ function mapSvg(chapters) {
     labels.push(`<line x1="${o.x.toFixed(1)}" y1="${o.y.toFixed(1)}" x2="${colX - 4}" y2="${(ly - 2.4).toFixed(1)}" class="leader"/><circle cx="${o.x.toFixed(1)}" cy="${o.y.toFixed(1)}" r="1.3" class="dot"/><text x="${colX}" y="${ly.toFixed(1)}" class="off">${o.code}</text>`);
   }
   if (chapters.length !== 50) throw new Error('Map expects 50 states');
-  return `<svg class="usmap" width="1188pt" height="792pt" viewBox="0 0 1188 792" aria-hidden="true">
-    <g class="states">${shapes}</g><g class="labels">${labels.join('')}</g></svg>`;
+  const sea = style === 'atlas' ? '<rect class="sea" x="60" y="168" width="1068" height="560" rx="10"/>' : '';
+  return `<svg class="usmap ${style}" width="1188pt" height="792pt" viewBox="0 0 1188 792" aria-hidden="true">
+    ${sea}<g class="states">${shapes}</g>${extra}<g class="labels">${labels.join('')}</g></svg>`;
+}
+
+// Compass rose for the atlas style.
+function compass(cx, cy) {
+  const r = 34;
+  const pt = (a, d) => `${(cx + d * Math.sin(a)).toFixed(1)},${(cy - d * Math.cos(a)).toFixed(1)}`;
+  const arm = (a, len, cls) => `<polygon class="${cls}" points="${pt(a, len)} ${pt(a + 0.35, r * 0.22)} ${pt(a + Math.PI, 0)} ${pt(a - 0.35, r * 0.22)}"/>`;
+  const arms = [0, Math.PI / 2, Math.PI, 1.5 * Math.PI].map((a) => arm(a, r, 'main')).join('')
+    + [0.25, 0.75, 1.25, 1.75].map((k) => arm(k * Math.PI, r * 0.6, 'minor')).join('');
+  return `<g class="compass"><circle cx="${cx}" cy="${cy}" r="${r * 0.75}"/>${arms}<text x="${cx}" y="${cy - r - 6}">N</text></g>`;
 }
 
 /** Pages 10–11: title and line on the left page, the map across both. */
-export function mapSpread(m, chapters) {
-  const svg = mapSvg(chapters);
-  return `<section class="page map verso" data-section="map">
+export function mapSpread(m, chapters, style = 'navy', option = '') {
+  const svg = mapSvg(chapters, style);
+  const opt = option ? ` data-option="${esc(option)}"` : '';
+  return `<section class="page map verso" data-section="map"${opt}>
     <div class="map-head">
       <h1 class="page-title">${esc(m.title)}</h1>
       ${starRule()}
@@ -95,7 +136,7 @@ export function mapSpread(m, chapters) {
     <div class="map-art">${svg}</div>
     ${FOOTER}
   </section>
-  <section class="page map recto" data-section="map-right">
+  <section class="page map recto" data-section="map-right"${opt}>
     <div class="map-art" style="left:-594pt">${svg}</div>
     ${FOOTER}
   </section>`;
@@ -117,6 +158,8 @@ export function recipeLookup(chapters) {
   };
 }
 
+// The state stays attached to the end of the title (client: no stranded middle dot).
+const STATE_SEP = '\u00a0·\u00a0';
 const row = (label, ref, cls = '') =>
   `<div class="ix-row${cls}"><span class="t">${label}</span><span class="lead"></span><span class="n" data-ref="${esc(ref).replace(/"/g, '&quot;')}">000</span></div>`;
 
@@ -137,32 +180,16 @@ export function backMatterFlows(sections, chapters) {
         case 'GroupDescription': out.push(`<p class="group-desc" data-keep>${esc(b.text)}</p>`); break;
         case 'item': {
           const r = find(b.recipe, b.state);
-          out.push(row(`${esc(b.recipe)} <i>· ${esc(b.state)}</i>`, `recipe:${r.title}`, ' item'));
+          out.push(row(`${esc(r.title)}${b.mark || ''}${STATE_SEP}<i>${esc(b.state)}</i>`, `recipe:${r.title}`, ' item'));
           break;
         }
+        case 'footnote': out.push(`<p class="group-desc footnote">${esc(b.text)}</p>`); break;
         default: throw new Error(`Back matter: unknown block ${b.type}`);
       }
     }
     return `<template class="flow" data-kind="prose" data-section="${slugs[i] || `back-${i}`}">${out.join('')}</template>`;
   });
 }
-
-// Ingredient index: the main ingredients readers look up, matched against the ingredient lines.
-const INGREDIENTS = [
-  ['Apples', /\bapples?\b(?! cider| butter)/i], ['Bacon', /\bbacon\b/i],
-  ['Beef', /\bbeef\b(?! (broth|stock|tallow))|ribeye|sirloin|chuck|brisket|prime rib/i],
-  ['Berries', /berries|huckleberr/i], ['Buckwheat flour', /buckwheat/i], ['Buttermilk', /buttermilk/i],
-  ['Cabbage', /cabbage|coleslaw/i], ['Catfish', /catfish/i], ['Cheddar cheese', /cheddar/i],
-  ['Chicken', /chicken(?! (broth|stock|soup))/i], ['Chocolate', /chocolate|cocoa/i], ['Clams', /clams?\b/i],
-  ['Coconut', /coconut/i], ['Cornmeal', /cornmeal/i], ['Crab', /\bcrabs?\b|crabmeat/i], ['Cream cheese', /cream cheese/i],
-  ['Elk', /\belk\b/i], ['Fish, white', /white fish|grouper|cod\b|halibut/i], ['Green tomatoes', /green tomatoes/i],
-  ['Ham', /\bham\b/i], ['Lamb', /\blamb\b|mutton/i], ['Lobster', /lobster/i], ['Maple syrup', /maple syrup/i],
-  ['Okra', /okra/i], ['Peaches', /peach/i], ['Peanut butter and peanuts', /peanut butter|roasted peanuts/i],
-  ['Pecans', /pecan/i], ['Pork', /\bpork\b(?! roll| fat)|pork shoulder|salt pork/i], ['Pork roll', /pork roll/i],
-  ['Potatoes', /potato|hash browns/i], ['Rice', /\brice\b(?! cereal)/i], ['Salmon', /salmon/i],
-  ['Sausage', /sausage|andouille|hot dog/i], ['Scrapple', /scrapple/i], ['Shrimp', /shrimp/i],
-  ['Trout', /trout/i], ['Venison', /venison/i], ['Wild rice', /wild rice/i],
-];
 
 function indexFlow(section, title, intro, groups) {
   const lis = groups.map(([head, entries]) => [
@@ -173,21 +200,13 @@ function indexFlow(section, title, intro, groups) {
 }
 
 export function indexFlows(chapters) {
+  // Client (round 9): only the recipe index (ingredient and state indexes removed).
   const recipes = chapters.flatMap((c) => c.recipes.map((r) => ({ r, c })));
   const byTitle = (a, b) => a.r.title.localeCompare(b.r.title);
   const recipeIndex = indexFlow('recipe-index', 'RECIPE INDEX', '', [
-    ['', [...recipes].sort(byTitle).map(({ r, c }) => [`${esc(r.title)} <i>· ${esc(c.name)}</i>`, `recipe:${r.title}`])],
+    ['', [...recipes].sort(byTitle).map(({ r, c }) => [`${esc(r.title)}${STATE_SEP}<i>${esc(c.name)}</i>`, `recipe:${r.title}`])],
   ]);
-  const ingredientGroups = INGREDIENTS.map(([name, re]) => [name, recipes
-    .filter(({ r }) => r.blocks.some((b) => b.type === 'ingredient' && re.test(b.text)))
-    .sort(byTitle)
-    .map(({ r, c }) => [`${esc(r.title)} <i>· ${esc(c.name)}</i>`, `recipe:${r.title}`])]).filter(([, e]) => e.length);
-  const ingredientIndex = indexFlow('ingredient-index', 'INGREDIENT INDEX', '', ingredientGroups);
-  const stateIndex = indexFlow('state-index', 'STATE INDEX', '', chapters.map((c) => [c.name, [
-    [`<i>${esc(c.nickname)}</i>`, `state:${c.slug}`],
-    ...c.recipes.map((r) => [esc(r.title), `recipe:${r.title}`]),
-  ]]));
-  return [recipeIndex, ingredientIndex, stateIndex];
+  return [recipeIndex];
 }
 
 export function acknowledgmentsPage(a) {
