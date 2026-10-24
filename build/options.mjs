@@ -6,7 +6,6 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
-import { execFileSync } from 'node:child_process';
 import * as fm from '../src/content/front-matter.mjs';
 import { readManuscript } from './manuscript.mjs';
 import { stateFooter, flatStar, esc } from '../src/components.mjs';
@@ -63,19 +62,14 @@ const page = await browser.newPage({ deviceScaleFactor: 2 });
 await page.goto(pathToFileURL(file).href, { waitUntil: 'load' });
 await page.evaluate(() => document.fonts.ready);
 await page.addScriptTag({ content: await readFile(path.join(root, 'src/paginate.js'), 'utf8') });
-const shots = path.join(root, 'dist', 'options');
-await mkdir(shots, { recursive: true });
-const sections = await page.$$('section.page');
-const list = [];
-for (let i = 0; i < sections.length; i++) {
-  const option = await sections[i].getAttribute('data-option');
-  const f = path.join(shots, `p${String(i).padStart(2, '0')}.png`);
-  await sections[i].screenshot({ path: f });
-  list.push({ file: f, option: (option || '').replace(/ \(Ohio (photo|recipe) page\)/, '') });
-}
+// Real book pages (8.25 × 11 in, vector), each with a small caption above the live area.
+await page.evaluate(() => document.querySelectorAll('section.page[data-option]').forEach((sec) => {
+  const c = document.createElement('div');
+  c.className = 'option-caption';
+  c.textContent = sec.dataset.option.replace(/ \(Ohio (photo|recipe) page\)/, '');
+  sec.appendChild(c);
+}));
+await writeFile(path.join(root, 'output/Options_Map_and_Notes.pdf'), await page.pdf({ preferCSSPageSize: true, printBackground: true }));
 await browser.close();
-await writeFile(path.join(shots, 'list.json'), JSON.stringify(list));
-// Pages side by side as spreads, one option per sheet, with its caption.
-execFileSync('python3', [path.join(root, 'build/options_sheets.py'), path.join(shots, 'list.json'), path.join(root, 'output/Options_Map_and_Notes.pdf')], { stdio: 'inherit' });
-await rm(shots, { recursive: true, force: true });
+console.log('✓ output/Options_Map_and_Notes.pdf — view in two-page mode (spreads)');
 await rm(file, { force: true });

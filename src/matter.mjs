@@ -73,7 +73,7 @@ function mapSvg(chapters, style = 'navy') {
   if (style === 'mosaic') {
     shapes = states.map((f, i) => {
       const [[x0, y0], [x1, y1]] = path.bounds(f);
-      const img = `assets/img/states/${slugOf(f.properties.name)}/hero.jpg`;
+      const img = `assets/img/map/${slugOf(f.properties.name)}.jpg`; // small copies of the hero landscapes (assets/img/map)
       return `<clipPath id="mc${i}"><path d="${path(f)}"/></clipPath><image href="${img}" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" preserveAspectRatio="xMidYMid slice" clip-path="url(#mc${i})"/>`;
     }).join('') + `<g class="borders">${states.map((f) => `<path d="${path(f)}"/>`).join('')}</g>`;
   } else if (style === 'heritage') {

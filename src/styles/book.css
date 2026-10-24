@@ -365,3 +365,6 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .food .photo-overlay ul { list-style: none; font-size: 11pt; line-height: 14.5pt; }
 .food .photo-overlay li { display: flex; gap: 7pt; align-items: baseline; padding: 1pt 0; }
 .food figure.full { position: relative; }
+/* Caption on the option pages (not part of the book) */
+.option-caption { position: absolute; left: 0; right: 0; top: 8pt; text-align: center; font: 700 7.5pt var(--montserrat); letter-spacing: .08em; color: #8a8a8a; text-transform: uppercase; z-index: 5; }
+.hero .option-caption, .closing-page .option-caption { color: #c9c9c9; }
