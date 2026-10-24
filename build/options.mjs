@@ -7,9 +7,9 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
 import * as fm from '../src/content/front-matter.mjs';
-import { readManuscript } from './manuscript.mjs';
+import { readManuscript, styleText } from './manuscript.mjs';
 import { stateFooter, flatStar, esc } from '../src/components.mjs';
-import { recipeFlow } from '../src/pages.mjs';
+import { recipeFlow, temperaturesPage } from '../src/pages.mjs';
 import { mapSpread } from '../src/matter.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -17,6 +17,10 @@ const { chapters } = await readManuscript(path.join(root, 'manuscript/Made_in_th
 const ohio = chapters.find((c) => c.slug === 'ohio');
 const FOOTER = stateFooter('');
 
+// Page 9 first, so a two-page view pairs the pages as in the book (10–11 as a spread).
+const t = fm.temperatures;
+const page9 = temperaturesPage({ ...t, intro: styleText(t.intro), lead: styleText(t.lead), after: styleText(t.after) })
+  .replace('data-section="temperatures"', 'data-section="temperatures" data-option="Page 9 — for reference, so the spreads pair up"');
 const maps = [
   ['mosaic', 'Map option A — Landscape mosaic: every state filled with its own hero landscape'],
   ['heritage', 'Map option B — Heritage colours: the book’s navy, red, gold and sage'],
@@ -53,7 +57,7 @@ const notes = [
 await mkdir(path.join(root, 'dist'), { recursive: true });
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Options</title>
 <base href="${pathToFileURL(root + '/').href}"><link rel="stylesheet" href="src/styles/book.css"></head>
-<body data-first-folio="10"><template id="footer-shell">${FOOTER}</template>${maps}${notes}</body></html>`;
+<body data-first-folio="9"><template id="footer-shell">${FOOTER}</template>${page9}${maps}${notes}</body></html>`;
 const file = path.join(root, 'dist', 'options.html');
 await writeFile(file, html);
 const executablePath = process.env.CHROMIUM_PATH || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((p) => existsSync(p));
