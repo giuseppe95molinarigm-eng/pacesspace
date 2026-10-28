@@ -97,6 +97,7 @@ export function temperaturesPage(k) {
 import { existsSync } from 'node:fs';
 import { SINGLE_PHOTO_PAGE, ONE_PHOTO, PHOTO_NOTES, INLINE_PHOTO } from './content/food-shots.mjs';
 import { styleText } from '../build/manuscript.mjs';
+import closers from './content/closers.mjs';
 import { statePath } from '../build/shapes.mjs';
 
 // Finished artwork dropped in assets/img/states/<state>/ (hero.jpg, dish-1.jpg, …).
@@ -125,6 +126,7 @@ const CAP_W = { A: .711, B: .582, C: .683, D: .7, E: .547, F: .518, G: .725, H: 
 // place on every hero page; names stay on one line (long ones are set a little smaller).
 const NAME = { maxWidth: 460, maxSize: 60, tracking: 0.04, baseline: 128 };
 const RULE_TOP = 134;
+const NAME_LIFT = { 'north-carolina': 6 };
 const NICK_TOP = 166;
 const emWidth = (t) => [...t].reduce((n, c) => n + (CAP_W[c] ?? .8) + NAME.tracking, 0);
 // Fixed photo zone under the nickname; each outline is centred on the zone's centre point.
@@ -136,6 +138,7 @@ const weightArea = (aspect) => STATE_AREA * Math.min(1.25, Math.max(0.85, aspect
 // Island and peninsula states, sized on purpose rather than by surface (client, L9).
 const SPECIAL = {
   hawaii: { w: 500, h: 380 },   // the whole island chain across the zone, every island filled
+  'rhode-island': { w: 420, h: 390, cy: 418 }, // v2.1 #301: Block Island kept clear of the flag band
   alaska: { w: 480, h: 420 },
   michigan: { w: 430, h: 470 }, // both peninsulas large; the Upper Peninsula carries the story
 };
@@ -153,6 +156,7 @@ export function heroShape(ch) {
   let shape;
   if (SPECIAL[ch.slug]) {
     shape = statePath(ch.name, SPECIAL[ch.slug].w, SPECIAL[ch.slug].h);
+    if (SPECIAL[ch.slug].cy) return { ...shape, left: HERO_CENTER_X - shape.width / 2, top: SPECIAL[ch.slug].cy - shape.height / 2 };
   } else {
     const probe = statePath(ch.name, 1000, 1000);
     const aspect = probe.width / probe.height;
@@ -191,6 +195,8 @@ const PER_ISLAND = []; // states drawn island by island (none since round 9: Haw
 
 export function heroPage(ch) {
   const L = heroLayout(ch.name);
+  // v2.1 #297: North Carolina's long name gets a little more air above the star rule.
+  if (NAME_LIFT[ch.slug]) L.top -= NAME_LIFT[ch.slug];
   // Approved template: gold star rule between name and nickname; state outlined in frame gold.
   return `<section class="page hero" data-state="${ch.slug}" data-role="hero"><div class="hero-inner">
     <svg class="frame" width="594pt" height="792pt" viewBox="0 0 594 792" aria-hidden="true">
@@ -214,7 +220,7 @@ const FOOTER = stateFooter('', 'recto');
 function storyFlow(ch) {
   const paras = ch.story.map((p) => `<p data-split="text">${esc(p)}</p>`).join('')
     // Client (round 9): serving suggestions at the end of a story sit in a boxed note.
-    + (ch.storyNotes || []).map((t) => `<div class="callout story-note"><h3 class="recipe-h">SERVING SUGGESTION</h3><p>${esc(t)}</p></div>`).join('');
+    + (ch.storyNotes || []).map((t) => `<div class="callout band story-note"><h3 class="recipe-h">SERVING SUGGESTION</h3><p>${esc(t)}</p></div>`).join('');
   return `<template class="flow" data-kind="story" data-state="${ch.slug}" data-flag="assets/flags/states/${ch.slug}.png">${paras}</template>`;
 }
 
@@ -238,6 +244,9 @@ function ingredientList(items) {
   return `<ul class="ingredients${cols}" data-split="items">${lis}</ul>`;
 }
 
+// Client (v2.1 #304–#305): Notes & Tips in a navy title band, time-saver tips in a cream box.
+const calloutClass = (title) => (/TIME-SAVER/i.test(title) ? 'callout tip' : 'callout band');
+
 function recipeBlocks(r, isSub) {
   const out = [];
   out.push(`<h2 class="recipe-title${isSub ? ' sub' : ''}" data-keep data-title="${esc(r.title)}"${r.newPage ? ' data-break-before' : ''}>${esc(r.title)}</h2>`);
@@ -250,7 +259,7 @@ function recipeBlocks(r, isSub) {
   let callout = null;
   const flushIngredients = () => { if (ingredients.length) out.push(ingredientList(ingredients)); ingredients = []; };
   const flushCallout = () => {
-    if (callout) out.push(`<div class="callout"><h3 class="recipe-h">${esc(callout.title)}</h3><ul>${callout.items.map((t) => `<li>${flatStar({ size: 7, color: '#bb9554', opacity: 0.6 })}<span>${esc(t)}</span></li>`).join('')}</ul></div>`);
+    if (callout) out.push(`<div class="${calloutClass(callout.title)}"><h3 class="recipe-h">${esc(callout.title)}</h3><ul>${callout.items.map((t) => `<li>${flatStar({ size: 7, color: '#bb9554', opacity: 0.6 })}<span>${esc(t)}</span></li>`).join('')}</ul></div>`);
     callout = null;
   };
   for (const [k, b] of r.blocks.entries()) {
@@ -312,8 +321,9 @@ function foodPages(ch, notes = null) {
       // The photo may move onto the last recipe page when that saves a page (client's list).
       const single = INLINE_PHOTO.includes(ch.slug) && ills.length === 1 && ill.pages === 1 && !notes ? ' data-photo="single"' : '';
       if (notes && n === 0) {
-        const above = notes.callout ? `<div class="callout photo-note"><h3 class="recipe-h">${esc(notes.callout.title)}</h3>${tipList(notes.callout.items)}</div>` : '';
-        const below = notes.below ? `<div class="photo-tips"><p>${esc(styleText(notes.below.intro))}</p>${tipList(notes.below.items.map(styleText))}</div>` : '';
+        const box = (c) => `<div class="${calloutClass(c.title)} photo-note"><h3 class="recipe-h">${esc(c.title)}</h3>${c.intro ? `<p>${esc(styleText(c.intro))}</p>` : ''}${tipList(c.items.map(styleText))}</div>`;
+        const above = notes.callout && notes.where === 'above' ? box(notes.callout) : '';
+        const below = [notes.callout && notes.where === 'below' ? box(notes.callout) : '', notes.below ? box(notes.below) : ''].join('');
         inner = above + inner + below;
       }
       // Framed photo with the book footer (client: not full page).
@@ -329,7 +339,7 @@ function closingPage(ch) {
   return `<template class="closing" data-state="${ch.slug}"><section class="page closing-page" data-state="${ch.slug}" data-role="closing">
     <div class="closing-inner">
       ${starRule({ lineLength: 70.8, gap: 7.5, bigStar: { size: 25.2, tone: 'gold' } })}
-      <p class="closing-line">From ${esc(nick)} to your table.</p>
+      <p class="closing-line">${esc(closers[ch.slug] || `From ${nick} to your table.`)}</p>
       <div class="closing-stars">${starRule({ cls: 'gold-rule' })}</div>
     </div>
   </section></template>`;
@@ -355,13 +365,15 @@ export function stateChapter(ch) {
   let notes = null;
   const extra = PHOTO_NOTES[ch.slug];
   if (extra) {
-    notes = { below: extra.below };
+    notes = { below: extra.below, where: extra.moveRecipeNotes };
     if (extra.moveRecipeNotes) {
+      // The recipe's first boxed note (its title and the items right after it) moves to the photo page.
       const r = ch.recipes[0];
       const at = r.blocks.findIndex((b) => b.type === 'callout-title');
-      const items = r.blocks.slice(at + 1).filter((b) => b.type === 'callout-item').map((b) => b.text);
-      notes.callout = { title: r.blocks[at].text, items };
-      ch = { ...ch, recipes: [{ ...r, blocks: r.blocks.filter((b) => b.type !== 'callout-title' && b.type !== 'callout-item') }, ...ch.recipes.slice(1)] };
+      let end = at + 1;
+      while (r.blocks[end]?.type === 'callout-item') end++;
+      notes.callout = { title: r.blocks[at].text, items: r.blocks.slice(at + 1, end).map((b) => b.text) };
+      ch = { ...ch, recipes: [{ ...r, blocks: [...r.blocks.slice(0, at), ...r.blocks.slice(end)] }, ...ch.recipes.slice(1)] };
     }
   }
   return heroPage(ch) + storyFlow(ch) + foodPages(ch, notes) + recipeFlow(ch) + closingPage(ch);

@@ -153,6 +153,15 @@ function applyCorrections(ch, list) {
     else if (k.yieldFor) {
       const r = ch.recipes.find((x) => x.title.startsWith(k.yieldFor));
       if (r) { r.yield = k.yield; done = true; }
+    } else if (k.noteToCallout) {
+      // A plain note becomes a boxed note at the end of the recipe (Wyoming serving tip).
+      for (const r of ch.recipes) {
+        const i = r.blocks.findIndex((b) => b.type === 'note' && hit(b.text, k.noteToCallout));
+        if (i < 0) continue;
+        const [b] = r.blocks.splice(i, 1);
+        r.blocks.push({ type: 'callout-title', text: k.title }, { type: 'callout-item', text: b.text.replace(/^Serving Tip:\s*/, '') });
+        done = true;
+      }
     } else if (k.retype) {
       for (const r of ch.recipes) for (const b of r.blocks) if (b.text === k.retype) { b.type = k.type; done = true; }
     }
@@ -207,7 +216,7 @@ const sentenceCase = (lead) => lead.split(' ').map((w, i) => {
 const WJ = '⁠'; // word joiner: no line break at this point
 function houseStyle(t) {
   return t
-    .replace(/\s+—\s+/g, '—')                          // closed em dashes
+    .replace(/ ?— ?/g, '—')                            // closed em dashes (never a line starting with one)
     .replace(/(\d) ([½¼¾⅓⅔⅛])/g, '$1$2')              // closed mixed numbers (1½)
     .replace(/(\S)–(?=\S)/g, `$1${WJ}–${WJ}`)          // ranges never break at the dash
     .replace(/°F \/ (\d)/g, '°F / $1');     // 110°F / 43°C stays on one line

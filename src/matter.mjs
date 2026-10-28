@@ -1,5 +1,5 @@
 // General pages added in round 8 (dedication, Notes from the Kitchen, Our Culinary Map) and the
-// back matter (closing essay, menus, allergen guide, recipe index, acknowledgments).
+// back matter (closing essay, menus, allergen guide, recipe index).
 // Long sections are <template class="flow"> blocks, poured into pages by src/paginate.js;
 // every page number is a data-ref filled in from the final layout.
 import { createRequire } from 'node:module';
@@ -34,7 +34,7 @@ function proseBlock([type, text, items]) {
     case 'deck': return `<p class="deck">${esc(text)}</p>`;
     case 'h2': return `<h2 class="prose-h" data-keep>${esc(text)}</h2>`;
     case 'h3': return `<h3 class="prose-sub" data-keep>${esc(text)}</h3>`;
-    case 'callout': return `<div class="callout"><h3 class="recipe-h">${esc(text)}</h3><ul>${items.map((t) => `<li>${bullet()}<span>${esc(t)}</span></li>`).join('')}</ul></div>`;
+    case 'callout': return `<div class="callout band"><h3 class="recipe-h">${esc(text)}</h3><ul>${items.map((t) => `<li>${bullet()}<span>${esc(t)}</span></li>`).join('')}</ul></div>`;
     default: throw new Error(`Unknown block ${type}`);
   }
 }
@@ -124,19 +124,18 @@ function compass(cx, cy) {
 }
 
 /** Pages 10–11: title and line on the left page, the map across both. */
-export function mapSpread(m, chapters, style = 'navy', option = '') {
+/** Pages 10–11: the client's choice (v2.1 #303) — option A, the landscape mosaic; the heading on the
+ * left page and the line on the right page mirror each other, no star rule. */
+export function mapSpread(m, chapters, style = 'mosaic', option = '') {
   const svg = mapSvg(chapters, style);
   const opt = option ? ` data-option="${esc(option)}"` : '';
   return `<section class="page map verso" data-section="map"${opt}>
-    <div class="map-head">
-      <h1 class="page-title">${esc(m.title)}</h1>
-      ${starRule()}
-      <p class="map-intro">${esc(m.intro)}</p>
-    </div>
+    <div class="map-head"><h1 class="page-title">${esc(m.title)}</h1></div>
     <div class="map-art">${svg}</div>
     ${FOOTER}
   </section>
   <section class="page map recto" data-section="map-right"${opt}>
+    <div class="map-head right"><p class="map-intro">${esc(m.intro)}</p></div>
     <div class="map-art" style="left:-594pt">${svg}</div>
     ${FOOTER}
   </section>`;
@@ -152,7 +151,10 @@ export function recipeLookup(chapters) {
     const exact = all.find((r) => norm(r.title) === norm(title));
     if (exact) return exact;
     const inState = all.filter((r) => r.state === state);
-    const hit = inState.find((r) => norm(title).includes(norm(r.title)) || norm(r.title).includes(norm(title))) || inState[0];
+    // Otherwise the recipe of that state sharing the most words with the line.
+    const words = (t) => new Set(norm(t).split(' '));
+    const score = (r) => [...words(title)].filter((w) => words(r.title).has(w)).length;
+    const hit = [...inState].sort((a, b) => score(b) - score(a))[0];
     if (!hit) throw new Error(`No recipe for "${title}" (${state})`);
     return hit;
   };
@@ -180,7 +182,7 @@ export function backMatterFlows(sections, chapters) {
         case 'GroupDescription': out.push(`<p class="group-desc" data-keep>${esc(b.text)}</p>`); break;
         case 'item': {
           const r = find(b.recipe, b.state);
-          out.push(row(`${esc(r.title)}${b.mark || ''}${STATE_SEP}<i>${esc(b.state)}</i>`, `recipe:${r.title}`, ' item'));
+          out.push(row(`${esc(r.title)}${b.mark || ''}${STATE_SEP}<i>${esc(b.state).replace(/ /g, '\u00a0')}</i>`, `recipe:${r.title}`, ' item'));
           break;
         }
         case 'footnote': out.push(`<p class="group-desc footnote">${esc(b.text)}</p>`); break;
@@ -204,11 +206,8 @@ export function indexFlows(chapters) {
   const recipes = chapters.flatMap((c) => c.recipes.map((r) => ({ r, c })));
   const byTitle = (a, b) => a.r.title.localeCompare(b.r.title);
   const recipeIndex = indexFlow('recipe-index', 'RECIPE INDEX', '', [
-    ['', [...recipes].sort(byTitle).map(({ r, c }) => [`${esc(r.title)}${STATE_SEP}<i>${esc(c.name)}</i>`, `recipe:${r.title}`])],
+    ['', [...recipes].sort(byTitle).map(({ r, c }) => [`${esc(r.title)}${STATE_SEP}<i>${esc(c.name).replace(/ /g, '\u00a0')}</i>`, `recipe:${r.title}`])],
   ]);
   return [recipeIndex];
 }
 
-export function acknowledgmentsPage(a) {
-  return `<template class="flow" data-kind="prose" data-section="acknowledgments">${header('', [a.title])}<p class="placeholder">${esc(a.placeholder)}</p></template>`;
-}

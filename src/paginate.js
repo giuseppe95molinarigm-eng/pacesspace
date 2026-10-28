@@ -114,7 +114,7 @@
   // before it gives up some lines so the last page is not left nearly empty.
   function pourBest(tpl) {
     const spare = () => tpl.cloneNode(true);
-    const copies = [spare(), spare(), spare()];
+    const copies = [spare(), spare()];
     let pages = pour(tpl, {});
     if (pages.length < 2) return;
     const used = usedShare(pages[pages.length - 1]);
@@ -131,10 +131,8 @@
       if (next.length < pages.length) return;
       pages = next;
     }
-    // Could not save the page: balance the last two pages instead.
-    const H = pages[pages.length - 1].querySelector('.live').getBoundingClientRect().height;
-    const reserve = Math.max(0, (0.45 - usedShare(pages[pages.length - 1])) * H);
-    swap(copies.shift(), { cls: 'compact tight', reserve: { index: pages.length - 2, px: reserve } });
+    // Could not save the page: keep the tightest setting (no balancing, which left a third of
+    // the page before blank — client, v2.1 #295–#296).
   }
 
   function pour(tpl, opts) {
@@ -221,6 +219,14 @@
   function finishState(tpl) {
     const state = tpl.dataset.state;
     let pages = statePages(state);
+    // v2.1 #293: the photo comes before the recipe only when the recipe takes two pages; a
+    // one-page recipe sits on the left with its photo facing it.
+    const recipePages = pages.filter((p) => p.dataset.role === 'recipe');
+    const photos = pages.filter((p) => p.dataset.role === 'food' && !p.dataset.spread);
+    if (recipePages.length === 1 && photos.length && pages.indexOf(photos[0]) < pages.indexOf(recipePages[0])) {
+      recipePages[0].after(...photos);
+      pages = statePages(state);
+    }
     const spread = pages.filter((p) => p.dataset.spread);
     if (spread.length && pages.indexOf(spread[0]) % 2) {
       // Spread would start on a right-hand page: it goes after the recipe instead.

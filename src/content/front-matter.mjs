@@ -16,9 +16,9 @@ export const copyright = {
     'No part of this book may be reproduced, stored in a retrieval system, or transmitted in any form or by any means — electronic, mechanical, photocopying, recording, or otherwise — without prior written permission of the copyright holder, except for brief quotations used in reviews.',
     'Illustrations in this edition were created with the assistance of AI-generated imagery, curated, refined, and adapted for this publication. All artwork is licensed for commercial print and digital publication.',
   ],
-  isbn: '[ISBN to be provided]',
+  isbn: '979-8-9823417-0-9',
   // Requested by the client ("Can I add a Library of Congress registration number?").
-  lccn: '[LCCN to be provided]',
+  lccn: '2026928086',
   closing: ['First Edition.', 'Printed in the United States of America.'],
 };
 
@@ -89,11 +89,6 @@ export const map = {
   intro: 'A look at the fifty stops on this table-spanning journey, from coastline to farmland to mountain pass.',
 };
 
-// Back matter not written yet in the manuscript.
-export const acknowledgments = {
-  title: 'ACKNOWLEDGMENTS',
-  placeholder: '[Acknowledgments — to be provided by the author, if desired.]',
-};
 
 export const welcome = {
   title: ['WELCOME TO', 'OUR PLACE'],

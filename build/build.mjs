@@ -6,7 +6,7 @@
 // 50 state chapters, back matter), then split into the files the client reviews:
 //   output/00_Front_Matter.pdf        pages 1–11 (title, copyright, dedication, contents, notes, map)
 //   output/states/NN_<State>.pdf      one file per state chapter
-//   output/99_Back_Matter.pdf         closing essay, menus, allergens, indexes, acknowledgments
+//   output/99_Back_Matter.pdf         closing essay, menus, allergen guide, recipe index
 //   output/Made_in_the_USA_Complete.pdf  the whole book (not committed: too large for git)
 //   output/states/INDEX.md            page ranges and open points
 import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
@@ -15,6 +15,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
 import { PDFDocument } from 'pdf-lib';
+import { execFileSync } from 'node:child_process';
 
 import * as frontMatter from '../src/content/front-matter.mjs';
 import { readManuscript, readBackMatter, styleText } from './manuscript.mjs';
@@ -23,7 +24,7 @@ import {
   coverPage, copyrightPage, tocPage, welcomePage, temperaturesPage, stateChapter, dishIllustrations,
 } from '../src/pages.mjs';
 import {
-  dedicationPage, notesFlow, mapSpread, backMatterFlows, indexFlows, acknowledgmentsPage,
+  dedicationPage, notesFlow, mapSpread, backMatterFlows, indexFlows,
 } from '../src/matter.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -63,8 +64,9 @@ function fixBackMatter(sections) {
   text(al, 'No gluten, dairy, egg, shellfish, fish, peanut, tree nut, or soy in the recipe as written.', 'No wheat, dairy, egg, shellfish, fish, peanut, tree nut, soy, or sesame in the recipe as written.');
   al.blocks = al.blocks.filter((b, k) => !(b.recipe === 'Funeral Potatoes' && al.blocks.slice(0, k).reverse().find((x) => x.type === 'GroupName')?.text === 'Gluten-Free'));
   const catfish = { type: 'item', recipe: 'Fried Catfish with Arkansas-Style Tartar Sauce', state: 'Arkansas' };
-  al.blocks.splice(items(al, 'Gluten-Free').at(2), 0, { ...catfish });
+  al.blocks.splice(items(al, 'Gluten-Free').at(3), 0, { ...catfish }); // after Akutaq · Alaska (state order)
   al.blocks.splice(items(al, 'A Note on Peanut Oil').at(3), 0, { ...catfish });
+  text(al, 'list “peanut or vegetable oil.”', 'list “vegetable or peanut oil.”'); // v2.1 #327
   const chislic = al.blocks.find((b) => b.recipe === 'Chislic');
   chislic.mark = '*';
   al.blocks.splice(items(al, 'Free of All Major Allergens').end, 0, { type: 'footnote', text: '*Fried in vegetable oil, not peanut oil.' });
@@ -98,7 +100,6 @@ const tocRows = [
   ...chapters.map((c) => [c.name, `state:${c.slug}`]),
   ['The Table We Set Together', 'section:table'], ['Menus for the Occasion', 'section:menus'],
   ['A Guide to Allergens', 'section:allergens'], ['Recipe Index', 'section:recipe-index'],
-  ['Acknowledgments', 'section:acknowledgments'],
 ];
 const half = Math.ceil(tocRows.length / 2);
 const toc = { left: tocRows.slice(0, half), right: tocRows.slice(half) };
@@ -111,7 +112,8 @@ const front = [
   mapSpread(fm.map, chapters),
 ].join('\n');
 const states = chapters.map((c) => stateChapter(c)).join('\n');
-const backMatter = [...backMatterFlows(back, chapters), ...indexFlows(chapters), acknowledgmentsPage(fm.acknowledgments)].join('\n');
+// Acknowledgments page removed for print (client, v2.1 #323).
+const backMatter = [...backMatterFlows(back, chapters), ...indexFlows(chapters)].join('\n');
 
 const htmlPath = path.join(root, 'dist', 'book.html');
 await writeFile(htmlPath, html({ title: 'Made in the USA: A Plate for Every State', body: front + states + backMatter }));
@@ -119,6 +121,29 @@ await page.goto(pathToFileURL(htmlPath).href, { waitUntil: 'load' });
 await page.evaluate(() => document.fonts.ready);
 await page.addScriptTag({ content: paginate });
 const layout = await page.evaluate(() => window.__layout);
+
+// Photos cut to their frames (client, v2.1 #298): the browser crops photos with object-fit, but the
+// PDF would still hold each whole image, reaching past the margins (and across the gutter on a
+// spread). Each photo is replaced by exactly the part that shows, so it sits on the text margins.
+const crops = await page.evaluate(() => [...document.querySelectorAll('section.page figure img')].map((img, k) => {
+  const f = img.closest('figure').getBoundingClientRect();
+  const r = img.getBoundingClientRect();
+  const s = Math.max(r.width / img.naturalWidth, r.height / img.naturalHeight); // object-fit: cover
+  const x0 = r.left + (r.width - img.naturalWidth * s) / 2;
+  const y0 = r.top + (r.height - img.naturalHeight * s) / 2;
+  img.dataset.crop = k;
+  return { k, src: decodeURI(new URL(img.src).pathname), crop: [(f.left - x0) / s, (f.top - y0) / s, f.width / s, f.height / s] };
+}));
+await mkdir(path.join(root, 'dist', 'crops'), { recursive: true });
+const jobs = crops.map((c) => ({ ...c, out: path.join(root, 'dist', 'crops', `${c.k}.jpg`) }));
+await writeFile(path.join(root, 'dist', 'crops.json'), JSON.stringify(jobs));
+execFileSync('python3', [path.join(root, 'build/crop_images.py'), path.join(root, 'dist', 'crops.json')], { stdio: 'inherit' });
+await page.evaluate((files) => Promise.all(files.map(({ k, url }) => new Promise((done) => {
+  const img = document.querySelector(`img[data-crop="${k}"]`);
+  img.onload = done; img.onerror = done;
+  img.setAttribute('style', 'width:100%;height:100%;margin:0;max-width:none;object-fit:fill;display:block');
+  img.src = url;
+}))), jobs.map((j) => ({ k: j.k, url: pathToFileURL(j.out).href })));
 const bookBytes = await page.pdf({ preferCSSPageSize: true, printBackground: true });
 if (process.env.PREVIEWS) {
   await rm(path.join(out, 'previews'), { recursive: true, force: true });

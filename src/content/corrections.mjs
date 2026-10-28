@@ -58,6 +58,7 @@ export default {
     r('a farmhand’s fuel-sliced thick', 'a farmhand’s fuel—sliced thick'), // #44
   ],
   florida: [
+    r('fluff the rice with a fork, and serve with shredded coconut and cilantro as garnish.', 'fluff the rice with a fork.'), // v2.1 #314
     r('this dish doesn’t just taste like Florida, it is Florida.', 'this dish doesn’t just taste like Florida: it is Florida.'), // #45
     { find: /^Long before Florida became a destination, the Florida Keys were already a kitchen\.\s*/, replace: '' }, // #46
     r(/^1 cup water$/, '½ cup water'), // #47
@@ -71,6 +72,7 @@ export default {
     r('9x13-inch', '9×13-inch'), // #53
   ],
   hawaii: [
+    r(/^NOTES & TIPS$/, 'TIME-SAVER TIP'), // v2.1 #315
     r('pa’akai', 'paʻakai'), r('’ohana', 'ʻohana'), r('ali’i', 'aliʻi'), r(/lu’au/g, 'luʻau'), // #54
     r('chickens, and pigs. That pig would become', 'chickens, and pigs. The pig would become'), // #55
     r('arrived sometime between 400 and 800 CE', 'arrived by roughly 1000–1200 CE (estimates vary)'), // #56
@@ -79,8 +81,9 @@ export default {
     { remove: /^Traditional-Style \(Oven Method\)$/ }, // #59
   ],
   idaho: [
+    r('the supper club. Milo’s Cellar is widely credited', 'the supper club. The Torch Lounge is widely credited'), // v2.1 #61
+    r(', and serve hot with Idaho finger steaks and fry sauce.', ', and serve hot.'), // v2.1 #294
     r('Idaho’s Russet Burbank—planted first near Lapwai in 1836 and grown into the state’s agricultural signature—fried', 'Idaho’s potatoes—an industry that traces to a mission garden near Lapwai in 1836, though the Russet Burbank did not become the state’s signature until the 20th century—fried'), // #60
-    r('Milo’s Cellar', 'the Torch Lounge'), // #61
     r(/^A 1950s Boise supper club battered beef tenderloin.*$/, 'Born in a 1950s Boise supper club: battered beef strips, Idaho Russet fries, and a fry sauce that settled the debate.'), // #62
     r('Heat the canola oil to 370°F', 'Heat the oil to 370°F'), // #63
     r('the remaining 2½ cups of flour, garlic powder, salt, and pepper', 'the remaining 2½ cups of flour, garlic powder, onion salt, salt, and pepper'), // #64
@@ -122,6 +125,7 @@ export default {
     r('(about 110°F (43°C))', '(110°F / 43°C)'), // #91
   ],
   kentucky: [
+    r('what it reveals: Burgoo has', 'what it reveals: burgoo has'), // v2.1 #92
     r(/(?<=[a-z,] )Burgoo/g, 'burgoo'), // #92: lowercase mid-sentence (title and sentence starts keep the capital)
     r('This allows the flavors to meld and the tough cuts to become fork-tender and the chicken to fall from the bone.', 'This lets the flavors meld, the tough cuts turn fork-tender, and the chicken fall from the bone.'), // #94
     r('good quality stock', 'good-quality stock'), // #105
@@ -129,9 +133,10 @@ export default {
     { remove: /^NOTES & TIPS$/ }, { remove: /^Burgoo is often served with cornbread/ },
   ],
   louisiana: [
+    r('Ladle the hot gumbo over a generous serving', 'Remove the bay leaves. Ladle the hot gumbo over a generous serving'), // v2.1 #103
     r('a fever-hot, mosquito—loud settlement', 'a fever-hot, mosquito-loud settlement'), // #96
     { retype: 'Seafood', type: 'ingredient-sub' }, // #98
-    { before: '1 lb. boneless, skinless chicken thighs', insert: { type: 'ingredient-sub', text: 'Protein & Seasonings' } }, // #98
+    r(/^Stock & Seasonings$/, 'Protein & Seasonings'), // #98, v2.1 #316: one group, one heading
     r('¼—½ tsp cayenne pepper', '¼–½ tsp cayenne pepper'), // #99
     r('Cook until the shrimp are pink and opaque and the crabmeat is heated through, 5–10 minutes.', 'Stir in the shrimp and crabmeat and cook until the shrimp are pink and opaque and the crabmeat is heated through, 5–10 minutes.'), // #100
     r('whisk a Tbsp or two of file powder', 'whisk 1–2 Tbsp filé powder'), // #101
@@ -157,6 +162,8 @@ export default {
     r('4 dozen hard-shell clams', '1 dozen hard-shell clams'), // #115
   ],
   michigan: [
+    r('sealed beef, potato, turnip, and onion', 'sealed beef, potato, rutabaga, and onion'), // v2.1 #324
+    { move: 'To Assemble', before: 'Filling' }, // v2.1 #317: TO ASSEMBLE in the first column
     r('allowing miners—whose hands were often dirty with arsenic-laced dust—to eat the filling and discard the crust entirely.', 'allowing miners, it was said, to hold the crust with dirty hands, eat the filling, and discard the crust.'), // #116
     r(/^Bite into a Cornish Pasty.*$/, 'Golden, crimped, and hearty, the pasty has warmed the hands and hearts of miners, farmers, and wanderers for generations.'), // #117–119, #122
     r('Wrap the dough in plastic wrap and refrigerate for 30 minutes', 'Divide the dough into 6 pieces, flatten into disks, wrap in plastic wrap, and refrigerate for 30 minutes'), // #121
@@ -223,6 +230,7 @@ export default {
     r('cook to your liking-over easy', 'cook to your liking—over easy'), // #161
   ],
   'new-mexico': [
+    { retype: 'Topping', type: 'ingredient-sub' }, // v2.1 #163
     r('Local anise seed, gathered from the wild or traded at market,', 'Anise seed, brought north by the Spanish and grown in village gardens or traded at market,'), // #162
   ],
   'new-york': [
@@ -236,6 +244,8 @@ export default {
     r(/^Pillowy dumplings, tender potatoes, and a rich, creamy broth come together.*$/, 'Pillowy dumplings, tender potatoes, and a rich, creamy broth in a bowl that tastes like being loved by someone’s grandmother.'), // #167
   ],
   ohio: [
+    r('Choose your style, a 2-way, 5-way or any way in between!', 'Discard the bay leaf. Choose your style, a 2-way, 5-way or any way in between!'), // v2.1 #171
+    r(/^NOTES & TIPS$/, 'SERVING STYLES'), // v2.1 #306
     r(/^A whisper of cinnamon and chocolate transforms.*$/, 'A whisper of cinnamon and chocolate turns humble meat sauce into a layered obsession—one that makes grown Ohioans weep with homesickness.'), // #169
     r('1 lb. ground beef (80% fat)', '1 lb. ground beef (80% lean)'), // #170
     r('Add all spices, cocoa,', 'Add the bay leaf, all spices, cocoa,'), // #171
@@ -277,6 +287,9 @@ export default {
   texas: [
     r(', and maybe a sprinkle of shredded cheese—though a true Texan might say that’s optional.', '.'), // #194
     r('1 Tbsp masa harina (corn flour)', '1 Tbsp masa harina'), // #195
+  ],
+  utah: [
+    r('9x13-inch', '9×13-inch'), // v2.1 #53
   ],
   vermont: [
     r('exactly what the Key lime does for fish', 'exactly what a squeeze of lemon does for fish'), // #196
@@ -320,6 +333,7 @@ export default {
     r('Add in more milk, if needed.', 'Add a little more milk if needed.'), // #228
   ],
   wyoming: [
+    { noteToCallout: /^Serving Tip:/, title: 'SERVING SUGGESTION' }, // v2.1 #328
     r('Wyoming’s state fish in 1969', 'Wyoming’s state fish in 1987'), // #229
     r('Cowboys pushing vast herds north along the Chisholm and Goodnight-Loving trails into Wyoming’s open ranges', 'Cowboys pushing vast herds north from Texas along trails like the Goodnight-Loving and the Western into Wyoming’s open ranges'), // #230
     r('held along the Green River near present-day Pinedale beginning in 1825', 'held along the Green River and its tributaries beginning in 1825'), // #231
