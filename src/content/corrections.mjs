@@ -28,6 +28,7 @@ export default {
     r(/^Sour cream$/, 'Sour cream or Mexican crema'), // #24
   ],
   arkansas: [
+    r('In large shallow dish, combine the cornmeal, cornstarch and all seasonings.', 'In a large shallow dish, combine the cornmeal, cornstarch, and all the seasonings.'), // v2.2 #373
     r('was Arkansas’s own invention', 'was Arkansas’s own spin'), // #25
     r('cementing a tradition that had been informal into one that was agricultural and industrial at once.', 'turning a tradition that had been informal into an agricultural industry as well.'), // #26
     r('Helena waterfront-once', 'Helena waterfront—once'), // #27
@@ -38,6 +39,7 @@ export default {
     r('By the late nineteenth century', 'By the late 19th century'), // #6
   ],
   california: [
+    r(/about 1-inch wide/g, 'about 1 inch wide'), // v2.2 #379
     r('Santa Barbara-each', 'Santa Barbara—each'), // #33
   ],
   colorado: [
@@ -46,6 +48,7 @@ export default {
     r('beat the eggs with milk,', 'beat the eggs with the milk, if using,'), // #37
   ],
   connecticut: [
+    r(/^(Thin|Simple|High|Quality) (Crust|Toppings|Heat|Ingredients):/, (m, a, b) => `${a} ${b.toLowerCase()}:`), // v2.2 #381
     r('An accidental topping at Frank Pepe’s coal-fired oven turned into New Haven’s most fiercely guarded pizza tradition: a sauceless pie piled with fresh littleneck clams.', 'At Frank Pepe’s coal-fired oven, an accident became New Haven’s fiercely guarded tradition: a sauceless pie piled with fresh clams.'), // #38
     r(/^Pecorino Romano cheese, grated$/, '¼ cup grated Pecorino Romano cheese'), // #40
     r('(ideally 500–550°F (260–288°C))', '(ideally 500–550°F, or 260–288°C)'), // #41
@@ -58,8 +61,9 @@ export default {
     r('a farmhand’s fuel-sliced thick', 'a farmhand’s fuel—sliced thick'), // #44
   ],
   florida: [
-    r('fluff the rice with a fork, and serve with shredded coconut and cilantro as garnish.', 'fluff the rice with a fork.'), // v2.1 #314
-    r('this dish doesn’t just taste like Florida, it is Florida.', 'this dish doesn’t just taste like Florida: it is Florida.'), // #45
+    r('Transfer to plate and garnish with cilantro and squeeze of lime juice.', 'Transfer to plates and garnish with shredded coconut, cilantro, and a squeeze of lime juice.'), // v2.2 #333
+    r('Remove from heat, fluff the rice with a fork, and serve with shredded coconut and cilantro as garnish.', 'Remove from heat and fluff the rice with a fork.'), // v2.1 #314, v2.2 #374
+    r('the creamy pull of coconut rice, this dish doesn’t just taste like Florida, it is Florida.', 'the creamy pull of coconut rice—this dish doesn’t just taste like Florida. It is Florida.'), // #45, v2.2 #374
     { find: /^Long before Florida became a destination, the Florida Keys were already a kitchen\.\s*/, replace: '' }, // #46
     r(/^1 cup water$/, '½ cup water'), // #47
     r('375°F (190°C) – 400°F (204°C)', '375–400°F (190–204°C)'), // #48
@@ -77,7 +81,7 @@ export default {
     r('chickens, and pigs. That pig would become', 'chickens, and pigs. The pig would become'), // #55
     r('arrived sometime between 400 and 800 CE', 'arrived by roughly 1000–1200 CE (estimates vary)'), // #56
     r(/Cooked for hours beneath hot volcanic stones and banana leaves in an underground imu, Kalua pork has been the smoky centerpiece of Hawaiian lu.au celebrations for a thousand years\./, 'Slow-cooked beneath hot stones and banana leaves in an underground imu, kalua pork has anchored Hawaiian luʻau for centuries.'), // #57
-    r('Rinse and pat the pork shoulder, or butt if using, dry.', 'Rinse the pork and pat it dry.'), // #58
+    r('Rinse and pat the pork shoulder, or butt if using, dry.', 'Pat the pork dry.'), // #58, v2.2 #346 (USDA: do not rinse raw meat)
     { remove: /^Traditional-Style \(Oven Method\)$/ }, // #59
   ],
   idaho: [
@@ -97,6 +101,7 @@ export default {
     { yieldFor: 'Fry Sauce', yield: 'Yield: about 1 cup' }, // #66
   ],
   illinois: [
+    r('then add toppings – gotta make sure they are in this order:', 'then add the toppings in this order:'), // v2.2 #378
     r('In a neighborhood where kosher dietary traditions shaped what went on the table, ketchup-sweet, vinegary, and containing sugar—had no place', 'Local lore says ketchup—sweet, vinegary, and containing sugar—had no place'), // #72, #74
     r('celery salt-all of it', 'celery salt—all of it'), // #73
     r(/^This isn’t just a hot dog\..*$/, 'Not just a hot dog but a Depression-era act of defiance—and one of the most satisfying things you will ever eat standing up.'), // #75
@@ -118,6 +123,7 @@ export default {
     r('until the sauce is bubbling and slightly caramelized.', 'until the sauce is bubbling and slightly caramelized and the center of the ham balls reaches 160°F (71°C).'), // #87
   ],
   kansas: [
+    { after: '¼ cup unsalted butter, melted', insert: { type: 'ingredient', text: '¼ cup melted butter or 1 egg beaten with 1 Tbsp water, for brushing' } }, // v2.2 #347
     r('They had left the colonies along Russia’s Volga River, lured to Kansas by the Atchison, Topeka and Santa Fe Railway, which was selling land at three dollars an acre.', 'They had left German-speaking settlements across the Russian Empire—including Mennonite communities in present-day Ukraine and Volga German communities farther east—drawn to Kansas by railroad land offers.'), // #88
     r('Tucked into their trunks beside hand-stitched linens and German-language Bibles were packets of Turkey Red wheat seed, a hard winter variety they had cultivated on the Russian steppe for generations. That wheat would transform Kansas agriculture entirely.', 'Family tradition holds that they carried Turkey Red wheat seed in their trunks beside hand-stitched linens and German-language Bibles, bringing with them a legacy of farming that would help transform Kansas agriculture.'), // #290
     r(/^Mennonite settlers carried this recipe across an ocean and half a continent, folding.*$/, 'Mennonite settlers carried this recipe across an ocean and half a continent: seasoned beef and cabbage in a golden hand-held loaf.'), // #89
@@ -125,6 +131,8 @@ export default {
     r('(about 110°F (43°C))', '(110°F / 43°C)'), // #91
   ],
   kentucky: [
+    r('who allegedly fed a large crowd of Confederate and Union soldiers near Lexington', 'who allegedly cooked for John Hunt Morgan’s Confederate cavalry near Lexington'), // v2.2 #365
+    r(/^2 lb\. bone-in chicken thighs$/, '2 lb. bone-in, skin-on chicken thighs'), // v2.2 #367
     r('what it reveals: Burgoo has', 'what it reveals: burgoo has'), // v2.1 #92
     r(/(?<=[a-z,] )Burgoo/g, 'burgoo'), // #92: lowercase mid-sentence (title and sentence starts keep the capital)
     r('This allows the flavors to meld and the tough cuts to become fork-tender and the chicken to fall from the bone.', 'This lets the flavors meld, the tough cuts turn fork-tender, and the chicken fall from the bone.'), // #94
@@ -144,6 +152,7 @@ export default {
     r('good quality stock', 'good-quality stock'), // #105
   ],
   maine: [
+    r('roughly chopped into ½ to ¾ inch pieces', 'roughly chopped into ½–¾-inch pieces'), // v2.2 #380
     r('4 New England-style top-split hot dog buns', '4 New England-style split-top hot dog buns'), // #104
     r('good quality mayonnaise', 'good-quality mayonnaise'), // #105
     r(/^Wait it Out$/, 'Chill the lobster salad'), // #106
@@ -155,13 +164,15 @@ export default {
     r('until the crabs turn bright red.', 'until the crabs turn bright orange-red. (For a full bushel, steam in batches.)'), // #110
   ],
   massachusetts: [
+    r('Ladle chowder into bowls, garnish with parsley,', 'Ladle chowder into bowls, top with the crisp salt pork and parsley,'), // v2.2 #366
     r('on a grey day', 'on a gray day'), // #111
     r(/^One spoonful of New England Clam Chowder.*$/, 'Rich, creamy, and briny-sweet, New England clam chowder is a warm embrace from the sea in a bowl.'), // #112
     r('In a separate saucepan, warm the milk and cream, if not using flour to thicken. If you prefer a thicker chowder, sprinkle in the flour and cook 2 minutes before adding liquid. Gradually add the milk and cream to the large pot, stirring gently. Stir in butter.', 'Warm the milk and cream in a saucepan. If you want a thicker chowder, stir the flour into the potatoes and broth and cook 2 minutes before adding the milk and cream. Gradually add the milk and cream to the large pot and stir in the butter.'), // #113
-    r('Remove and discard the solids, leaving the fat in the pot.', 'Remove the crisp pork with a slotted spoon, leaving the fat in the pot; set it aside and sprinkle it over the bowls.'), // #114
+    r('Remove and discard the solids, leaving the fat in the pot.', 'Remove the crisp pork with a slotted spoon, leaving the fat in the pot; set it aside for garnish.'), // #114
     r('4 dozen hard-shell clams', '1 dozen hard-shell clams'), // #115
   ],
   michigan: [
+    r('a circle about 8-inch across and ⅛-inch thick', 'a circle about 8 inches across and ⅛ inch thick'), // v2.2 #379
     r('sealed beef, potato, turnip, and onion', 'sealed beef, potato, rutabaga, and onion'), // v2.1 #324
     { move: 'To Assemble', before: 'Filling' }, // v2.1 #317: TO ASSEMBLE in the first column
     r('allowing miners—whose hands were often dirty with arsenic-laced dust—to eat the filling and discard the crust entirely.', 'allowing miners, it was said, to hold the crust with dirty hands, eat the filling, and discard the crust.'), // #116
@@ -176,7 +187,7 @@ export default {
     { story: [
       'The Mississippi River has always had a personality: wide, dark, and unhurried, carrying the silt and soil of half a continent southward toward the Gulf. It was that river mud, rich and deep chocolate brown, that gave this dessert its name. Like the river, it carries the story of the people who have lived along its banks.',
       'The Delta’s table was shaped long before this pie existed. Black cooks, enslaved and later free, built much of the region’s culinary tradition in plantation kitchens, church halls, and home kitchens, and their skill with pecans, molasses, eggs, and chocolate set the standard for dense, deeply flavored sweets across the Mississippi Valley. Mississippi Mud Pie is a much younger dish, but it grew up in the food culture they helped create.',
-      'Its story begins with the river itself. Steamboats and rail lines made river towns like Vicksburg and Natchez, and ports like New Orleans, gateways for goods, and by the late 19th century chocolate was no longer a luxury. Over the 20th century, the pantry changed. Chocolate cookies became a favorite way to make a crust without an oven. By the 1950s, electric refrigerators and freezers were standard in American kitchens, and cooks could set a dessert rather than bake it. Instant puddings and whipped toppings soon followed.',
+      'Its story begins with the river itself. Steamboats and rail lines made river towns like Vicksburg and Natchez, and ports like New Orleans, gateways for goods, and by the late 19th century chocolate was no longer a luxury. Over the 20th century, the pantry changed. Chocolate cookies became a favorite way to make a crust. By the 1950s, electric refrigerators and freezers were standard in American kitchens, and cooks could set a dessert rather than bake it. Instant puddings and whipped toppings soon followed.',
       'The name “Mississippi Mud” appears in American newspaper recipe columns by the 1960s, first on a rich chocolate cake and, by the early 1970s, on the chilled pie. Where it began is still debated, and several towns have claimed it, but the inspiration is clear: the dark, silky look of the riverbank mud that lines the Mississippi on a drying August afternoon in Greenville or Clarksdale. The comparison stuck because anyone who has stood on that bank and looked down at the dark, smooth earth understands what they are about to taste.',
       'This is a dessert that rewards you generously. A crisp chocolate cookie crust holds a cool, fudgy chocolate filling, topped with cream and chocolate shavings or toasted pecans. Slice it straight from the refrigerator or freezer, with a dollop of whipped cream or a spoonful of vanilla ice cream melting alongside, and you won’t just be making dessert. You’ll be sitting down at a table with generations of Southern cooks and one of its most beloved sweets.',
     ] },
@@ -194,10 +205,11 @@ export default {
   ],
   montana: [
     r('the Salish people—known also as the Flathead—for centuries', 'the Salish (Séliš) people for centuries'), // #134
-    r('Meriwether Lewis recorded the encounter in his journals, noting the generosity of the people and the unfamiliar but welcome food placed before his party.', 'Lewis and Clark both recorded the encounter in their journals (William Clark first met the Salish at Ross’s Hole), noting the generosity of the people and the unfamiliar but welcome food placed before the party.'), // #135
+    r('Meriwether Lewis recorded the encounter in his journals, noting the generosity of the people and the unfamiliar but welcome food placed before his party.', 'Lewis and Clark both recorded the encounter in their journals, noting the generosity of the people and the unfamiliar but welcome food placed before the party.'), // #135
+    r('they were met by the Salish near present-day Lolo, Montana—hungry, exhausted, and deeply relieved.', 'they were met by the Salish at Ross’s Hole, near present-day Sula—hungry, exhausted, and deeply relieved—and later rested at Travelers’ Rest near Lolo.'), // v2.2 #360
     r(/^In Montana, where bull elk roam.*$/, 'Bull elk in the high meadows, huckleberries on the mountainsides—pressed together into a burger that tastes like the Rockies.'), // #136
-    r('(we prefer ours medium—160°F / 71°C)', '(we cook ours to 160°F (71°C))'), // #137
-    r(', and enjoy the sweet taste of Montana’s wild essence in each delicious bite.', '. Serve with plenty of napkins.'), // #139
+    r(' (we prefer ours medium—160°F / 71°C)', '; we cook ours to 160°F (71°C)'), // #137, v2.2 #376
+    r('Place the burgers on buns, generously top with huckleberry BBQ sauce, and enjoy the sweet taste of Montana’s wild essence in each delicious bite.', 'Place the burgers on buns and top generously with the huckleberry BBQ sauce. Serve with plenty of napkins.'), // #139, v2.2 #376
     r('For those that cannot tolerate spicy foods, simply omit', 'For anyone who prefers it mild, omit'), // #140
     r(/^¼ cup butter$/, '¼ cup cold butter, diced'), // #141
   ],
@@ -209,6 +221,9 @@ export default {
     r('for dipping-classic Nebraskan style', 'for dipping—classic Nebraskan style'), // #145
   ],
   nevada: [
+    r('pushing the transcontinental line westward toward Promontory Summit', 'pushing the transcontinental line eastward toward Promontory Summit'), // v2.2 #354
+    r('the valleys of Elko and Lovelock counties', 'the valleys of Elko and Humboldt counties'), // v2.2 #355
+    r('—ranchers like Henry Blasdel, Nevada’s first state governor, understood early that the land', '—Nevada’s early ranchers understood that the land'), // v2.2 #356
     r('with horseradish and au jus', 'with horseradish and pan jus'), // #146
     r('silver veins running through the Sierra Nevada', 'silver veins running through the Virginia Range'), // #147
     r(/^Few things in life command a room.*$/, 'A prime rib roast commands the room—herb-crusted, rose-blushed, and met with a reverent hush the moment it hits the table.'), // #148
@@ -226,10 +241,12 @@ export default {
     r('Add beets or cook beets in separate pot.', 'Add the beets, or cook them in a separate pot.'), // #158
   ],
   'new-jersey': [
+    r('In the winter of 1856, a Newark-born businessman named John Taylor', 'In 1856, a Hamilton Square–born businessman named John Taylor'), // v2.2 #359
     r(/^Pork roll—that salty.*$/, 'Salty, griddle-crisped pork roll turns an ordinary New Jersey breakfast into a small, perfect moment you didn’t know you needed.'), // #160
     r('cook to your liking-over easy', 'cook to your liking—over easy'), // #161
   ],
   'new-mexico': [
+    r('If dough feels dry, add a splash more brandy.', 'If dough feels dry, add a splash more brandy, wine, or orange juice.'), // v2.2 #368
     { retype: 'Topping', type: 'ingredient-sub' }, // v2.1 #163
     r('Local anise seed, gathered from the wild or traded at market,', 'Anise seed, brought north by the Spanish and grown in village gardens or traded at market,'), // #162
   ],
@@ -237,13 +254,16 @@ export default {
     r('A steaming bowl of tender chicken and rigatoni wrapped in spicy, creamy tomato sauce—is pure Utica comfort in every bite.', 'A steaming bowl of tender chicken and rigatoni, wrapped in spicy, creamy tomato sauce, is pure Utica comfort in every bite.'), // #164
   ],
   'north-carolina': [
+    r('½-inch thick rounds', '½-inch-thick rounds'), // v2.2 #379
     r(/^Few things in a Southern kitchen rival.*$/, 'A perfect crunch gives way to a tart, tender center—the simple joy of a fried green tomato, tasting like summer itself.'), // #165
   ],
   'north-dakota': [
+    r('Catherine the Great had invited German farmers to settle the Volga River region of Russia in the 1760s,', 'Catherine the Great and her successors invited German farmers to settle the Russian Empire, first along the Volga and later on the Black Sea steppe in what is now Ukraine,'), // v2.2 #357
     r('They arrived in the Red River Valley and the James River lowlands in significant numbers through the 1880s and 1890s, settling towns like Emmons County, Logan County, and the rolling farmland surrounding Wishek and Linton.', 'They arrived in south-central North Dakota in significant numbers through the 1880s and 1890s, settling counties like Emmons and Logan, in the farmland around Wishek and Linton.'), // #166
     r(/^Pillowy dumplings, tender potatoes, and a rich, creamy broth come together.*$/, 'Pillowy dumplings, tender potatoes, and a rich, creamy broth in a bowl that tastes like being loved by someone’s grandmother.'), // #167
   ],
   ohio: [
+    r('To order a five-way with confidence, beans, onions, cheese, and chili over spaghetti, was to announce', 'To order a five-way with confidence—chili, beans, onions, and cheese over spaghetti—was to announce'), // v2.2 #375
     r('Choose your style, a 2-way, 5-way or any way in between!', 'Discard the bay leaf. Choose your style, a 2-way, 5-way or any way in between!'), // v2.1 #171
     r(/^NOTES & TIPS$/, 'SERVING STYLES'), // v2.1 #306
     r(/^A whisper of cinnamon and chocolate transforms.*$/, 'A whisper of cinnamon and chocolate turns humble meat sauce into a layered obsession—one that makes grown Ohioans weep with homesickness.'), // #169
@@ -252,21 +272,23 @@ export default {
     r('for 30 mins.', 'for 30 minutes.'), // #172
   ],
   oklahoma: [
-    r('When the Five Civilized Tribes—the Cherokee, Choctaw, Chickasaw, Creek, and Seminole—were', 'When the Five Tribes (the Cherokee, Choctaw, Chickasaw, Muscogee (Creek), and Seminole Nations) were'), // #173
+    r('When the Five Civilized Tribes—the Cherokee, Choctaw, Chickasaw, Creek, and Seminole—were', 'When the Five Tribes—the Cherokee, Choctaw, Chickasaw, Muscogee (Creek), and Seminole Nations—were'), // #173
     r(/^There is no sound quite like the sizzle.*$/, 'The sizzle of batter hitting a blazing skillet, the smell of golden cornbread—crisp-edged, tender-hearted, and worth every forearm burn.'), // #174
   ],
   oregon: [
+    r('Pull out your largest baking sheet, don’t be shy', 'Heat your oil, don’t be shy'), // v2.2 #371
     r('Russian fur traders had introduced cultivated potatoes to the Oregon Territory as early as the 1820s, planting them', 'The Hudson’s Bay Company brought cultivated potatoes to Fort Vancouver in the 1820s, planting them'), // #176
-    r('The Hudson’s Bay Company expanded on this, encouraging', 'It expanded on this, encouraging'),
+    r(/The Hudson’s Bay Company brought cultivated potatoes to Fort Vancouver in the 1820s, planting them at trading posts.*?The Hudson’s Bay Company expanded on this, encouraging potato cultivation at Fort Vancouver along the Columbia River, where/, 'The Hudson’s Bay Company brought cultivated potatoes to Fort Vancouver on the Columbia River in the 1820s, where'), // v2.2 #372
     r(/^These thick-cut potato wedges—crispy outside.*$/, 'Crispy outside, tender inside, these thick-cut potato wedges bridge the gap between French fries and home fries.'), // #177
     r('paper towel–lined tray', 'paper towel-lined tray'), // #178
   ],
   pennsylvania: [
     r('on that South Philly corner ninety years ago', 'on that South Philly corner nearly a century ago'), // #179
-    r(/^Pat Olivieri’s 1930s street-cart invention.*$/, 'Pat Olivieri’s 1930s street-cart invention—shaved ribeye, molten cheese, soft-roll magic—is a love letter to Philadelphia.'), // #180
+    r(/^Pat Olivieri’s 1930s street-cart invention.*$/, 'Pat Olivieri’s 1930s street-cart invention—shaved ribeye, sweet onions, soft-roll magic—is a love letter to Philadelphia.'), // #180
     r('2 long Amoroso-style hoagie roll', '2 long Amoroso-style hoagie rolls'), // #181
   ],
   'rhode-island': [
+    r('their deep understanding of corn, which they called nasaump.', 'their deep understanding of corn, which they cracked and cooked into a porridge they called nasaump.'), // v2.2 #362
     r('has been operating continuously since 1675—making it the oldest grist mill in America and still producing', 'has been operating since 1675, among the oldest working grist mills in the country, still producing'), // #183
     r(/johnny cakes/g, 'johnnycakes'), r(/johnny cake/g, 'johnnycake'), // #184
     r('1 cup boiling water (approx., see note)', '1 cup boiling water (add a little more if the batter is stiff)'), // #185
@@ -277,6 +299,7 @@ export default {
     r(/^3 cups chicken stock$/, '2 cups chicken stock'), // #188
   ],
   'south-dakota': [
+    r('the collapsed promises of Catherine the Great’s land grants along the Volga River', 'the collapsed promises of the Russian Empire’s land grants on the Black Sea steppe'), // v2.2 #358
     r(/^When you thread seasoned meat onto a stick.*$/, 'Salted cubes of meat, fried quick and eaten hot—a thousand years of fellowship in every bite.'), // #190
     r('350–375°F (175–191°C)', '350–375°F (175–190°C)'), // #191
   ],
@@ -285,10 +308,12 @@ export default {
     r('Pour about 2-inch of oil', 'Pour about 2 inches of oil'), // #193
   ],
   texas: [
-    r(', and maybe a sprinkle of shredded cheese—though a true Texan might say that’s optional.', '.'), // #194
+    r('Lime wedges and chopped onions, for garnish', 'Chopped onions, for garnish'), // v2.2 #338
+    r('Ladle into bowls and top with chopped onion, a squeeze of lime, and maybe a sprinkle of shredded cheese—though a true Texan might say that’s optional.', 'Ladle into bowls and top with chopped onion.'), // #194, v2.2 #338
     r('1 Tbsp masa harina (corn flour)', '1 Tbsp masa harina'), // #195
   ],
   utah: [
+    r('By the time Utah became a state in 1896, the dish had already outgrown its somber occasion.', 'By the mid-20th century, the dish had outgrown its somber occasion.'), // v2.2 #361
     r('9x13-inch', '9×13-inch'), // v2.1 #53
   ],
   vermont: [
@@ -319,6 +344,7 @@ export default {
     r('1 Tbsp tamari (or soy sauce)', '1 Tbsp tamari (or coconut aminos)'), // #218
   ],
   'west-virginia': [
+    r('Stacked tall and flooded with sorghum molasses or the dark, robust buckwheat honey', 'Poured thin onto a well-seasoned griddle and finished with a ribbon of sorghum or maple syrup, or the dark, robust buckwheat honey'), // v2.2 #371
     r('a spoonful of sourdough starter the night before', 'a spoonful of starter saved from the last batch the night before'), // #219
     { find: /^Buckwheat pancakes pair beautifully.*$/, replace: '' }, // #220
     r('4 tsp hot water (or 3 Tbsp warm milk)', '4 tsp hot water (or warm milk)'), // #221

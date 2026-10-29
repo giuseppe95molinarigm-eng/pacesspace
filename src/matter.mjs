@@ -182,7 +182,9 @@ export function backMatterFlows(sections, chapters) {
         case 'GroupDescription': out.push(`<p class="group-desc" data-keep>${esc(b.text)}</p>`); break;
         case 'item': {
           const r = find(b.recipe, b.state);
-          out.push(row(`${esc(r.title)}${b.mark || ''}${STATE_SEP}<i>${esc(b.state).replace(/ /g, '\u00a0')}</i>`, `recipe:${r.title}`, ' item'));
+          const label = b.label ? esc(b.label) : esc(r.title);
+          const note = b.note ? ` <i class="ix-note">(${esc(b.note)})</i>` : '';
+          out.push(row(`${label}${b.mark || ''}${STATE_SEP}<i>${esc(b.state).replace(/ /g, '\u00a0')}</i>${note}`, `recipe:${r.title}`, ' item'));
           break;
         }
         case 'footnote': out.push(`<p class="group-desc footnote">${esc(b.text)}</p>`); break;
@@ -211,3 +213,13 @@ export function indexFlows(chapters) {
   return [recipeIndex];
 }
 
+
+/** About the Author, the last page of the book. Text carries its own <i> for book titles. */
+export function aboutPage(a, style) {
+  const html = (t) => style(t).replace(/&(?![a-z]+;)/g, '&amp;');
+  return `<template class="flow" data-kind="prose" data-section="about">${header(a.kicker, a.title)}
+    <p class="deck about-deck">${html(a.deck)}</p>
+    ${a.paragraphs.map((p) => `<p data-split="text">${html(p)}</p>`).join('')}
+    <div class="ornament">${flatStar({ size: 12.8, color: '#a33522' })}</div>
+    ${a.closing.map((l) => `<p class="closing-line">${esc(l)}</p>`).join('')}</template>`;
+}

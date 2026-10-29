@@ -65,7 +65,7 @@ export const notes = [
     kicker: 'NOTES FROM THE KITCHEN',
     title: ['FRYING, SIMPLY'],
     blocks: [
-      ['deck', 'More than twenty dishes in this book pass through hot oil — and frying has a fearsome reputation it does not deserve.'],
+      ['deck', 'About a dozen dishes in this book pass through hot oil — and frying has a fearsome reputation it does not deserve.'],
       ['p', 'Catfish in Arkansas, finger steaks in Idaho, chimichangas in the Sonoran Desert, hot chicken in Nashville. Done with a little attention, frying is one of the most rewarding things you can do in a kitchen.'],
       ['h3', 'Choosing your oil'],
       ['p', 'Reach for a neutral oil with a high smoke point — vegetable, canola, peanut, or a blend. We primarily call for vegetable and peanut oil for frying. These fry clean and let the food, not the fat, do the talking. When a recipe wants a particular oil for flavor or tradition, it will say so; otherwise, any neutral oil will serve you well.'],
@@ -124,4 +124,18 @@ export const temperatures = {
   },
   after: 'Doneness is a matter of taste as much as safety — pull meat a few degrees early and let it rest, and it will climb to just where you want it.',
   closing: 'Now—to the hearth. Let’s begin.',
+};
+
+// Last page of the book (client, tracker v2.2: About the Author instead of Acknowledgments).
+// From About_the_Author_Christina_Reed.docx; book titles in italics.
+export const about = {
+  kicker: 'MEET THE COOK',
+  title: ['ABOUT THE AUTHOR'],
+  deck: 'Christina Reed believes the quickest way to know a place is to sit down at its table. <i>Made in the USA: A Plate for Every State</i> grew out of that belief—fifty states, fifty stories, and the dishes their people grow up with, argue over, and carry with them when they leave home.',
+  paragraphs: [
+    'She believes, too, that this country was never cooked from a single recipe. It grew from the people who were already here—who knew the rivers, the seasons, and the corn long before anyone else arrived—and from the people who crossed oceans and borders with seeds in their pockets and recipes in their memory, and made a new country a home of their own. Every one of those hands added something to the pot, and it is in that pot, shared and passed and made again, that we find what holds us together. One table. Many hands. A home for all of us.',
+    'She is also the author of <i>Souled Out</i>, a 52-week wellness journal that invites readers to check in with themselves one week at a time. The two books are close cousins. One asks what feeds the spirit; the other asks what feeds a family, a town, a state.',
+    'When she isn’t writing, Christina is spending time with the people she loves—her friends, her family—and traveling the world, always curious about what is for dinner somewhere new. Home is Maryland, land of the newspaper-covered crab feast, where she lives with her husband.',
+  ],
+  closing: ['There is always room at her table', 'for one more.'],
 };

@@ -214,16 +214,28 @@ const sentenceCase = (lead) => lead.split(' ').map((w, i) => {
 }).join(' ').replace(/ & /g, ' and ');
 
 const WJ = '⁠'; // word joiner: no line break at this point
+const FR = '½¼¾⅓⅔⅛';
 function houseStyle(t) {
   return t
-    .replace(/ ?— ?/g, '—')                            // closed em dashes (never a line starting with one)
-    .replace(/(\d) ([½¼¾⅓⅔⅛])/g, '$1$2')              // closed mixed numbers (1½)
+    .replace(/ – /g, '—')                              // spaced en dash used as a dash
+    .replace(/ ?— ?/g, '—')                            // closed em dashes
+    .replace(/—/g, `${WJ}—`)                           // a line never starts with an em dash
+    .replace(new RegExp(`(\\d) ([${FR}])`, 'g'), '$1$2') // closed mixed numbers (1½)
     .replace(/(\S)–(?=\S)/g, `$1${WJ}–${WJ}`)          // ranges never break at the dash
-    .replace(/°F \/ (\d)/g, '°F / $1');     // 110°F / 43°C stays on one line
+    .replace(/°F \/ (\d)/g, '°F / $1')       // 110°F / 43°C stays on one line
+    .replace(new RegExp(`([\\d${FR}])-(?=inch|ounce|quart|lb|pound)`, 'g'), `$1-${WJ}`); // 9×13-inch stays whole
 }
+// Recipe text only: ranges with "to" become en-dash ranges ("1½ to 2 Tbsp" → "1½–2 Tbsp").
+const rangeStyle = (t) => t
+  .replace(new RegExp(`([\\d${FR}])- to ([\\d${FR}])`, 'g'), '$1–$2')
+  .replace(new RegExp(`([\\d${FR}]) to ([\\d${FR}])`, 'g'), '$1–$2');
 
 export function applyHouseStyle(ch) {
   for (const r of ch.recipes) for (const b of r.blocks) if (b.type === 'step' && b.parts[0]) b.parts[0] = sentenceCase(b.parts[0]);
+  for (const r of ch.recipes) {
+    r.yield = rangeStyle(r.yield);
+    for (const b of r.blocks) { if (b.text) b.text = rangeStyle(b.text); if (b.parts) b.parts = b.parts.map(rangeStyle); }
+  }
   for (const [get, set] of textFields(ch)) { const t = get(); if (typeof t === 'string') set(houseStyle(t)); }
   ch.storyNotes = (ch.storyNotes || []).map(houseStyle);
 }

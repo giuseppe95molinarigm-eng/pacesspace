@@ -8,7 +8,7 @@ import { readManuscript } from './manuscript.mjs';
 import { statePath } from './shapes.mjs';
 import { dishIllustrations } from '../src/pages.mjs';
 import landscapes from '../src/content/landscapes.mjs';
-import foodShots from '../src/content/food-shots.mjs';
+import foodShots, { INLINE_PHOTO } from '../src/content/food-shots.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = path.join(root, 'illustrations');
@@ -35,7 +35,7 @@ const FOOD_RULES = 'Composition: the finished dish is the clear hero and fills m
 // Shot, light, surface and composition device vary from picture to picture.
 const LIGHTS = ['soft natural window light in the early morning, cool and fresh, gentle side light', 'warm natural window light in the late afternoon, low golden side light with long soft shadows'];
 const SURFACES = ['a light marble counter', 'a pale linen tablecloth', 'a sage-green painted wooden table', 'a butcher-block kitchen counter', 'a white enamel tabletop', 'a soft blue tiled counter', 'a worn oak farmhouse table', 'a terracotta-coloured tablecloth'];
-const DEVICES = ['arranged along a golden spiral that ends on the dish', 'arranged on golden-triangle diagonals', 'with dynamic-symmetry diagonals running through the dish', 'following the golden-ratio (phi) grid'];
+const DEVICES = ['arranged along a golden spiral that ends on the dish', 'arranged on golden-triangle diagonals', 'with dynamic-symmetry diagonals running through the dish', 'balanced on golden-ratio proportions'];
 // Flat dishes read best from above, tall ones straight on, the rest from the 45° "hero" angle.
 function shotFor(dish) {
   const d = dish.toLowerCase();
@@ -44,7 +44,7 @@ function shotFor(dish) {
   return '45° hero shot';
 }
 let dishCount = 0;
-const NEGATIVE = 'No people, no hands, no faces, no text, no lettering, no logos, no labels or packaging with writing (plain unlabeled bottles and jars only), no watermark, no frame or border.';
+const NEGATIVE = 'No people, no hands, no faces, no text, no lettering, no logos, no labels or packaging with writing (plain unlabeled bottles and jars only), no watermark, no frame or border, no drawn lines, grids or overlays.';
 
 // "1 ½ lb. boneless pork shoulder, cut into…" → "boneless pork shoulder"
 function ingredientName(text) {
@@ -127,8 +127,9 @@ for (const ch of chapters) {
       || ch.recipes.find((r) => dish.toLowerCase().startsWith(r.title.toLowerCase())) || ch.recipes[0];
     const sides = ch.recipes.filter((r) => r !== recipe && dish.toLowerCase().includes(r.title.toLowerCase())).map((r) => r.title);
     const spread = ill.pages === 2;
-    const w = px(FOOD.w * (spread ? 2 : 1)), h = px(FOOD.h);
-    const ratio = spread ? '7:5' : '5:7';
+    const w = spread ? px(1188) : px(FOOD.w), h = spread ? px(792) : px(FOOD.h);
+    // Spreads run full bleed across both pages (3:2); photos set on a recipe page are landscape.
+    const ratio = spread ? '3:2' : INLINE_PHOTO.includes(ch.slug) ? '4:3' : '5:7';
     const ings = keyIngredients(recipe);
     const k = dishCount++;
     const spec = foodShots[ch.slug]?.[n + 1];

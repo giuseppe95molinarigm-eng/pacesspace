@@ -6,7 +6,7 @@
 // 50 state chapters, back matter), then split into the files the client reviews:
 //   output/00_Front_Matter.pdf        pages 1–11 (title, copyright, dedication, contents, notes, map)
 //   output/states/NN_<State>.pdf      one file per state chapter
-//   output/99_Back_Matter.pdf         closing essay, menus, allergen guide, recipe index
+//   output/99_Back_Matter.pdf         closing essay, menus, allergen guide, recipe index, about the author
 //   output/Made_in_the_USA_Complete.pdf  the whole book (not committed: too large for git)
 //   output/states/INDEX.md            page ranges and open points
 import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
@@ -24,7 +24,7 @@ import {
   coverPage, copyrightPage, tocPage, welcomePage, temperaturesPage, stateChapter, dishIllustrations,
 } from '../src/pages.mjs';
 import {
-  dedicationPage, notesFlow, mapSpread, backMatterFlows, indexFlows,
+  dedicationPage, notesFlow, mapSpread, backMatterFlows, indexFlows, aboutPage,
 } from '../src/matter.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -34,14 +34,14 @@ const FIRST_STATE_FOLIO = 12; // pages 10–11 are the culinary map spread; Alab
 
 const { chapters, skipped } = await readManuscript(MANUSCRIPT);
 const fm = { ...frontMatter };
-const back = fixBackMatter(await readBackMatter(MANUSCRIPT));
+const back = fixBackMatter(await readBackMatter(MANUSCRIPT), chapters);
 // Book-wide style (closed em dashes, ranges kept on one line) on the front-matter text too.
 const styled = (v) => (typeof v === 'string' ? styleText(v) : Array.isArray(v) ? v.map(styled)
   : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, styled(x)])) : v);
 for (const k of ['copyright', 'dedication', 'notes', 'map', 'welcome', 'temperatures']) fm[k] = styled(fm[k]);
 
 // Client corrections to the back matter (CookbookFeedbackTrackerv2, #235–#249).
-function fixBackMatter(sections) {
+function fixBackMatter(sections, chapters) {
   const sec = (title) => sections.find((x) => x.title === title);
   const text = (s, find, replace) => {
     const b = s.blocks.find((x) => x.text && x.text.includes(find));
@@ -70,6 +70,29 @@ function fixBackMatter(sections) {
   const chislic = al.blocks.find((b) => b.recipe === 'Chislic');
   chislic.mark = '*';
   al.blocks.splice(items(al, 'Free of All Major Allergens').end, 0, { type: 'footnote', text: '*Fried in vegetable oil, not peanut oil.' });
+  // Tracker v2.2 (#348–#353).
+  const stateOrder = (name) => chapters.findIndex((c) => c.name === name);
+  const groupOf = (k) => al.blocks.slice(0, k + 1).reverse().find((x) => x.type === 'GroupName')?.text;
+  const drop = (group, recipe) => { al.blocks = al.blocks.filter((b, k) => !(b.recipe === recipe && groupOf(k) === group)); };
+  const addSorted = (group, item) => {
+    const { end } = items(al, group);
+    const start = al.blocks.findIndex((b) => b.type === 'GroupName' && b.text === group);
+    let at = end;
+    for (let k = start + 1; k < end; k++) if (al.blocks[k].type === 'item' && stateOrder(al.blocks[k].state) > stateOrder(item.state)) { at = k; break; }
+    al.blocks.splice(at, 0, { type: 'item', ...item });
+  };
+  drop('Contains Eggs', 'Hoosier Pie'); // #348: the custard has no eggs
+  drop('Contains Fish', 'Akutaq'); // #349: the fish is optional
+  addSorted('Contains Fish', { recipe: 'Akutaq', state: 'Alaska', label: 'Optional fish: Akutaq (leave out the flaked fish)' });
+  addSorted('Gluten-Free', { recipe: 'Kalua Pork', state: 'Hawaii' }); // #350
+  addSorted('Gluten-Free', { recipe: 'Chili con Carne', state: 'Texas' });
+  text(al, 'Pecans, almonds, or coconut. In Florida coconut is central; in Mississippi and Wisconsin the nuts appear as a topping or flavoring that can often be omitted.', 'Pecans or almonds. Coconut is no longer classed as a tree nut by the FDA, but some people with nut allergies avoid it, so the Florida coconut rice is listed here as well. In Mississippi and Wisconsin the nuts appear as a topping or flavoring that can often be omitted.'); // #351
+  for (const [recipe, state, note] of [ // #352
+    ['Steamed Crabs', 'Maryland', 'skip the butter'], ['Cincinnati Chili', 'Ohio', 'skip the cheese'],
+    ['Gullah Shrimp and Sausage Perloo', 'South Carolina', 'use the oil'], ['Buffet-Style Prime Rib Roast with Pan Jus', 'Nevada', 'use the oil'],
+    ['Cowboy Cutthroat Trout', 'Wyoming', 'use the oil'],
+  ]) addSorted('Dairy-Free', { recipe, state, note });
+  text(al, 'Present through soy sauce, which can be swapped for coconut aminos.', 'Present through tamari (a soy sauce), which can be swapped for coconut aminos.'); // #353
   for (const s of sections) for (const b of s.blocks) if (b.text) b.text = styleText(b.text);
   return sections;
 }
@@ -92,6 +115,7 @@ const executablePath = process.env.CHROMIUM_PATH
   || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((p) => existsSync(p));
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 const page = await browser.newPage({ deviceScaleFactor: 1.5 });
+page.setDefaultTimeout(0); // the whole book with full-resolution photos takes a while to load
 const paginate = await readFile(path.join(root, 'src/paginate.js'), 'utf8');
 
 // Contents: front sections, the 50 states, back matter — two balanced columns.
@@ -100,6 +124,7 @@ const tocRows = [
   ...chapters.map((c) => [c.name, `state:${c.slug}`]),
   ['The Table We Set Together', 'section:table'], ['Menus for the Occasion', 'section:menus'],
   ['A Guide to Allergens', 'section:allergens'], ['Recipe Index', 'section:recipe-index'],
+  ['About the Author', 'section:about'],
 ];
 const half = Math.ceil(tocRows.length / 2);
 const toc = { left: tocRows.slice(0, half), right: tocRows.slice(half) };
@@ -112,8 +137,8 @@ const front = [
   mapSpread(fm.map, chapters),
 ].join('\n');
 const states = chapters.map((c) => stateChapter(c)).join('\n');
-// Acknowledgments page removed for print (client, v2.1 #323).
-const backMatter = [...backMatterFlows(back, chapters), ...indexFlows(chapters)].join('\n');
+// Acknowledgments removed (v2.1 #323); About the Author is the last page (v2.2).
+const backMatter = [...backMatterFlows(back, chapters), ...indexFlows(chapters), aboutPage(fm.about, styleText)].join('\n');
 
 const htmlPath = path.join(root, 'dist', 'book.html');
 await writeFile(htmlPath, html({ title: 'Made in the USA: A Plate for Every State', body: front + states + backMatter }));

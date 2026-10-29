@@ -5,6 +5,7 @@
 (function () {
   const FOOTER = document.getElementById('footer-shell').innerHTML;
   const FIRST_FOLIO = Number(document.body.dataset.firstFolio || 1);
+  const TAIL_WORDS = 16; // about two lines of text
 
   function newPage(kind, state, flag) {
     const sec = document.createElement('section');
@@ -51,10 +52,12 @@
       head.textContent = words.slice(0, mid).join(' ');
       if (fits(sec)) lo = mid; else hi = mid - 1;
     }
-    // Need at least two lines on this page, otherwise move the whole paragraph.
-    head.textContent = words.slice(0, lo).join(' ');
+    // Need at least two lines on this page, otherwise move the whole paragraph; and at least two
+    // lines carried over to the next page (no widow).
+    lo = Math.min(lo, words.length - TAIL_WORDS);
+    head.textContent = words.slice(0, Math.max(lo, 0)).join(' ');
     const lineH = parseFloat(getComputedStyle(head).lineHeight) || 17;
-    if (lo === 0 || head.getBoundingClientRect().height < lineH * 1.9) { head.remove(); return null; }
+    if (lo <= 0 || head.getBoundingClientRect().height < lineH * 1.9) { head.remove(); return null; }
     const tail = p.cloneNode(false);
     tail.textContent = words.slice(lo).join(' ');
     return tail;
@@ -76,7 +79,8 @@
       headText.textContent = words.slice(0, mid).join(' ');
       if (fits(sec)) lo = mid; else hi = mid - 1;
     }
-    headText.textContent = words.slice(0, lo).join(' ');
+    lo = Math.min(lo, words.length - TAIL_WORDS); // at least two lines carried over (no widow)
+    headText.textContent = words.slice(0, Math.max(lo, 0)).join(' ');
     const lineH = parseFloat(getComputedStyle(head).lineHeight) || 16;
     if (lo < 4 || head.getBoundingClientRect().height < lineH * 1.9) { head.remove(); return null; }
     const tail = document.createElement('p');
@@ -126,7 +130,9 @@
       const next = pour(copy, opts);
       return next;
     };
-    for (const level of ['compact', 'compact tight']) {
+    // First a fit that keeps the normal spacing (ingredients in two columns), then tighter settings.
+    copies.push(spare());
+    for (const level of ['fit-cols', 'compact', 'compact tight']) {
       const next = swap(copies.shift(), { cls: level });
       if (next.length < pages.length) return;
       pages = next;
@@ -271,6 +277,25 @@
       e.pages.push(p.dataset.role);
     }
     p.querySelectorAll('.recipe-title').forEach((t) => layout.recipes.push({ state: s, title: t.dataset.title, folio }));
+  });
+
+  // Photo pages that also hold boxes show the whole photo, scaled to the room left (client:
+  // "don't cut the photo, just resize it"). Runs once every page knows its side (margins).
+  document.querySelectorAll('section.food .live').forEach((live) => {
+    if (!live.querySelector('.photo-note')) return;
+    const fig = live.querySelector('figure.full');
+    const img = fig && fig.querySelector('img');
+    if (!img || !img.naturalWidth) return;
+    live.classList.add('fit-photo');
+    const H = live.getBoundingClientRect().height;
+    const W = live.getBoundingClientRect().width;
+    const gap = parseFloat(getComputedStyle(live).rowGap) || 0;
+    const others = [...live.children].filter((c) => c !== fig);
+    const used = others.reduce((n, c) => n + c.getBoundingClientRect().height, 0) + gap * others.length;
+    const ratio = img.naturalWidth / img.naturalHeight;
+    const h = Math.min(H - used, W / ratio);
+    fig.style.height = `${h}px`;
+    fig.style.width = `${h * ratio}px`;
   });
 
   // "Serve with Fry Sauce (page XX)" → real page of the "Fry Sauce" recipe.

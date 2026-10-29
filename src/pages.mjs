@@ -293,11 +293,7 @@ export function recipeFlow(ch, attrs = '') {
   return `<template class="flow" data-kind="recipe" data-state="${ch.slug}"${attrs}>${ch.recipes.map((r, i) => recipeBlocks(r, i > 0)).join('')}</template>`;
 }
 
-// Photo pages use the text margins (client, L5). A spread is one picture laid across both pages
-// from outer margin to outer margin: the strip that falls in the two inside margins is hidden,
-// so the scene stays continuous across the gutter.
-const PHOTO = { w: 594 - 63 - 45, gutter: 2 * 63 };
-
+// Photo pages use the text margins (client, L5); photo spreads run full bleed (v2.2 #337).
 const tipList = (items) => `<ul>${items.map((t) => `<li>${flatStar({ size: 7, color: '#bb9554', opacity: 0.6 })}<span>${esc(t)}</span></li>`).join('')}</ul>`;
 
 function foodPages(ch, notes = null) {
@@ -308,10 +304,8 @@ function foodPages(ch, notes = null) {
     return Array.from({ length: ill.pages }, (_, half) => {
       let inner;
       if (file) {
-        const total = 2 * PHOTO.w + PHOTO.gutter;
-        const style = ill.pages === 2
-          ? `width:${total}pt;max-width:none;margin-left:${half ? -(PHOTO.w + PHOTO.gutter) : 0}pt`
-          : '';
+        // A spread runs full bleed: one picture 1188pt wide, half on each page (client, v2.2 #337).
+        const style = ill.pages === 2 ? `width:1188pt;max-width:none;margin-left:${half ? -594 : 0}pt` : '';
         inner = `<figure class="full${ill.pages === 2 ? ' spread' : ''}"><img src="${file}" alt="${esc(ill.description)}" style="${style}"></figure>`;
       } else {
         const where = ill.pages === 2 ? ` — full-page spread, ${half ? 'right' : 'left'} page` : '';

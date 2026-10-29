@@ -388,3 +388,28 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .ingredients > li.group + li.group { padding-top: 0; margin-top: 5pt; }
 .tight .ingredients > li.group + li.group { padding-top: 0; margin-top: 3pt; }
 .ingredients.cols-2 > li:first-child { margin-top: 0; }
+
+/* ---------- Round 11 (tracker v2.2) ---------- */
+/* Index and allergen rows: leaders run from the end of the text (on its last line) to the page
+   number; the text masks the dots behind it (#370). */
+.ix-row { display: block; position: relative; overflow: hidden; padding-right: 28pt; }
+.ix-row .t { position: relative; z-index: 1; background: var(--paper); padding-right: 3pt; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.ix-row .lead { position: absolute; z-index: 0; left: 0; right: 26pt; bottom: 1pt; margin: 0; direction: ltr; text-align: right; }
+.ix-row .lead::before { content: '................................................................................................................................................................................................................................'; }
+.ix-row .n { position: absolute; right: 0; bottom: 1pt; }
+.ix-row .ix-note { color: var(--ink); }
+/* Even ingredient spacing (#336): the tightest setting keeps 15pt lines */
+.tight .ingredients { line-height: 15pt; }
+.tight .ingredients li { padding: .3pt 0; }
+/* A one-page fit that keeps the normal spacing: ingredients in two columns */
+.fit-cols .ingredients { columns: 2; }
+/* Full-page photo spreads run to the page edges; only the footer sits on them (#337) */
+.food[data-spread] .live { top: 0; left: 0 !important; right: 0 !important; bottom: 0; }
+.food[data-spread] figure { border: none; }
+.food[data-spread] .state-footer { z-index: 2; }
+/* Photo pages with boxes: the whole photo, scaled down, never cropped (#321, #306) */
+.food .live.fit-photo figure.full { flex: none; align-self: center; }
+/* Culinary map: title and line moved toward the spine */
+.map .map-head { left: 96pt; }
+.map .map-head.right { left: var(--m-in); right: 96pt; }
+.prose .about-deck { margin-bottom: 16pt; }
