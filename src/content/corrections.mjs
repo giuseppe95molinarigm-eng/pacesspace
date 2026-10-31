@@ -288,7 +288,7 @@ export default {
     r('2 long Amoroso-style hoagie roll', '2 long Amoroso-style hoagie rolls'), // #181
   ],
   'rhode-island': [
-    r('their deep understanding of corn, which they called nasaump.', 'their deep understanding of corn, which they cracked and cooked into a porridge they called nasaump.'), // v2.2 #362
+    r('their deep understanding of corn, which they called nasaump.', 'their deep understanding of corn, which they cooked into a porridge they called nasaump.'), // v2.2 #362, v2.3 #386
     r('has been operating continuously since 1675—making it the oldest grist mill in America and still producing', 'has been operating since 1675, among the oldest working grist mills in the country, still producing'), // #183
     r(/johnny cakes/g, 'johnnycakes'), r(/johnny cake/g, 'johnnycake'), // #184
     r('1 cup boiling water (approx., see note)', '1 cup boiling water (add a little more if the batter is stiff)'), // #185

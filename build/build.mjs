@@ -7,7 +7,8 @@
 //   output/00_Front_Matter.pdf        pages 1–11 (title, copyright, dedication, contents, notes, map)
 //   output/states/NN_<State>.pdf      one file per state chapter
 //   output/99_Back_Matter.pdf         closing essay, menus, allergen guide, recipe index, about the author
-//   output/Made_in_the_USA_Complete.pdf  the whole book (not committed: too large for git)
+//   output/Made_in_the_USA_Complete.pdf  the whole book at trim size (not committed: too large for git)
+//   output/Made_in_the_USA_KDP_Hardcover_Interior.pdf  the same with 0.125in bleed for KDP print
 //   output/states/INDEX.md            page ranges and open points
 import { mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -112,7 +113,7 @@ await mkdir(path.join(out, 'states'), { recursive: true });
 await mkdir(path.join(root, 'dist'), { recursive: true });
 
 const executablePath = process.env.CHROMIUM_PATH
-  || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((p) => existsSync(p));
+  || ['/opt/pw-browsers/chromium-1243/chrome-linux64/chrome', '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((p) => existsSync(p));
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 const page = await browser.newPage({ deviceScaleFactor: 1.5 });
 page.setDefaultTimeout(0); // the whole book with full-resolution photos takes a while to load
@@ -178,8 +179,29 @@ if (process.env.PREVIEWS) {
     await sections[i].screenshot({ path: path.join(out, 'previews', `p${String(i + 1).padStart(3, '0')}.jpg`), type: 'jpeg', quality: 80 });
   }
 }
+
+// Print version for Amazon KDP (v2.3 #390): 8.375 × 11.25 in pages, i.e. 0.125in bleed on the
+// top, bottom and outside edge (KDP adds no bleed on the binding side). Each page sits in a
+// larger sheet; real artwork fills the bleed: page backgrounds (hero and closer navy), footer
+// bands, story flags and the photo spreads, which were laid out 9pt past the trim from the start.
+await page.evaluate((B) => {
+  document.body.classList.add('bleed');
+  const size = document.createElement('style');
+  size.textContent = '@page { size: 8.375in 11.25in; margin: 0; }';
+  document.head.appendChild(size);
+  for (const sec of document.querySelectorAll('section.page')) {
+    const sheet = document.createElement('div');
+    sheet.className = `sheet ${sec.classList.contains('verso') ? 'verso' : 'recto'}`;
+    sheet.style.background = getComputedStyle(sec).backgroundColor;
+    sec.before(sheet);
+    sheet.appendChild(sec);
+  }
+}, 9);
+const printBytes = await page.pdf({ preferCSSPageSize: true, printBackground: true });
 await browser.close();
 await rm(path.join(root, 'dist'), { recursive: true, force: true });
+await writeFile(path.join(out, 'Made_in_the_USA_KDP_Hardcover_Interior.pdf'), printBytes);
+execFileSync('python3', [path.join(root, 'build/trimbox.py'), path.join(out, 'Made_in_the_USA_KDP_Hardcover_Interior.pdf')], { stdio: 'inherit' });
 
 const book = await PDFDocument.load(bookBytes);
 const total = book.getPageCount();

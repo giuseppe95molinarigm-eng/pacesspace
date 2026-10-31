@@ -10,7 +10,7 @@ export default {
   arkansas: { 1: { show: 'crisp golden cornmeal-crusted fried catfish fillets piled on a platter with lemon wedges and a small bowl of creamy tartar sauce with pickle relish; no herbs or green flecks anywhere', props: 'a halved lemon' } },
   california: { 1: { show: 'three Baja-style fish tacos on warm flour tortillas with golden beer-battered white fish strips, shredded green and purple cabbage slaw with cilantro, drizzled with lime crema, lime wedges, filling the whole plate edge to edge with nothing else on the plate (no bowls or ramekins on the plate); a separate small bowl of lime crema stands on the bare table a few inches away from the plate', props: 'the small bowl of lime crema on the table, off the plate, and a lime' } },
   colorado: { 1: { show: 'a golden folded Denver omelet on a plate, cut open to show diced ham, green and red bell pepper, onion and melted cheddar spilling out; no herbs or green flecks', props: 'a few diced bell pepper pieces on the board' } },
-  connecticut: { 1: { show: 'a whole New Haven white clam apizza: very thin, crisp, charred and blistered irregular crust with flat edges (not thick or puffy), no tomato sauce and no mozzarella, topped with chopped shucked clam meat, minced garlic, olive oil, oregano and a light dusting of grated Pecorino Romano and chopped parsley', props: 'a small clear glass jar of reserved cloudy clam juice beside the pizza (no bowls of white granules, no spoons)', shot: '90° overhead shot (flat lay)' } },
+  connecticut: { 1: { show: 'a whole New Haven white clam apizza: very thin, crisp, charred and blistered irregular crust with flat edges (not thick or puffy), no tomato sauce and no mozzarella, topped with chopped shucked clam meat, minced garlic, olive oil, oregano and a light dusting of grated Pecorino Romano and chopped parsley', props: 'exactly one small clear glass creamer pitcher with a pouring spout, filled with reserved cloudy clam juice, standing in the upper-left part of the picture completely inside the frame with space around it (no other jars or pitchers, no bowls, no spoons)', shot: '90° overhead shot (flat lay)' } },
   delaware: { 1: { show: 'a scrapple breakfast sandwich on a split toasted kaiser roll (crusty roll with a pinwheel-scored top, no sesame seeds): two separate thin crisp golden-brown slices of scrapple clearly visible as two stacked layers, a fried egg with runny yolk and melted American cheese, on a plate', props: 'a small dish of ketchup' } },
   florida: { 1: { shot: '45° hero shot, close crop: the plate fills most of the frame, no window', show: 'a large Key lime grilled grouper fillet with grill marks and a generous mound of coconut rice sprinkled with shredded coconut and a little cilantro, together filling most of the plate; one fork resting at the side of the plate; no whole limes on the plate, no pepper flakes', props: 'two small yellow-green Key lime wedges in a little dish beside the plate' } },
   georgia: { 1: { show: 'a Georgia peach cobbler baked in a rectangular 9×13-inch glass baking dish: a continuous golden poured-batter crust risen up around juicy peach slices (no biscuit mounds), one portion already scooped out, exactly one serving spoon in the dish (no other spoons)', props: 'a stick of butter on a dish, a few fresh peaches and a small bowl of ground cinnamon' } },
@@ -55,24 +55,27 @@ export default {
   vermont: { 1: { show: 'a lattice-topped apple pie with one slice cut out, the slice on a small plate with a slice of white sharp Vermont cheddar (uncolored, ivory white, not orange) melting on top', props: 'a small plate of thin white sharp Vermont cheddar slices (ivory white, not orange) and a red apple' } },
   virginia: { 1: { show: 'a bowl of creamy Virginia peanut soup garnished with chopped roasted peanuts and a few chopped chives', props: 'the soup pot behind with a ladle resting in it, and a small dish of roasted peanuts' } },
   washington: { 1: { show: 'a whole cedar-planked salmon fillet with a glossy honey-balsamic glaze on the charred cedar plank, garnished with a little fresh thyme and lemon wedges; no dill, no potted plants', props: 'a halved lemon' } },
-  'west-virginia': { 1: { show: 'West Virginia buckwheat pancakes: very thin, lacy, flexible brown buckwheat pancakes with crisp lacy edges, a few folded and overlapping on a large plate with softened butter melting and maple syrup, the plate large and filling the right half of the picture, entirely clear of the centre line; on the left half a jug of maple syrup and a cast-iron griddle; no blueberries; one single worn oak table across the whole picture', props: 'a jug of maple syrup and a cast-iron griddle' } },
+  'west-virginia': { 1: { show: 'West Virginia buckwheat pancakes: very thin, lacy, flexible brown buckwheat pancakes with crisp lacy edges, a few folded and overlapping on a plate with softened butter melting and maple syrup; the whole plate is small enough to sit completely inside the right third of the picture with clear tablecloth all around it (not touching the top, bottom or right edges, well away from the centre line); the left third holds a jug of maple syrup and a cast-iron griddle; the middle of the picture is plain tablecloth; no blueberries; one continuous table surface', props: 'a jug of maple syrup and a cast-iron griddle' } },
   wisconsin: { 1: { show: 'a whole oval Wisconsin kringle: flaky pastry ring with pecan and almond-paste filling, drizzled only with white icing (no sliced almonds on top), a few slices cut', props: 'nothing else' } },
   wyoming: { 1: { show: 'two whole grilled cutthroat trout side by side on a long oval serving platter, the skin rubbed with a reddish smoky-spicy paprika and chili rub and grill marks, scattered with fresh chopped parsley and thyme, lemon wedges', props: 'a halved lemon', shot: '45° hero shot' } },
 };
 
 // Photo spreads keep a single page here (client, round 8).
-export const SINGLE_PHOTO_PAGE = ['california', 'nevada', 'mississippi', 'pennsylvania', 'wisconsin', 'south-carolina'];
+export const SINGLE_PHOTO_PAGE = ['california', 'nevada', 'mississippi', 'pennsylvania', 'wisconsin'];
+// South Carolina keeps its FINAL photo spread, retouched to remove the brand name (v2.3 #382).
 // The photo moves onto the last recipe page, which saves a page (client, round 9).
-export const INLINE_PHOTO = ['michigan', 'pennsylvania', 'wisconsin', 'south-carolina']; // SC: v2.2 #332
+export const INLINE_PHOTO = ['michigan', 'pennsylvania', 'wisconsin'];
 // Only the first photo is kept (client, round 9: one photo with every item of the meal).
 export const ONE_PHOTO = ['idaho'];
 
 // Notes printed on the photo page (client, rounds 9–10).
 //   moveRecipeNotes: 'above' | 'below' — the recipe's first boxed note moves onto the photo page
 //   below: an extra boxed note under the photo ({ title, intro, items })
+//   fit: show the whole photo scaled to the room left; otherwise it fills the room, cropped (v2.3 #384)
 export const PHOTO_NOTES = {
   connecticut: {
     moveRecipeNotes: 'above',
+    fit: true, // the whole photo, scaled down (v2.2 #321)
     below: {
       title: 'SERVING STYLE', // v2.1 #320
       intro: 'For New Haven-style clam apizza, the clam juice is liquid gold! It adds that briny, ocean-fresh flavor that makes white clam pizza so distinctive.',
@@ -85,7 +88,7 @@ export const PHOTO_NOTES = {
     },
   },
   // v2.1 #306: the serving styles under a smaller photo; the time-saver tip stays with the recipe.
-  ohio: { moveRecipeNotes: 'below' },
+  ohio: { moveRecipeNotes: 'below', fit: true },
   // v2.1 #295: the notes under the photo, so the recipe fits its page instead of spilling a box over.
   oklahoma: { moveRecipeNotes: 'below' },
   massachusetts: { moveRecipeNotes: 'below' }, // the box alone would spill onto its own page

@@ -42,7 +42,7 @@
 
   // Split a paragraph at a word boundary so its first part fills the page.
   function splitText(p, sec, box) {
-    const words = p.textContent.split(/\s+/);
+    const words = p.textContent.split(/[ \t\n\r]+/); // not \s: no-break spaces stay
     const head = p.cloneNode(false);
     head.classList.add('split-head');
     box.appendChild(head);
@@ -68,7 +68,7 @@
   function splitStep(p, sec, box) {
     const text = p.querySelector('.step-text');
     if (!text) return null;
-    const words = text.textContent.split(/\s+/);
+    const words = text.textContent.split(/[ \t\n\r]+/);
     const head = p.cloneNode(true);
     head.classList.add('split-head');
     const headText = head.querySelector('.step-text');
@@ -282,8 +282,8 @@
   // Photo pages that also hold boxes show the whole photo, scaled to the room left (client:
   // "don't cut the photo, just resize it"). Runs once every page knows its side (margins).
   document.querySelectorAll('section.food .live').forEach((live) => {
-    if (!live.querySelector('.photo-note')) return;
-    const fig = live.querySelector('figure.full');
+    const fig = live.querySelector('figure.full[data-fit]');
+    if (!fig) return;
     const img = fig && fig.querySelector('img');
     if (!img || !img.naturalWidth) return;
     live.classList.add('fit-photo');

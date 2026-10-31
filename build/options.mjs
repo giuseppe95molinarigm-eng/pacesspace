@@ -60,7 +60,7 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 <body data-first-folio="9"><template id="footer-shell">${FOOTER}</template>${page9}${maps}${notes}</body></html>`;
 const file = path.join(root, 'dist', 'options.html');
 await writeFile(file, html);
-const executablePath = process.env.CHROMIUM_PATH || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((p) => existsSync(p));
+const executablePath = process.env.CHROMIUM_PATH || ['/opt/pw-browsers/chromium-1243/chrome-linux64/chrome', '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((p) => existsSync(p));
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 const page = await browser.newPage({ deviceScaleFactor: 2 });
 await page.goto(pathToFileURL(file).href, { waitUntil: 'load' });

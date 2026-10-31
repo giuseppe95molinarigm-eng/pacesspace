@@ -223,7 +223,8 @@ function houseStyle(t) {
     .replace(new RegExp(`(\\d) ([${FR}])`, 'g'), '$1$2') // closed mixed numbers (1½)
     .replace(/(\S)–(?=\S)/g, `$1${WJ}–${WJ}`)          // ranges never break at the dash
     .replace(/°F \/ (\d)/g, '°F / $1')       // 110°F / 43°C stays on one line
-    .replace(new RegExp(`([\\d${FR}])-(?=inch|ounce|quart|lb|pound)`, 'g'), `$1-${WJ}`); // 9×13-inch stays whole
+    .replace(new RegExp(`([\\d${FR}])-(?=inch|ounce|quart|lb|pound)`, 'g'), `$1-${WJ}`) // 9×13-inch stays whole
+    .replace(new RegExp(`([\\d${FR}]) (?=(inch|inches|cup|cups|Tbsp|tsp|lb\\.|oz\\.|quarts?|pounds?|minutes|hours)\\b)`, 'g'), '$1\u00a0'); // "1 inch" stays together
 }
 // Recipe text only: ranges with "to" become en-dash ranges ("1½ to 2 Tbsp" → "1½–2 Tbsp").
 const rangeStyle = (t) => t

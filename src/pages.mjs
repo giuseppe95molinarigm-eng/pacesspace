@@ -294,6 +294,9 @@ export function recipeFlow(ch, attrs = '') {
 }
 
 // Photo pages use the text margins (client, L5); photo spreads run full bleed (v2.2 #337).
+export const BLEED = 9; // 0.125in print bleed (KDP)
+// Spread pictures moved sideways so the dish clears the binding (v2.3 #388), in pt.
+const SPREAD_SHIFT = { louisiana: { x: 36 } };
 const tipList = (items) => `<ul>${items.map((t) => `<li>${flatStar({ size: 7, color: '#bb9554', opacity: 0.6 })}<span>${esc(t)}</span></li>`).join('')}</ul>`;
 
 function foodPages(ch, notes = null) {
@@ -304,8 +307,19 @@ function foodPages(ch, notes = null) {
     return Array.from({ length: ill.pages }, (_, half) => {
       let inner;
       if (file) {
-        // A spread runs full bleed: one picture 1188pt wide, half on each page (client, v2.2 #337).
-        const style = ill.pages === 2 ? `width:1188pt;max-width:none;margin-left:${half ? -594 : 0}pt` : '';
+        // A spread runs full bleed (v2.2 #337): one picture across both pages and 9pt (the print
+        // bleed) past the outer, top and bottom edges. In spread coordinates each page's frame
+        // covers [-9, 594] (left page) or [594, 1197] (right page), 810pt tall from -9.
+        // SPREAD_SHIFT nudges a picture sideways (zooming just enough to keep the edges covered).
+        let style = '';
+        if (ill.pages === 2) {
+          const { x = 0 } = SPREAD_SHIFT[ch.slug] || {};
+          const zoom = 1 + (2 * Math.abs(x)) / (594 * 2 + 2 * BLEED) + 0.002;
+          const W = (594 * 2 + 2 * BLEED) * zoom, H = (792 + 2 * BLEED) * zoom;
+          const left = -BLEED - (W - (594 * 2 + 2 * BLEED)) / 2 + x; // spread coordinates
+          const ml = half ? left - 594 : left + BLEED;
+          style = `width:${W.toFixed(2)}pt;height:${H.toFixed(2)}pt;max-width:none;margin-left:${ml.toFixed(2)}pt;margin-top:${(-(H - 792 - 2 * BLEED) / 2).toFixed(2)}pt`;
+        }
         inner = `<figure class="full${ill.pages === 2 ? ' spread' : ''}"><img src="${file}" alt="${esc(ill.description)}" style="${style}"></figure>`;
       } else {
         const where = ill.pages === 2 ? ` — full-page spread, ${half ? 'right' : 'left'} page` : '';
@@ -318,7 +332,7 @@ function foodPages(ch, notes = null) {
         const box = (c) => `<div class="${calloutClass(c.title)} photo-note"><h3 class="recipe-h">${esc(c.title)}</h3>${c.intro ? `<p>${esc(styleText(c.intro))}</p>` : ''}${tipList(c.items.map(styleText))}</div>`;
         const above = notes.callout && notes.where === 'above' ? box(notes.callout) : '';
         const below = [notes.callout && notes.where === 'below' ? box(notes.callout) : '', notes.below ? box(notes.below) : ''].join('');
-        inner = above + inner + below;
+        inner = above + (notes.fit ? inner.replace('<figure class="full', '<figure data-fit class="full') : inner) + below;
       }
       // Framed photo with the book footer (client: not full page).
       return `<section class="page food" data-state="${ch.slug}" data-role="food"${spread}${single}><div class="live">${inner}</div>${FOOTER}</section>`;
@@ -359,7 +373,7 @@ export function stateChapter(ch) {
   let notes = null;
   const extra = PHOTO_NOTES[ch.slug];
   if (extra) {
-    notes = { below: extra.below, where: extra.moveRecipeNotes };
+    notes = { below: extra.below, where: extra.moveRecipeNotes, fit: extra.fit };
     if (extra.moveRecipeNotes) {
       // The recipe's first boxed note (its title and the items right after it) moves to the photo page.
       const r = ch.recipes[0];

@@ -1,6 +1,6 @@
 # Made in the USA — page map
 
-Generated from `manuscript/Made_in_the_USA_BASE.docx`. One continuous book of 234 pages.
+Generated from `manuscript/Made_in_the_USA_BASE.docx`. One continuous book of 236 pages.
 
 | Section | Pages |
 |---|---|
@@ -15,11 +15,11 @@ Generated from `manuscript/Made_in_the_USA_BASE.docx`. One continuous book of 23
 | temperatures | 9 |
 | map | 10 |
 | map-right | 11 |
-| table | 226 |
-| menus | 227–228 |
-| allergens | 229–232 |
-| recipe-index | 233 |
-| about | 234 |
+| table | 228 |
+| menus | 229–230 |
+| allergens | 231–234 |
+| recipe-index | 235 |
+| about | 236 |
 
 | File | Pages | Count | Story / recipe / photo / closing pages | Images |
 |---|---|---|---|---|
@@ -62,17 +62,17 @@ Generated from `manuscript/Made_in_the_USA_BASE.docx`. One continuous book of 23
 | 37_Oregon.pdf | 168–171 | 4 | 1 / 1 / 1 / 0 | ✓ |
 | 38_Pennsylvania.pdf | 172–175 | 4 | 1 / 2 / 0 / 0 | ✓ |
 | 39_Rhode_Island.pdf | 176–179 | 4 | 1 / 1 / 1 / 0 | ✓ |
-| 40_South_Carolina.pdf | 180–183 | 4 | 1 / 2 / 0 / 0 | ✓ |
-| 41_South_Dakota.pdf | 184–187 | 4 | 1 / 1 / 1 / 0 | ✓ |
-| 42_Tennessee.pdf | 188–191 | 4 | 1 / 1 / 1 / 0 | ✓ |
-| 43_Texas.pdf | 192–195 | 4 | 1 / 1 / 1 / 0 | ✓ |
-| 44_Utah.pdf | 196–199 | 4 | 1 / 1 / 1 / 0 | ✓ |
-| 45_Vermont.pdf | 200–203 | 4 | 1 / 1 / 1 / 0 | ✓ |
-| 46_Virginia.pdf | 204–207 | 4 | 1 / 1 / 1 / 0 | ✓ |
-| 47_Washington.pdf | 208–211 | 4 | 1 / 1 / 1 / 0 | ✓ |
-| 48_West_Virginia.pdf | 212–217 | 6 | 1 / 2 / 2 / 0 | ✓ |
-| 49_Wisconsin.pdf | 218–221 | 4 | 1 / 2 / 0 / 0 | ✓ |
-| 50_Wyoming.pdf | 222–225 | 4 | 1 / 1 / 1 / 0 | ✓ |
+| 40_South_Carolina.pdf | 180–185 | 6 | 1 / 2 / 2 / 0 | ✓ |
+| 41_South_Dakota.pdf | 186–189 | 4 | 1 / 1 / 1 / 0 | ✓ |
+| 42_Tennessee.pdf | 190–193 | 4 | 1 / 1 / 1 / 0 | ✓ |
+| 43_Texas.pdf | 194–197 | 4 | 1 / 1 / 1 / 0 | ✓ |
+| 44_Utah.pdf | 198–201 | 4 | 1 / 1 / 1 / 0 | ✓ |
+| 45_Vermont.pdf | 202–205 | 4 | 1 / 1 / 1 / 0 | ✓ |
+| 46_Virginia.pdf | 206–209 | 4 | 1 / 1 / 1 / 0 | ✓ |
+| 47_Washington.pdf | 210–213 | 4 | 1 / 1 / 1 / 0 | ✓ |
+| 48_West_Virginia.pdf | 214–219 | 6 | 1 / 2 / 2 / 0 | ✓ |
+| 49_Wisconsin.pdf | 220–223 | 4 | 1 / 2 / 0 / 0 | ✓ |
+| 50_Wyoming.pdf | 224–227 | 4 | 1 / 1 / 1 / 0 | ✓ |
 
 ## To check
 - Text in the manuscript not printed (California): "[] California-style fish tacos are a staple of West Coast beach food—light, fresh, and full of bold flavor. Inspired by Baja fish tacos but with a SoCal twist, …"

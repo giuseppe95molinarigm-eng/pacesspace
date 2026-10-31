@@ -403,8 +403,12 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .tight .ingredients li { padding: .3pt 0; }
 /* A one-page fit that keeps the normal spacing: ingredients in two columns */
 .fit-cols .ingredients { columns: 2; }
-/* Full-page photo spreads run to the page edges; only the footer sits on them (#337) */
-.food[data-spread] .live { top: 0; left: 0 !important; right: 0 !important; bottom: 0; }
+/* Full-page photo spreads run to the page edges and 9pt beyond (print bleed) on the outer, top
+   and bottom sides; only the footer sits on them (#337, v2.3 #390) */
+.food[data-spread] .live { top: -9pt; bottom: -9pt; }
+.verso.food[data-spread] .live { left: -9pt !important; right: 0 !important; }
+.recto.food[data-spread] .live { left: 0 !important; right: -9pt !important; }
+.food[data-spread] figure.full img { object-fit: cover; }
 .food[data-spread] figure { border: none; }
 .food[data-spread] .state-footer { z-index: 2; }
 /* Photo pages with boxes: the whole photo, scaled down, never cropped (#321, #306) */
@@ -413,3 +417,16 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .map .map-head { left: 96pt; }
 .map .map-head.right { left: var(--m-in); right: 96pt; }
 .prose .about-deck { margin-bottom: 16pt; }
+
+/* ---------- Round 12 (tracker v2.3) ---------- */
+/* Book titles inside the italic lead read roman (#385) */
+.prose .about-deck i { font-style: normal; }
+/* KDP print version: each page in a sheet 9pt larger on the top, bottom and outside edge (#390) */
+.bleed .sheet { position: relative; width: 603pt; height: 810pt; overflow: hidden; break-after: page; page-break-after: always; }
+.bleed .sheet:last-child { break-after: auto; page-break-after: auto; }
+.bleed .sheet > .page { position: absolute; top: 9pt; left: 0; margin: 0; box-shadow: none; overflow: visible; break-after: auto; page-break-after: auto; }
+.bleed .sheet.verso > .page { left: 9pt; }
+.bleed .state-footer .band-red { left: -9pt; right: -9pt; }
+.bleed .state-footer .band-navy { left: -9pt; right: -9pt; bottom: -9pt; }
+.bleed .story .story-flag { top: -70pt; width: 612pt; margin-left: -9pt; }
+.bleed .page.map, .bleed .page.cover { overflow: hidden; }

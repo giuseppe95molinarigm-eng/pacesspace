@@ -96,7 +96,10 @@ function mapSvg(chapters, style = 'navy') {
     const [x, y] = path.centroid(f);
     if (OFFSHORE.includes(code)) { offshore.push({ code, x, y }); continue; }
     const [dx, dy] = NUDGE[code] || [0, 0];
-    labels.push(`<text x="${(x + dx).toFixed(1)}" y="${(y + dy + 2.6).toFixed(1)}">${code}</text>`);
+    // Labels keep at least ½in (36pt) clear of the fold at 594pt (v2.3 #389).
+    let lx = x + dx;
+    if (Math.abs(lx - 594) < 36) lx = lx < 594 ? 594 - 36 - 8 : 594 + 36 + 8;
+    labels.push(`<text x="${lx.toFixed(1)}" y="${(y + dy + 2.6).toFixed(1)}">${code}</text>`);
   }
   // Offshore labels in one column off the coast, at least 13pt apart.
   offshore.sort((a, b) => a.y - b.y);
@@ -162,6 +165,13 @@ export function recipeLookup(chapters) {
 
 // The state stays attached to the end of the title (client: no stranded middle dot).
 const STATE_SEP = '\u00a0·\u00a0';
+// A long title wraps at a natural point (v2.3 #370): the closing "with …" / "and …" phrase is
+// kept whole, so "Buffet-Style Prime Rib Roast / with Pan Jus" never splits as "…with Pan / Jus".
+function bindTail(title) {
+  const m = title.match(/^(.*) ((?:with|and) .+)$/);
+  if (!m || m[1].length < 12) return title;
+  return `${m[1]} ${m[2].replace(/ /g, '\u00a0').replace(/-/g, '-\u2060')}`;
+}
 const row = (label, ref, cls = '') =>
   `<div class="ix-row${cls}"><span class="t">${label}</span><span class="lead"></span><span class="n" data-ref="${esc(ref).replace(/"/g, '&quot;')}">000</span></div>`;
 
@@ -182,7 +192,7 @@ export function backMatterFlows(sections, chapters) {
         case 'GroupDescription': out.push(`<p class="group-desc" data-keep>${esc(b.text)}</p>`); break;
         case 'item': {
           const r = find(b.recipe, b.state);
-          const label = b.label ? esc(b.label) : esc(r.title);
+          const label = b.label ? esc(b.label) : esc(bindTail(r.title));
           const note = b.note ? ` <i class="ix-note">(${esc(b.note)})</i>` : '';
           out.push(row(`${label}${b.mark || ''}${STATE_SEP}<i>${esc(b.state).replace(/ /g, '\u00a0')}</i>${note}`, `recipe:${r.title}`, ' item'));
           break;
@@ -208,7 +218,7 @@ export function indexFlows(chapters) {
   const recipes = chapters.flatMap((c) => c.recipes.map((r) => ({ r, c })));
   const byTitle = (a, b) => a.r.title.localeCompare(b.r.title);
   const recipeIndex = indexFlow('recipe-index', 'RECIPE INDEX', '', [
-    ['', [...recipes].sort(byTitle).map(({ r, c }) => [`${esc(r.title)}${STATE_SEP}<i>${esc(c.name).replace(/ /g, '\u00a0')}</i>`, `recipe:${r.title}`])],
+    ['', [...recipes].sort(byTitle).map(({ r, c }) => [`${esc(bindTail(r.title))}${STATE_SEP}<i>${esc(c.name).replace(/ /g, '\u00a0')}</i>`, `recipe:${r.title}`])],
   ]);
   return [recipeIndex];
 }
