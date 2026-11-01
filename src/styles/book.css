@@ -37,8 +37,8 @@
   --rust: #b45841;        /* "Notes from the kitchen" kicker */
   --gold: #bb9554;        /* frames, outline, footer stars */
   --ink: #231f20;
-  --paper: #fbfaf7;
-  --paper-toc: #f9f7f2;
+  --paper: #ffffff;
+  --paper-toc: #ffffff;
   --cream: #f4efe5;       /* hero page */
   --tagline-box: #d6dde7;
   --caslon: 'Book Caslon', 'Libre Caslon Text', Georgia, serif;
@@ -430,3 +430,5 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .bleed .state-footer .band-navy { left: -9pt; right: -9pt; bottom: -9pt; }
 .bleed .story .story-flag { top: -70pt; width: 612pt; margin-left: -9pt; }
 .bleed .page.map, .bleed .page.cover { overflow: hidden; }
+/* client (v2.4): map intro on two lines, centred on the title line */
+.map .map-intro { max-width: 410pt; text-wrap: balance; }
