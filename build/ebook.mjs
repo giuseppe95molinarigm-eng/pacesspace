@@ -229,7 +229,7 @@ add('title', 'Made in the USA', `<section epub:type="titlepage" class="title-pag
 const c = fm.copyright;
 add('copyright', 'Copyright', `<section epub:type="copyright-page" class="copyright">
   <p><i>${x(c.title)}</i></p>${c.lines.map((l) => `<p>${x(l)}</p>`).join('')}
-  <p>Hardcover ISBN: ${x(c.isbn)}<br/>Library of Congress Control Number: ${x(c.lccn)}</p>
+  <p>${c.isbn.map(([n, ed]) => `ISBN: ${x(n)} (${x(ed)})<br/>`).join('')}Library of Congress Control Number: ${x(c.lccn)}</p>
   <p>${x(c.closing[0])} Kindle edition.</p></section>`);
 add('dedication', 'Dedication', `<section epub:type="dedication" class="dedication">${ORN}
   ${fm.dedication.stanzas.map(([to, text]) => `<p class="to">${x(to)}</p><p class="noindent">${x(text)}</p>`).join('')}

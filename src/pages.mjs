@@ -33,7 +33,7 @@ export function copyrightPage(c) {
       <p class="book-title">${esc(c.title)}</p>
       ${c.lines.map((l) => `<p>${esc(l)}</p>`).join('')}
       <div class="registration">
-        <p>ISBN: ${esc(c.isbn)}</p>
+        ${c.isbn.map(([n, ed]) => `<p>ISBN: ${esc(n)} (${esc(ed)})</p>`).join('')}
         <p>Library of Congress Control Number: ${esc(c.lccn)}</p>
       </div>
       ${c.closing.map((l) => `<p>${esc(l)}</p>`).join('')}

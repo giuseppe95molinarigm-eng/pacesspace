@@ -428,7 +428,10 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
 .bleed .sheet.verso > .page { left: 9pt; }
 .bleed .state-footer .band-red { left: -9pt; right: -9pt; }
 .bleed .state-footer .band-navy { left: -9pt; right: -9pt; bottom: -9pt; }
-.bleed .story .story-flag { top: -70pt; width: 612pt; margin-left: -9pt; }
 .bleed .page.map, .bleed .page.cover { overflow: hidden; }
 /* client (v2.4): map intro on two lines, centred on the title line */
 .map .map-intro { max-width: 410pt; text-wrap: balance; }
+/* Client (24 Nov, paperback proof): the flag no longer runs to the page edges, where KDP's trim
+   cut the stars off. It sits inside the safe area, 0.5in below the trim, aligned with the text block. */
+.recto.story .story-flag, .verso.story .story-flag { left: 0; }
+.story .story-flag { top: -25pt; width: 100%; }

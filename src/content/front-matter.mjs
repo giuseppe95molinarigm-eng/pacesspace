@@ -16,7 +16,8 @@ export const copyright = {
     'No part of this book may be reproduced, stored in a retrieval system, or transmitted in any form or by any means — electronic, mechanical, photocopying, recording, or otherwise — without prior written permission of the copyright holder, except for brief quotations used in reviews.',
     'Illustrations in this edition were created with the assistance of AI-generated imagery, curated, refined, and adapted for this publication. All artwork is licensed for commercial print and digital publication.',
   ],
-  isbn: '979-8-9823417-0-9',
+  // One ISBN per print edition (client, 6 Nov: paperback 979-8-9823417-1-6); the same interior serves both.
+  isbn: [['979-8-9823417-0-9', 'hardcover'], ['979-8-9823417-1-6', 'paperback']],
   // Requested by the client ("Can I add a Library of Congress registration number?").
   lccn: '2026928086',
   closing: ['First Edition.', 'Printed in the United States of America.'],

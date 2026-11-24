@@ -147,6 +147,8 @@ await browser.close();
 await rm(path.join(root, 'dist'), { recursive: true, force: true });
 await writeFile(path.join(out, 'Made_in_the_USA_KDP_Hardcover_Interior.pdf'), printBytes);
 execFileSync('python3', [path.join(root, 'build/trimbox.py'), path.join(out, 'Made_in_the_USA_KDP_Hardcover_Interior.pdf')], { stdio: 'inherit' });
+// Paperback and hardcover share the interior (same trim, bleed and margins; both ISBNs on the copyright page).
+await writeFile(path.join(out, 'Made_in_the_USA_KDP_Paperback_Interior.pdf'), await readFile(path.join(out, 'Made_in_the_USA_KDP_Hardcover_Interior.pdf')));
 
 const book = await PDFDocument.load(bookBytes);
 const total = book.getPageCount();
