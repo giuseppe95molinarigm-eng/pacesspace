@@ -435,3 +435,6 @@ body { font-family: var(--caslon); color: var(--ink); -webkit-print-color-adjust
    cut the stars off. It sits inside the safe area, 0.5in below the trim, aligned with the text block. */
 .recto.story .story-flag, .verso.story .story-flag { left: 0; }
 .story .story-flag { top: -25pt; width: 100%; }
+/* KDP preflight (25 Nov): the page's own background box stopped exactly at the trim and was read
+   as "insufficient bleed". In the bleed file the sheet (trim + bleed) carries the colour instead. */
+.bleed .sheet > .page { background: transparent !important; }
